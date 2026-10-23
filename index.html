@@ -11,7 +11,7 @@
   --bg:#0B0E13;--card:#12161D;--card2:#0E1218;--line:#1F2630;--line2:#1A2028;--btn:#2A323D;
   --ink:#EEF1F5;--ink2:#C9D0DA;--ink3:#B4BCC8;--mute:#8A94A3;--mute2:#6F7A89;
   --up:#F25C54;--dn:#2EB872;--ok:#5AC48A;--warn:#E8A33D;--bad:#E07A3F;--acc:#7DB8F7;
-  --c-l1:#A78BFA;--c-txn:#5AA9F5;--c-l4:#2DD4BF;--c-all:#E8A33D;--c-rg:#F472B6;--c-dp:#FBBF24;--c-v4:#60D394;--c-s3:#22D3EE;
+  --c-l1:#A78BFA;--c-txn:#5AA9F5;--c-l4:#2DD4BF;--c-all:#E8A33D;--c-rg:#F472B6;--c-dp:#FBBF24;--c-v4:#60D394;--c-s3:#22D3EE;--c-u15:#FB923C;--c-la:#E879F9;
   --t-disp-bg:#33270F;--t-disp-fg:#F0C060;--t-lu-bg:#3A1A1A;--t-info-bg:#1B2A3A;--t-info-fg:#9CC8F5;--t-risk-bg:#3A1F17;--t-risk-fg:#F4A07A;--t-ok-bg:#15302A;--t-ok-fg:#7FDCB0}
 :root[data-theme="light"]{
   --bg:#F3F5F9;--card:#FFFFFF;--card2:#F7F8FB;--line:#E3E7EE;--line2:#EDF0F5;--btn:#D5DBE4;
@@ -39,6 +39,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 'Noto Sans TC
 .k-DISPO{background:color-mix(in srgb,var(--c-dp) 18%,transparent);color:var(--c-dp)}
 .k-V41{background:color-mix(in srgb,var(--c-v4) 18%,transparent);color:var(--c-v4)}
 .k-STACK3{background:color-mix(in srgb,var(--c-s3) 18%,transparent);color:var(--c-s3)}
+.k-ULTRA15{background:color-mix(in srgb,var(--c-u15) 18%,transparent);color:var(--c-u15)}
+.k-LALLOC{background:color-mix(in srgb,var(--c-la) 18%,transparent);color:var(--c-la)}
 .k-系統{background:color-mix(in srgb,var(--mute) 18%,transparent);color:var(--mute)}
 .ok-row td:first-child{border-left:3px solid var(--ok)}.bad-row td:first-child{border-left:3px solid var(--warn)}
 .t-disp{background:var(--t-disp-bg);color:var(--t-disp-fg)}.t-lu{background:var(--t-lu-bg);color:var(--up)}
@@ -315,6 +317,16 @@ svg text{fill:var(--mute2);font-size:11px;font-family:'JetBrains Mono',ui-monosp
   <div class="tbl scroll"><table id="d_v41_t"><thead></thead><tbody class="num"></tbody></table></div>
   <div class="tbl scroll"><table id="d_v41_t2"><thead></thead><tbody class="num"></tbody></table></div>
   <div class="note" id="d_v41_note"></div>
+</section>
+
+<section id="d_u15" class="card pad" style="display:flex;flex-direction:column;gap:12px" aria-label="ultra15 季調多因子明細">
+  <div class="between"><h2 class="h2"><span class="tag k-ULTRA15">ULTRA15</span> 季調多因子 15 檔:目標倉位</h2><span class="sub" id="d_u15_sub"></span></div>
+  <div class="tbl scroll"><table id="d_u15_t"><thead></thead><tbody class="num"></tbody></table></div>
+</section>
+
+<section id="d_la" class="card pad" style="display:flex;flex-direction:column;gap:12px" aria-label="long_alloc 雙池配置明細">
+  <div class="between"><h2 class="h2"><span class="tag k-LALLOC">LALLOC</span> long_alloc 雙池:目標倉位</h2><span class="sub" id="d_la_sub"></span></div>
+  <div class="tbl scroll"><table id="d_la_t"><thead></thead><tbody class="num"></tbody></table></div>
 </section>
 
 <section id="d_stack3" hidden class="card pad" style="display:none;flex-direction:column;gap:12px" aria-label="STACK3 三模型選股明細">
@@ -725,6 +737,7 @@ async function render(){
  let TRD=null,L4P=null;try{const r=await fetch(`data/trader_${selDay}.json?`+Date.now());if(r.ok)TRD=await r.json()}catch(e){}
  try{const r=await fetch(`l4_picks_${selDay}.json?`+Date.now());if(r.ok)L4P=await r.json()}catch(e){}
  const fdn=new Date(),td=`${fdn.getFullYear()}-${String(fdn.getMonth()+1).padStart(2,"0")}-${String(fdn.getDate()).padStart(2,"0")}`,past=selDay<td;
+ const off=!!(MS&&MS.date===selDay&&MS.closed);   // 休市日:排程本來就停,沒回報不算故障
  const FS={done:['已完成','t-ok'],running:['進行中','t-info'],waiting:['待命','t-info'],failed:['故障','t-risk'],skipped:['已略過','t-disp'],pending:['待執行',''],none:['無紀錄','']};
  // 每筆單歸到第一張符合的單據卡
  const OB=new Map();(TRD&&TRD.orders||[]).forEach(o=>{const x=S.find(x=>x[7]&&x[7].s.includes(o.session)&&x[7].f(o));if(x){if(!OB.has(x))OB.set(x,[]);OB.get(x).push(o)}});
@@ -742,13 +755,14 @@ async function render(){
   if(ap&&ap.decision==='go')return {s:'done',note:'今天沒有這類單'};
   return {s:'skipped',note:!M?'會議沒開,不送':ap?'你按了不做':'沒核准,不送'}};
  const fst=S.map(x=>{if(x[6]&&selDay<x[6])return {s:'none',note:`${x[6].slice(5)} 起上線,這天還沒有`};
-  if(x[7])return ordSt(x);
-  if(x[5]==='l4picks')return L4P?{s:'done',note:`選出 ${(L4P.picks||[]).length} 檔:${(L4P.picks||[]).join('、')}`}:{s:!past&&hm<x[4][0]?'pending':'failed',note:!past&&hm<x[4][0]?'':'時間已過,還沒有名單'};
+  if(x[7]){const r=ordSt(x);return off&&r&&r.s==='pending'?{s:'skipped',note:'休市,不送'}:r}
+  if(x[5]==='l4picks')return L4P?{s:'done',note:`選出 ${(L4P.picks||[]).length} 檔:${(L4P.picks||[]).join('、')}`}:off?{s:'skipped',note:'休市,沒有名單'}:{s:!past&&hm<x[4][0]?'pending':'failed',note:!past&&hm<x[4][0]?'':'時間已過,還沒有名單'};
   const by={};(FL||[]).filter(e=>e.step===(x[5]||x[0])).forEach(e=>by[e.src]=e);const L=Object.values(by),of=k=>L.filter(e=>e.status===k);
   let s=of('failed').length?'failed':of('running').length?'running':of('waiting').length?'waiting':of('done').length?'done':of('skipped').length?'skipped':FL?'pending':'none';
   let note=(s==='failed'?of('failed'):L).map(e=>e.note).filter(Boolean).join(';');
-  if(FL&&(s==='pending'&&(past||hm>=x[4][0]))){s='failed';note='時間已過,沒有任何回報(程式沒跑?)'}
-  else if(FL&&(s==='running'||s==='waiting')&&(past||hm>=x[4][1])){s='failed';note='逾時未完成'+(note?':'+note:'')}
+  if(off&&s==='pending'){s='skipped';note='休市,不跑'}
+  else if(FL&&(s==='pending'&&(past||hm>=x[4][0]))){s='failed';note='時間已過,沒有任何回報(程式沒跑?)'}
+  else if(FL&&(s==='running'||s==='waiting')&&(past||hm>=x[4][1])){s=off?'skipped':'failed';note=(off?'休市,之後沒有回報':'逾時未完成')+(note?':'+note:'')}
   return {s,note,t:L.map(e=>e.t).sort().pop()}});
  const SV=S.map((x,i)=>[x,fst[i]]).filter(([x,f])=>f);
  // 同一個時間的事合併成一張卡,卡裡每件事各一行(各自的狀態)
@@ -762,7 +776,7 @@ async function render(){
   return `<div class="step ${s==='running'||s==='waiting'?'now':s==='done'?'done':s==='failed'?'bad':''}"><div class="between"><span class="num tm">${g[0][0][0]}</span>${pl(s)}</div>${body}</div>`}).join('');
 
  const SF=SV.map(([x,f])=>f),nf=SF.filter(x=>x.s==="failed").length,ri=SF.findIndex(x=>x.s==="running"),pi=SF.findIndex(x=>x.s==="pending"),SX=SV.map(([x])=>x);
- $('#rules_now').innerHTML=(nf?`<b style="color:var(--t-risk-fg)">${nf} 項故障</b>・`:'')+(!FL?(selDay===td?'今天還沒有任何流程回報(休市或排程沒啟動)':selDay+' 沒有流程紀錄'):[ri>=0?`目前:<b style="color:var(--c-all)">${SX[ri][0]} ${SX[ri][1]}</b>`:'',pi>=0?`下一步 ${SX[pi][0]} ${SX[pi][1]}`:''].filter(Boolean).join('・')||(selDay===td?'今天':'這天')+'流程已全部結束');
+ $('#rules_now').innerHTML=(off?'<b>今日休市</b>・':'')+(nf?`<b style="color:var(--t-risk-fg)">${nf} 項故障</b>・`:'')+(!FL?(selDay===td?'今天還沒有任何流程回報(休市或排程沒啟動)':selDay+' 沒有流程紀錄'):[ri>=0?`目前:<b style="color:var(--c-all)">${SX[ri][0]} ${SX[ri][1]}</b>`:'',pi>=0?`下一步 ${SX[pi][0]} ${SX[pi][1]}`:''].filter(Boolean).join('・')||(selDay===td?'今天':'這天')+'流程已全部結束');
 }
 // ---- six-strategy integration (integration.json from build_integration.py) ----
 const RK={RGMC:'rgmc',DISPO:'dispo',V41:'v41',TXN:'txn',L1:'l1',L4:'l4',STACK3:'stack3'};
@@ -792,7 +806,18 @@ function detailStack3(){const x=IG.stack3;if(!x)return;const amt=IGAMT.STACK3||0
  $('#d_stack3_t tbody').innerHTML=x.picks.map((r,i)=>`<tr class="${rgs.has(r.sid)?'bad-row':'ok-row'}"><td>${i+1}</td><td><span class="code">${r.sid}</span> ${esc(nm(r.sid))}${dtag(r.sid)}</td><td class="r">${(r.score*100).toFixed(1)}</td><td class="r">${money(per)}</td><td class="r">${money(r.amt)}</td><td class="r">${money(r.adv20)}</td><td>${rgs.has(r.sid)?'<span class="pill t-risk" style="font-size:11px">RGMC 持有</span>':'<span class="pill t-ok" style="font-size:11px">無</span>'}</td></tr>`).join('');
  const s=IG.strategies.STACK3||{};
  $('#d_stack3_note').textContent=`三個選股模型(own_C、雙頭、lambdarank)的排名等權。回測(2023-01 ~ 2026-09,扣成本)年化 77%、Sharpe 2.08、MDD −26%;和 RGMC 日報酬相關 ${(IG.corr.STACK3||{}).RGMC??'—'}、持股重疊約 7–16%。變體是看過結果才挑的,有挑選偏誤;2025 年明顯弱於 RGMC。`}
-function details(){if(!IG)return;detailStack3();const today=new Date().toISOString().slice(0,10);
+// ultra15 / long_alloc:只給目標倉位(不在資金分配方案內、沒有實單)
+const wpc=w=>(w<0?'−':'')+Math.abs(w*100).toFixed(1)+'%';
+function detailU15(){const u=IG.ultra15;if(!u||!u.rows)return;
+ $('#d_u15_sub').innerHTML=`本季 ${u.entry_date} 開盤換股・至 ${u.as_of} <span class="${cls(u.qtd)}">${pct(u.qtd)}</span>`;
+ $('#d_u15_t thead').innerHTML=th([['標的'],['目標權重','r'],['本季報酬','r']]);
+ $('#d_u15_t tbody').innerHTML=u.rows.map(r=>`<tr><td><span class="code">${r.sid}</span> ${esc(r.name||nm(r.sid))}</td><td class="r">${wpc(r.w)}</td><td class="r ${cls(r.ret)}">${pct(r.ret,1)}</td></tr>`).join('')}
+function detailLA(){const a=IG.lalloc;if(!a)return;
+ $('#d_la_sub').textContent=a.error?'':`訊號日 ${a.as_of}・兩池各自 100%・手動下單`;
+ $('#d_la_t thead').innerHTML=th([['池'],['目標倉位(占該池權益,0% 不列)']]);
+ $('#d_la_t tbody').innerHTML=a.error?`<tr><td colspan="2" class="warn">訊號讀取失敗:${esc(a.error)}</td></tr>`:(a.pools||[]).map(p=>
+  `<tr><td>${p.name==='TW Mr'?'台股':'美股'}</td><td style="white-space:normal">${Object.entries(p.targets).filter(([,w])=>Math.abs(w)>=0.0005).map(([s,w])=>`${esc(s.replace('借款',''))} ${wpc(w)}`).join('・')}</td></tr>`).join('')}
+function details(){if(!IG)return;detailStack3();detailU15();detailLA();const today=new Date().toISOString().slice(0,10);
  // L4
  const picks=(((state&&state.cap)||{}).l4_picks)||[],ent=new Map((((state&&state.l4)||{}).entry||[]).map(e=>[e.sid,e])),p4=IGAMT.L4||0;
  $('#d_l4_sub').textContent=`今天 ${picks.length} 檔・分配 ${money(p4)}`;

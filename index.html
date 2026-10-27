@@ -495,10 +495,10 @@ function orders(day,isToday){
  (day.l4_entry||[]).forEach(e=>{const q=q4(e.sid);O.push({t:'13:30:00',k:'L4',p:`<span class="code">${e.sid}</span> ${e.name||nm(e.sid)}${dtag(e.sid)}`,s:'買進',q:q.txt,px:e.entry,how:'收盤競價・限價',amt:q.sh*e.entry,why:'抱隔夜,明天開盤賣'})});
  if(isToday&&IG){const g=IG.rgmc,T=igToday();
   if(T.rebalToday){const ra=IGAMT.RGMC||0,rr=g.rows.slice().sort((a,b)=>(b.target_w||0)-(a.target_w||0)),rl=allocLots(rr.filter(r=>r.target_w>0).map(r=>({id:r.sid,px:r.px,base:r.target_w*ra,adv:r.adv20||0})),ra),rp=r=>`<span class="code">${r.sid}</span> ${nm(r.sid)}${dtag(r.sid)}`;
-   rr.filter(r=>!(r.target_w>0)).forEach(r=>{const n=Math.floor((r.w||0)*ra/(r.px*LOT));O.push({t:'09:05:00',k:'RGMC',p:rp(r),s:'賣出',q:lotTxt(n),px:r.px,how:'run.py [a] 早盤段・現價 ×0.99',amt:n*LOT*r.px,why:`換股賣出(成本 ${r.cost} → ${pct(r.ret,1)},價格以昨收估)`})});
-   rr.filter(r=>r.new).forEach(r=>{const n=rl[r.sid]||0;O.push({t:'13:10:00',k:'RGMC',p:rp(r),s:'買進',q:lotTxt(n),px:r.px,how:'run.py [a]・限價 ROD',amt:n*LOT*r.px,why:`換股買進・目標 ${pct(r.target_w,1)}(價格以昨收估)`})})}
+   rr.filter(r=>!(r.target_w>0)).forEach(r=>{const n=Math.floor((r.w||0)*ra/(r.px*LOT));O.push({t:'09:05:00',k:'RGMC',p:rp(r),s:'賣出',q:lotTxt(n),px:r.px,how:'AI 操盤手 am 場次・現價 ×0.99',amt:n*LOT*r.px,why:`換股賣出(成本 ${r.cost} → ${pct(r.ret,1)},價格以昨收估)`})});
+   rr.filter(r=>r.new).forEach(r=>{const n=rl[r.sid]||0;O.push({t:'13:10:00',k:'RGMC',p:rp(r),s:'買進',q:lotTxt(n),px:r.px,how:'AI 操盤手 pre_close 場次・限價 ROD',amt:n*LOT*r.px,why:`換股買進・目標 ${pct(r.target_w,1)}(價格以昨收估)`})})}
   const dR=sid=>(IG.dispo.rows||[]).find(x=>x.stock_id===sid)||{},dpx=sid=>dR(sid).mark_px??dR(sid).ref_price_basis,dl=allocLots(T.dispoTargets.map(([sid,w])=>({id:sid,px:dpx(sid),base:w*(IGAMT.DISPO||0),adv:((IG.dispo.liq||{})[sid]||{}).adv20||0})),IGAMT.DISPO||0);
-  T.dispoTargets.forEach(([sid,w])=>{const n=dl[sid]||0;O.push({t:'13:10:00',k:'DISPO',p:`<span class="code">${sid}</span> ${nm(sid)}${dtag(sid)}`,s:'買進',q:lotTxt(n),px:dpx(sid)??'—',how:'run.py [a]・限價 ROD',amt:n?n*LOT*dpx(sid):w*(IGAMT.DISPO||0),why:'處置期倒數進場(成交價以收盤模擬)'})});
+  T.dispoTargets.forEach(([sid,w])=>{const n=dl[sid]||0;O.push({t:'13:10:00',k:'DISPO',p:`<span class="code">${sid}</span> ${nm(sid)}${dtag(sid)}`,s:'買進',q:lotTxt(n),px:dpx(sid)??'—',how:'AI 操盤手 pre_close 場次・限價 ROD',amt:n?n*LOT*dpx(sid):w*(IGAMT.DISPO||0),why:'處置期倒數進場(成交價以收盤模擬)'})});
   if(F&&F.tgt!==F.cur)O.push({t:'15:00:00',k:'V41',p:`${F.ctn}・夜盤`,s:F.tgt>F.cur?'買進':'賣出',q:Math.abs(F.tgt-F.cur)+' 口',px:F.px,how:'auto_trader・穿價限價',amt:Math.abs(F.tgt-F.cur)*F.px*F.mul,why:`槓桿 ${IG.v41.current_lev}x → ${IG.v41.execution_target_lev}x(目標口數要加上未平的疊加 ${F.ovn>=0?'+':''}${F.ovn} 口)`})}
  return O.sort((a,b)=>a.t.localeCompare(b.t))}
 
@@ -705,7 +705,7 @@ async function render(){
  // 單據規則 {s:場次, f:篩選, end:這類單最晚何時送完, hide:沒單就不顯示}:狀態直接由下單紀錄(data/trader_<日>.json)算,每筆單只歸第一張符合的卡
  const T0='2026-10-21',OR=(sess,f,end,hide)=>({s:sess,f,end,hide}),ot=o=>o.t||'';
  const S=[['08:25','監看啟動','監看程式啟動,載入處置 / 暫停當沖名單;之後整天算紙上模擬與 L1 名單',['系統'],['08:30','08:35']],
-  ['08:30','資料更新','auto_daily 更新股價、處置股、暫停當沖名單;更新完才開早盤會議',['系統'],['08:35','09:00']],
+  ['08:20','資料更新','auto_daily 在早盤會議前 10 分鐘更新股價、處置股;每場會產生資訊包時再檢查一次,缺檔或過期就先重抓再交給操盤手',['系統'],['08:25','08:50']],
   ['08:30','★ 早盤會議','對帳(持倉、掛單、每筆單實況)→ 操盤手寫上午的程式 → 審查 → TG 核准鈕。最好 09:00 前按',['RGMC','DISPO','L1','L4'],['09:00','09:15'],'am',T0],
   ['09:00','L1 名單','監看程式依 09:00 開盤跳空 ≥ 6.5% 產生 L1 名單',['L1'],['09:05','09:30'],'08:59'],
   ['09:01','早盤程式','核准後啟動,一路跑到 13:25;它做的每個動作在下面各一張卡',['L4','L1','RGMC','DISPO'],['13:30','13:40'],'orders_am',T0],
@@ -737,7 +737,7 @@ async function render(){
  let TRD=null,L4P=null;try{const r=await fetch(`data/trader_${selDay}.json?`+Date.now());if(r.ok)TRD=await r.json()}catch(e){}
  try{const r=await fetch(`l4_picks_${selDay}.json?`+Date.now());if(r.ok)L4P=await r.json()}catch(e){}
  const fdn=new Date(),td=`${fdn.getFullYear()}-${String(fdn.getMonth()+1).padStart(2,"0")}-${String(fdn.getDate()).padStart(2,"0")}`,past=selDay<td;
- const off=!!(MS&&MS.date===selDay&&MS.closed);   // 休市日:排程本來就停,沒回報不算故障
+ const off=!!(MS&&(MS.date===selDay&&MS.closed||(MS.closed_days||[]).includes(selDay)));   // 休市日(含回看過去的休市日):排程本來就停,沒回報不算故障
  const FS={done:['已完成','t-ok'],running:['進行中','t-info'],waiting:['待命','t-info'],failed:['故障','t-risk'],skipped:['已略過','t-disp'],pending:['待執行',''],none:['無紀錄','']};
  // 每筆單歸到第一張符合的單據卡
  const OB=new Map();(TRD&&TRD.orders||[]).forEach(o=>{const x=S.find(x=>x[7]&&x[7].s.includes(o.session)&&x[7].f(o));if(x){if(!OB.has(x))OB.set(x,[]);OB.get(x).push(o)}});
@@ -776,7 +776,7 @@ async function render(){
   return `<div class="step ${s==='running'||s==='waiting'?'now':s==='done'?'done':s==='failed'?'bad':''}"><div class="between"><span class="num tm">${g[0][0][0]}</span>${pl(s)}</div>${body}</div>`}).join('');
 
  const SF=SV.map(([x,f])=>f),nf=SF.filter(x=>x.s==="failed").length,ri=SF.findIndex(x=>x.s==="running"),pi=SF.findIndex(x=>x.s==="pending"),SX=SV.map(([x])=>x);
- $('#rules_now').innerHTML=(off?'<b>今日休市</b>・':'')+(nf?`<b style="color:var(--t-risk-fg)">${nf} 項故障</b>・`:'')+(!FL?(selDay===td?'今天還沒有任何流程回報(休市或排程沒啟動)':selDay+' 沒有流程紀錄'):[ri>=0?`目前:<b style="color:var(--c-all)">${SX[ri][0]} ${SX[ri][1]}</b>`:'',pi>=0?`下一步 ${SX[pi][0]} ${SX[pi][1]}`:''].filter(Boolean).join('・')||(selDay===td?'今天':'這天')+'流程已全部結束');
+ $('#rules_now').innerHTML=(off?`<b>${selDay===td?'今日':''}休市</b>・`:'')+(nf?`<b style="color:var(--t-risk-fg)">${nf} 項故障</b>・`:'')+(!FL?(selDay===td?'今天還沒有任何流程回報(休市或排程沒啟動)':selDay+' 沒有流程紀錄'):[ri>=0?`目前:<b style="color:var(--c-all)">${SX[ri][0]} ${SX[ri][1]}</b>`:'',pi>=0?`下一步 ${SX[pi][0]} ${SX[pi][1]}`:''].filter(Boolean).join('・')||(selDay===td?'今天':'這天')+'流程已全部結束');
 }
 // ---- six-strategy integration (integration.json from build_integration.py) ----
 const RK={RGMC:'rgmc',DISPO:'dispo',V41:'v41',TXN:'txn',L1:'l1',L4:'l4',STACK3:'stack3'};
@@ -838,7 +838,7 @@ function details(){if(!IG)return;detailStack3();detailU15();detailLA();const tod
  const g=IG.rgmc,amt=IGAMT.RGMC||0,dtr=g.days_to_rebal;
  const rebalToday=igToday().rebalToday;
  $('#d_rgmc_sub').textContent=`資料日 ${g.as_of}・最近換股 ${g.last_rebal}・分配 ${money(amt)}`;
- $('#d_rgmc_todo').innerHTML=`<b>今天要做:</b>`+(!g.regime_on?'大盤開關關閉,全部現金,不買。':g.pending_action==='rebalance'&&!rebalToday?`<span class="warn">下個交易日換股</span>:引擎已依 ${g.as_of} 收盤排名定出新目標,run.py [a] 09:05 賣出 ${g.rows.filter(r=>!(r.target_w>0)).length} 檔、13:10 買進 ${g.rows.filter(r=>r.new).length} 檔新標的(下表「新買進」,成本以 ${g.as_of} 收盤模擬)。`:rebalToday?'<span class="warn">今天是換股日</span>:run.py [a] 09:05 先賣出、13:10 買進,依最新排名重新配置(每 7 個交易日一次)。':dtr===0?'資料日就是換股日,13:10 依排名配置。':`不換股,持有下面 ${g.rows.length} 檔;資料日後第 ${dtr} 個交易日換股。`)+(g.cash_w!=null?` 現金比例 ${Math.round(g.cash_w*100)}%。`:'');
+ $('#d_rgmc_todo').innerHTML=`<b>今天要做:</b>`+(!g.regime_on?'大盤開關關閉,全部現金,不買。':g.pending_action==='rebalance'&&!rebalToday?`<span class="warn">下個交易日換股</span>:引擎已依 ${g.as_of} 收盤排名定出新目標,AI 操盤手 09:05 賣出 ${g.rows.filter(r=>!(r.target_w>0)).length} 檔、13:10 買進 ${g.rows.filter(r=>r.new).length} 檔新標的(下表「新買進」,成本以 ${g.as_of} 收盤模擬)。`:rebalToday?'<span class="warn">今天是換股日</span>:AI 操盤手 09:05 先賣出(am 場次)、13:10 買進(pre_close 場次),依最新排名重新配置(每 7 個交易日一次)。':dtr===0?'資料日就是換股日,13:10 依排名配置。':`不換股,持有下面 ${g.rows.length} 檔;資料日後第 ${dtr} 個交易日換股。`)+(g.cash_w!=null?` 現金比例 ${Math.round(g.cash_w*100)}%。`:'');
  $('#d_rgmc_t thead').innerHTML=th([...STD8,...EX2]);
  // 換股:資料日後第 dtr 個交易日收盤排名 → 下個交易日 09:05 賣 / 13:10 買
  const nd=dtr>0?tdNext(g.as_of,dtr):g.as_of,nx=tdNext(nd),ex0=tdNext(g.as_of);
@@ -854,7 +854,7 @@ function details(){if(!IG)return;detailStack3();detailU15();detailLA();const tod
  const hpe=d.held_pe||{},extra=Object.keys(held).filter(s=>!tsid.has(s)),exits=extra.filter(s=>!hpe[s]||hpe[s]<=today),keeps=extra.filter(s=>hpe[s]&&hpe[s]>today);
  const nb=rows.filter(r=>act(r)[0]==='買進').length,ns=rows.filter(r=>act(r)[0]==='賣出').length+exits.length;
  $('#d_dispo_sub').textContent=`決策日 ${n.decision_date||d.as_of}・目標 ${rows.length} 檔・分配 ${money(pa)}`;
- $('#d_dispo_todo').innerHTML=`<b>今天要做:</b>run.py [a] 下單 — 13:10 買進 ${nb} 檔、13:25 收盤競價賣出 ${ns} 檔、續抱 ${rows.filter(r=>act(r)[0]==='續抱').length+keeps.length} 檔。規則:處置期結束前倒數 5~2 個交易日每天進一批(每批 10%、單檔上限 40%;含上市第二次處置,排最後),出關日 13:25 收盤競價賣出(現價 ×0.97);買進價不追超過公告日收盤 +3%。`;
+ $('#d_dispo_todo').innerHTML=`<b>今天要做:</b>AI 操盤手 pre_close 場次下單 — 13:10 買進 ${nb} 檔、13:25 收盤競價賣出 ${ns} 檔、續抱 ${rows.filter(r=>act(r)[0]==='續抱').length+keeps.length} 檔。規則:處置期結束前倒數 5~2 個交易日每天進一批(每批 10%、單檔上限 40%;含上市第二次處置,排最後),出關日 13:25 收盤競價賣出(現價 ×0.97);買進價不追超過公告日收盤 +3%。`;
  $('#d_dispo_t thead').innerHTML=th([...STD8,...EX2,['處置類別'],['買進上限','r'],['今天動作']]);
  const peX=(pe,proj,how)=>xw(pe,'13:25',(how||'出關日收盤競價賣出')+(proj?'(出關日推估)':''));
  const cb=d.cap_base||1,liq=d.liq||{};
@@ -921,15 +921,7 @@ function integ(){
 ;
  igChart();
  // conflict rules + today's checks
- const rg=new Set(IG.rgmc.holdings),l1=(((state&&state.l1)||{}).positions||[]).map(p=>p.sid),l4=(((state&&state.cap)||{}).l4_picks||[]).map(x=>x.sid);
- const hit=(a,b)=>a.filter(x=>b.has?b.has(x):b.includes(x));
- const c1=hit(l1,rg),c2=hit(l4,rg),c3=hit(l4,new Set(l1)),c4=hit(l4,dispo),c5=hit([...rg],dispo);
- const R=[[!c1.length&&!c2.length,'不和 RGMC 搶同一檔',`RGMC 目前持有 ${IG.rgmc.holdings.length} 檔(${IG.rgmc.holdings.join('、')},最近換股 ${IG.rgmc.last_rebal})。L1 / L4 遇到就跳過`+(c1.length||c2.length?`;今天重疊:${[...c1,...c2].join('、')}`:'')],
-  [!c3.length,'L1 和 L4 不碰同一檔',c3.length?`今天重疊:${c3.join('、')},L4 改選下一名`:'L4 選股排除今天 L1 放空的標的'],
-  [!c4.length,'處置股讓給處置股策略',c4.length?`L4 今天入選處置股 ${c4.join('、')}:跳過或先預繳`:'L4 跳過處置股;實單買處置股要先預繳'],
-  [!c5.length,'RGMC 與處置股的分工(既有規則)',c5.length?`RGMC 持有處置股 ${c5.join('、')}:依既有規則處置股策略讓給 RGMC`:'處置股策略讓給 RGMC(flows.py exclusive_order)'],
-  [true,'新策略不走 [a] 合併下單','[a] 只要有一檔被兩個策略同時指定就整批擋單;L1 / L4 用獨立下單流程(或另一個帳戶)'],
-  [true,'期貨只下一張淨單','v4.1、TXN(各自一份資金)和 L4 避險(可開關)在同一個期貨帳戶軋成淨口數;15:00 v4.1 調倉時要把當時未平的疊加與避險口數算進去,否則會被當成多出來的口數修掉'],
+ const R=[[true,'期貨只下一張淨單','v4.1、TXN(各自一份資金)和 L4 避險(可開關)在同一個期貨帳戶軋成淨口數;15:00 v4.1 調倉時要把當時未平的疊加與避險口數算進去,否則會被當成多出來的口數修掉'],
   [true,'資金不互相佔用','L1 用當沖額度(收盤前平倉不佔現金);L4 隔夜佔現金(T+2 交割,隔天賣出回補);v4.1 用期貨帳戶保證金']];
  $('#ig_rules').innerHTML=R.map(([ok,t,d])=>`<div><span class="pill ${ok?'t-ok':'t-risk'}" style="font-size:11px;padding:2px 7px">${ok?'OK':'注意'}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:700;color:var(--ink)">${t}</span><span style="font-size:12px;color:var(--ink3);line-height:1.5">${esc(d)}</span></div></div>`).join('');
  // correlation

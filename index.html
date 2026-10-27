@@ -604,7 +604,7 @@ async function render(){
    <div><span class="num" style="font-size:20px;font-weight:600;color:var(--warn)">${state.blocked??'—'}</span> <span class="sub">檔不做 L1</span></div>
    <div class="sub">L4 入選處置股 <span class="num warn">${((state.cap&&state.cap.l4_picks)||[]).filter(x=>dispo.has(x.sid)).length}</span> 檔・需預繳</div></div>`;
  // history & chart
- const LO=liveOld(),rowsAll=days.map(d=>{const o=(IG&&IG.recent&&IG.recent[d])||(d===today?{RGMC:LO.rgmc,DISPO:LO.dispo,V41:LO.v41,live:1}:{}),r={d,...H[d],b0050:(bench.ret||{})[d],rgmc:o.RGMC??null,stack3:o.STACK3??null,dispo:o.DISPO??null,v41:o.V41??null,live:!!o.live};if(HEDGE()&&r.l4!=null)r.l4=r.l4+(r.l4h||0);r.combo=comboOf(r);return r});const rows=range==='5'?rowsAll.slice(-5):range==='20'?rowsAll.slice(-20):rowsAll;
+ const LO=liveOld(),rowsAll=days.filter(d=>!((MS&&MS.closed_days)||[]).includes(d)).map(d=>{const o=(IG&&IG.recent&&IG.recent[d])||(d===today?{RGMC:LO.rgmc,DISPO:LO.dispo,V41:LO.v41,live:1}:{}),r={d,...H[d],b0050:(bench.ret||{})[d],rgmc:o.RGMC??null,stack3:o.STACK3??null,dispo:o.DISPO??null,v41:o.V41??null,live:!!o.live};if(HEDGE()&&r.l4!=null)r.l4=r.l4+(r.l4h||0);r.combo=comboOf(r);return r});const rows=range==='5'?rowsAll.slice(-5):range==='20'?rowsAll.slice(-20):rowsAll;
  seg($('#ranges'),[['5','近 5 日'],['20','近 20 日'],['ALL','全部']],range,k=>{range=k;render()});
  const ser=chart(rows);
  let eq=1,eb=1;$('#hist tbody').innerHTML=rowsAll.map(r=>{eq*=1+r.combo;eb*=1+(r.b0050||0);const ex=r.b0050==null?null:r.combo-r.b0050;return `<tr><td>${r.d}${r.final?'':' <span class="pill t-info" style="font-size:11px;padding:1px 6px">進行中</span>'}</td><td class="r ${cls(r.rgmc)}">${pct(r.rgmc)}</td><td class="r ${cls(r.dispo)}">${pct(r.dispo)}</td><td class="r ${cls(r.v41)}">${pct(r.v41)}</td><td class="r ${cls(r.txn)}">${pct(r.txn)}</td><td class="r ${cls(r.l1)}">${pct(r.l1)}</td><td class="r ${cls(r.l4)}">${pct(r.l4)}</td><td class="r ${cls(r.combo)}"><b>${pct(r.combo)}</b></td><td class="r ${cls(r.b0050)}">${pct(r.b0050)}</td><td class="r ${cls(ex)}">${pct(ex)}</td><td class="r ${cls(eq-1)}">${pct(eq-1)}</td><td class="r ${cls(eb-1)}">${pct(eb-1)}</td></tr>`}).reverse().join('');
@@ -685,12 +685,13 @@ async function render(){
  // L1 table
  const l1R=l1.slice().sort((a,b)=>(b.og||0)-(a.og||0)).map(p=>({sid:p.sid,name:p.name,shares:p.shares,cost:p.open,px:p.cover??p.last,ret:p.ret,w:p.cover==null?1/l1.length:0,tw:1/l1.length,apx:p.open,adv:p.adv20||0}));
  const l1L=std8Lots(l1R,IGAMT.L1||0),l1M=new Map(l1R.map(r=>[r.sid,r]));
+ const l1P=p=>(l1L[p.sid]||0)*LOT*p.open*(p.ret||0);   // 損益 = 依分配金額的張數 × LOT × 開盤價 × ret(ret 已扣成本)
  $('#l1t tbody').innerHTML=l1.length?l1.map(p=>{const dist=p.limit/p.last-1,f=Math.max(0,Math.min(1,1-dist/0.1));
   return `<tr>${std8Cells(l1M.get(p.sid),l1L,isToday?srcp(p.sid):'')}${ex2Cells(xw(selDay,'09:00','開盤放空'),p.cover!=null?xw(selDay,(p.cover_t||'').slice(0,5),'已回補'):xw(selDay,'13:25','收盤競價回補(漲停價掛單);10:00 後碰漲停→漲停價回補'))}<td class="r up">${pct(p.og,1)}</td><td class="r">${p.limit}</td>
   <td>${p.cover!=null?'—':pct(dist,1)+`<span class="meter"><i style="width:${(f*100).toFixed(0)}%;background:var(${f>.8?'--up':'--warn'})"></i></span>`}</td>
   <td>${p.cover==null?'<span class="pill t-info">持有空單</span>':`<span class="pill ${/漲停/.test(p.status)?'t-lu':'t-ok'}">${esc(p.status)}</span>`}${p.touch_before10?' <span class="warn" title="10:00 前碰過漲停">●</span>':''}</td>
-  <td class="r">${p.cover!=null?p.cover+' <span class="mute">'+(p.cover_t||'')+'</span>':'—'}</td><td class="r ${cls(p.pnl)}">${sm(p.pnl*p1/((state.l1&&state.l1.size)||500000))}</td></tr>`}).join(''):`<tr><td colspan="16" class="mute">${isToday&&!state.market_open?'等待 09:00 開盤…':'這天沒有符合條件的股票'}</td></tr>`;
- const tt=l1.reduce((a,p)=>a+(p.pnl||0),0)*p1/((state.l1&&state.l1.size)||500000);$('#l1note').textContent=l1.length?`合計損益 ${sm(tt)} 元(${l1.length} 檔;每檔 ${money(p1)} = L1 分配 ÷ 檔數)`:'';
+  <td class="r">${p.cover!=null?p.cover+' <span class="mute">'+(p.cover_t||'')+'</span>':'—'}</td><td class="r ${cls(l1P(p))}">${sm(l1P(p))}</td></tr>`}).join(''):`<tr><td colspan="16" class="mute">${isToday&&!state.market_open?'等待 09:00 開盤…':'這天沒有符合條件的股票'}</td></tr>`;
+ const tt=l1.reduce((a,p)=>a+l1P(p),0);$('#l1note').textContent=l1.length?`合計損益 ${sm(tt)} 元(${l1.length} 檔;每檔 ${money(p1)} = L1 分配 ÷ 檔數)`:'';
  capacity(day);
  // engine
  const age=(Date.now()-new Date(state.updated.replace(' ','T')))/1000,on=age<30;
@@ -844,7 +845,7 @@ function details(){if(!IG)return;detailStack3();detailU15();detailLA();const tod
  $('#d_rgmc_t thead').innerHTML=th([...STD8,...EX2]);
  // 換股:資料日後第 dtr 個交易日收盤排名 → 下個交易日 09:05 賣 / 13:10 買
  const nd=dtr>0?tdNext(g.as_of,dtr):g.as_of,nx=tdNext(nd),ex0=tdNext(g.as_of);
- const keepX=g.regime_on?xw(nx,'09:05',`最早這天;${nd} 收盤排名不在新目標才賣,大盤開關關閉→全部出場`):xw(ex0,'09:05','大盤開關關閉,全部賣出');
+ const keepX=g.regime_on?xw(nx,'09:05'):xw(ex0,'09:05','大盤開關關閉,全部賣出');
  const rb=g.pending_action==='rebalance',rgR=g.rows.slice().sort((a,b)=>(b.target_w||0)-(a.target_w||0)).map(r=>({sid:r.sid,shares:r.shares,cost:r.cost,px:r.px,ret:r.new?0:r.ret,w:r.w,tw:r.target_w,adv:r.adv20||0,new:r.new,alloc:rb&&!(r.target_w>0)?'<span class="sub">換股賣出</span>':null,
   ed:r.new?xw(ex0,'13:10','待買進'):r.entry_date,xd:rb&&!(r.target_w>0)?xw(ex0,'09:05','換股賣出(跌出新目標)'):keepX})),rgL=std8Lots(rgR,amt);
  $('#d_rgmc_t tbody').innerHTML=rgR.map(r=>`<tr class="${r.new?'bad-row':''}">${std8Cells(r,rgL,r.new?' <span class="pill t-disp" style="font-size:11px">新買進</span>':'')}${ex2Cells(r.ed,r.xd)}</tr>`).join('');

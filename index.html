@@ -576,8 +576,10 @@ function alertKind(m){if(/失敗|錯誤|讀不到/.test(m))return['風險','t-ri
 
 async function render(){
  if(!state)return;const hm=session();const H=state.history||{};const days=Object.keys(H).sort();
- const sel=$('#day');if(sel.options.length!==days.length)sel.innerHTML=days.map(d=>`<option>${d}</option>`).join('');
- if(!dayPinned||!days.includes(selDay))selDay=days[days.length-1];sel.value=selDay;   // 沒手動選日期就跟著最新一天(過午夜、監看程式剛啟動)
+ const nd=new Date(),td0=`${nd.getFullYear()}-${String(nd.getMonth()+1).padStart(2,"0")}-${String(nd.getDate()).padStart(2,"0")}`;
+ const opts=days.includes(td0)?days:[...days,td0];   // 過午夜就換到今天,監看程式還沒寫今天的資料也一樣(不顯示舊的一天)
+ const sel=$('#day');if(sel.dataset.k!==opts.join()){sel.innerHTML=opts.map(d=>`<option>${d}</option>`).join('');sel.dataset.k=opts.join()}
+ if(!dayPinned||!opts.includes(selDay))selDay=opts[opts.length-1];sel.value=selDay;   // 沒手動選日期就跟著今天
  const today=state.updated.slice(0,10),isToday=selDay===today;
  let day=null;try{day=await (await fetch(`day_${selDay}.json?`+Date.now())).json()}catch(e){}
  const h=H[selDay]||{};

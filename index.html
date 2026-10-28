@@ -1029,24 +1029,25 @@ function details(){if(!IG)return;detailStack3();detailU15();detailLA();const tod
  // DISPO
  const d=IG.dispo,n=d.notes||{},pa=IGAMT.DISPO||0,k_=pa/(d.cap_base||1),held=d.positions||{},rows=d.rows||[];
  const tsid=new Set(rows.map(r=>r.stock_id));
- const act=r=>{const h=r.stock_id in held;if(r.period_end&&r.period_end<=today)return h?['賣出','13:25 出關日收盤競價賣出','t-risk']:['不動','今天出關,不進場','t-info'];return h?['續抱',`持有到 ${r.period_end} 出關日`,'t-ok']:['買進','13:10 限價買進','t-disp']};
- const hpe=d.held_pe||{},extra=Object.keys(held).filter(s=>!tsid.has(s)),exits=extra.filter(s=>!hpe[s]||hpe[s]<=today),keeps=extra.filter(s=>hpe[s]&&hpe[s]>today);
- const nb=rows.filter(r=>act(r)[0]==='買進').length,ns=rows.filter(r=>act(r)[0]==='賣出').length+exits.length;
- $('#d_dispo_sub').textContent=`決策日 ${n.decision_date||d.as_of}・目標 ${rows.length} 檔・分配 ${money(pa)}`;
- $('#d_dispo_todo').innerHTML=`<b>今天要做:</b>AI 操盤手 pre_close 場次下單 — 13:10 買進 ${nb} 檔、13:25 收盤競價賣出 ${ns} 檔、續抱 ${rows.filter(r=>act(r)[0]==='續抱').length+keeps.length} 檔。規則:處置期結束前倒數 5~2 個交易日每天進一批(每批 10%、單檔上限 40%;含上市第二次處置,排最後),出關日 13:25 收盤競價賣出(現價 ×0.97);買進價不追超過公告日收盤 +3%。`;
+ const dd=n.decision_date||d.as_of,tw_=d.weights||{};
+ const act=r=>{const h=r.stock_id in held;if(r.period_end&&r.period_end<=dd)return h?['賣出','13:25 出關日收盤競價賣出','t-risk']:['不動','出關日,不進場','t-info'];return h?((tw_[r.stock_id]||0)>held[r.stock_id]+1e-4?['加碼','13:10 限價加碼一批','t-disp']:['續抱',`持有到 ${r.period_end} 出關日`,'t-ok']):['買進','13:10 限價買進','t-disp']};
+ const hpe=d.held_pe||{},extra=Object.keys(held).filter(s=>!tsid.has(s)),exits=extra.filter(s=>!hpe[s]||hpe[s]<=dd),keeps=extra.filter(s=>hpe[s]&&hpe[s]>dd);
+ const nb=rows.filter(r=>['買進','加碼'].includes(act(r)[0])).length,ns=rows.filter(r=>act(r)[0]==='賣出').length+exits.length;
+ $('#d_dispo_sub').textContent=`決策日 ${dd}・持有截至 ${d.positions_as_of||'—'}・目標 ${rows.length} 檔・分配 ${money(pa)}`;
+ $('#d_dispo_todo').innerHTML=`<b>${dd>today?`下個交易日 ${dd} 要做`:'今天要做'}:</b>AI 操盤手 pre_close 場次下單 — 13:10 買進/加碼 ${nb} 檔、13:25 收盤競價賣出 ${ns} 檔、續抱 ${rows.filter(r=>act(r)[0]==='續抱').length+keeps.length} 檔。規則:處置期結束前倒數 5~2 個交易日每天進一批(每批 10%、單檔上限 40%;含上市第二次處置,排最後),出關日 13:25 收盤競價賣出(現價 ×0.97);買進價不追超過公告日收盤 +3%。`;
  $('#d_dispo_t thead').innerHTML=th([...STD8,...EX2,['處置類別'],['買進上限','r'],['今天動作']]);
  const peX=(pe,proj,how)=>xw(pe,'13:25',(how||'出關日收盤競價賣出')+(proj?'(出關日推估)':''));
  const cb=d.cap_base||1,liq=d.liq||{};
  const dpR=rows.map(r=>{const [a]=act(r),h=r.stock_id in held,px=r.mark_px??r.ref_price_basis,sh=r.target_shares||0;
-  return {sid:r.stock_id,shares:sh,cost:r.entry_px??null,px,ret:r.ret??null,w:h?sh*px/cb:0,tw:a==='賣出'||a==='不動'?0:sh*r.ref_price_basis/cb,apx:r.ref_price_basis,adv:(liq[r.stock_id]||{}).adv20||0}}),dpL=std8Lots(dpR,pa);
+  return {sid:r.stock_id,shares:sh,cost:r.entry_px??null,px,ret:r.ret??null,w:h?held[r.stock_id]:0,tw:a==='賣出'||a==='不動'?0:sh*r.ref_price_basis/cb,apx:r.ref_price_basis,adv:(liq[r.stock_id]||{}).adv20||0}}),dpL=std8Lots(dpR,pa);
  const sim=d.sim||{},blank=(s,w)=>{const m=sim[s];return `<td><span class="code">${s}</span> ${esc(nm(s))}</td><td class="r">—</td><td class="r">${m?m.entry_px:'—'}</td><td class="r">${m?m.mark_px:'—'}</td><td class="r ${m?cls(m.ret):''}">${m?pct(m.ret,1):'—'}</td><td class="r">${w==null?'—':pct(w,1)}</td><td class="r">0.0%</td><td class="r">${m?`<span class="sub">一張 ${money(LOT*m.mark_px)}</span>`:'—'}</td>`};
  $('#d_dispo_t tbody').innerHTML=rows.map((r,i)=>{const [a,why,c]=act(r),cap=r.ref_price_basis*(1+(r.chase_cap_pct||0));
-  return `<tr class="${a==='買進'||a==='賣出'?'bad-row':'ok-row'}">${std8Cells(dpR[i],dpL,rgs.has(r.stock_id)?' <span class="pill t-risk" style="font-size:11px">RGMC 持有→讓出</span>':'')}${ex2Cells(r.entry_date,r.period_end?peX(r.period_end,r.period_end_mode==='projected'):'—')}<td>${esc(r.measure||'')}・${r.auction_interval_minutes||'—'} 分盤</td><td class="r">${cap.toFixed(2)}</td><td><span class="pill ${c}" style="font-size:11px">${a}</span> <span class="sub">${why}</span></td></tr>`}).join('')
-  +exits.map(s=>`<tr class="bad-row">${blank(s,held[s])}${ex2Cells((sim[s]||{}).entry_date,hpe[s]?peX(today,false,`出關日 ${hpe[s]} 已到,收盤競價賣出`):xw(today,'13:25','收盤競價賣出'))}<td class="sub">已持有</td><td class="r">—</td><td><span class="pill t-risk" style="font-size:11px">賣出</span> <span class="sub">13:25 競價賣出</span></td></tr>`).join('')
+  return `<tr class="${a==='續抱'||a==='不動'?'ok-row':'bad-row'}">${std8Cells(dpR[i],dpL,rgs.has(r.stock_id)?' <span class="pill t-risk" style="font-size:11px">RGMC 持有→讓出</span>':'')}${ex2Cells(r.entry_date,r.period_end?peX(r.period_end,r.period_end_mode==='projected'):'—')}<td>${esc(r.measure||'')}・${r.auction_interval_minutes||'—'} 分盤</td><td class="r">${cap.toFixed(2)}</td><td><span class="pill ${c}" style="font-size:11px">${a}</span> <span class="sub">${why}</span></td></tr>`}).join('')
+  +exits.map(s=>`<tr class="bad-row">${blank(s,held[s])}${ex2Cells((sim[s]||{}).entry_date,hpe[s]?peX(dd,false,`出關日 ${hpe[s]} 已到,收盤競價賣出`):xw(dd,'13:25','收盤競價賣出'))}<td class="sub">已持有</td><td class="r">—</td><td><span class="pill t-risk" style="font-size:11px">賣出</span> <span class="sub">13:25 競價賣出</span></td></tr>`).join('')
   +keeps.map(s=>`<tr class="ok-row">${blank(s,held[s])}${ex2Cells((sim[s]||{}).entry_date,peX(hpe[s]))}<td class="sub">不在今天新目標內;依賣出保護抱到出關日</td><td class="r">—</td><td><span class="pill t-ok" style="font-size:11px">續抱</span></td></tr>`).join('')
   +(d.skipped||[]).filter(x=>!(x.stock_id in held)).map(x=>`<tr>${blank(x.stock_id,null)}${ex2Cells(sim[x.stock_id]?xw(sim[x.stock_id].entry_date,'13:10',`模擬進場 @ ${sim[x.stock_id].entry_px}`):'<span class="sub">未進場</span>','—')}<td colspan="2" class="sub">${x.reason==='gross_weight_cap'?'名額已滿(總權重上限)':x.reason}</td><td><span class="pill t-info" style="font-size:11px">跳過</span></td></tr>`).join('')
   ||'<tr><td colspan="13" class="sub">今天沒有目標</td></tr>';
- $('#d_dispo_note').textContent=`股數(回測)= 處置股 adapter 用試算資金 ${money(d.cap_base)} 算出的目標股數;成本 = 進場窗第一天收盤;換股時目標 = 目標股數 × 公告日收盤 ÷ 試算資金;依分配金額用整張分配器(每檔 ≤ 5% 20 日均額)。已持有但不在目標內、或被跳過的名單:成本 = 同一進場窗第一天收盤(模擬,進場日 = 出關日往前 4 個交易日),依分配金額欄列一張的金額。出關日標「推估」= 依處置天數推算,公告後以實際為準。`;
+ $('#d_dispo_note').textContent=`持有 = 處置股 adapter 前一交易日(${d.positions_as_of||'—'})的理論部位,不讀帳戶;目前權重 = 該部位佔試算資金比例,換股時目標 > 目前權重 = 決策日加碼一批。股數(回測)= 處置股 adapter 用試算資金 ${money(d.cap_base)} 算出的目標股數;成本 = 進場窗第一天收盤;換股時目標 = 目標股數 × 公告日收盤 ÷ 試算資金;依分配金額用整張分配器(每檔 ≤ 5% 20 日均額)。已持有但不在目標內、或被跳過的名單:成本 = 同一進場窗第一天收盤(模擬,進場日 = 出關日往前 4 個交易日),依分配金額欄列一張的金額。出關日標「推估」= 依處置天數推算,公告後以實際為準。`;
  BX.DISPO={pos:`目標 ${rows.length}・持有 ${Object.keys(held).length} 檔`,nt:nb?'13:10':ns?'13:25':null,nx:nb||ns?[nb?nxt('13:10',`買 ${nb} 檔`):'',ns?nxt('13:25',`賣 ${ns} 檔`):''].filter(Boolean).join(' '):'今天不動'};
  // V41
  const v=IG.v41,eqv=IGAMT.V41||0,px=v.index_close||1,lot=x=>x*eqv/(px*10);

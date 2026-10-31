@@ -304,6 +304,11 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .part .b{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:13px;color:var(--ink3);line-height:1.6}
 .part .t{color:var(--ink);font-size:14px}
 .part .m{font-family:'JetBrains Mono',monospace;color:var(--ink2);font-size:12.5px}
+.ptree summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;padding:9px 0}
+.ptree.l0>summary{font-size:16px;color:var(--ink)}
+.ptree.l1>summary{font-size:14px;color:var(--ink2)}
+.ptree.l2>summary{font-size:13px;color:var(--ink3)}
+.ptree.l0>div,.ptree.l1>div{padding-left:14px}
 .ptype{font-size:11px;color:var(--ink3);border:1px solid var(--line);border-radius:4px;padding:0 6px}
 .hub details{border-top:1px solid var(--line2)}
 .hub details:last-of-type{border-bottom:1px solid var(--line2)}
@@ -1297,10 +1302,9 @@ tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')rend
 const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['trader','操盤手'],['strategies','策略看板'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論'],['ops','控制']];
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
 const STG=[['live','實盤','t-ok'],['paper','監看中','t-info'],['candidate','研究候選','t-disp'],['paused','停用 / 暫停',''],['archived','封存','']];
-const PF={q:'',status:'all',type:'all',neg:false};
+const PF={q:'',status:'all',neg:false};
 let HUB=null,curV='monitor';
 const mdh=s=>window.marked?marked.parse(s||''):'<pre>'+esc(s)+'</pre>';
-const ptype=t=>t.replace(/\(.*\)/,'').trim();
 let HUB_T=0;async function loadHub(){if(HUB&&!HUB.error&&Date.now()-HUB_T<60000)return HUB;try{HUB=await (await fetch('data/hub.json?'+Date.now())).json();HUB_T=Date.now()}catch(e){HUB={error:true}}return HUB}
 function setV(v){if(!VT.some(x=>x[0]===v))v='monitor';curV=v;try{localStorage.setItem('vtab',v)}catch(e){}
  seg($('#vtabs'),VT,v,setV);$('#v-monitor').hidden=v!=='monitor';$('#v-hub').hidden=v==='monitor';if(v!=='monitor')renderHub();window.scrollTo(0,0)}
@@ -1316,7 +1320,6 @@ function hStrat(H){
    ${s.metrics?`<span class="num" style="font-size:12.5px;color:var(--ink)">${esc(s.metrics)}</span>`:''}${s.integration?st(s):''}
    ${s.notes?`<span class="sub" style="line-height:1.6">${esc(s.notes)}</span>`:''}${s.code?`<span class="path">${esc(s.code)}</span>`:''}</div>`).join('')}</div></section>`}).join('')}
 function hParts(H){
- const types=[...new Set(H.parts.map(p=>ptype(p.type)))];
  const cnt=k=>H.parts.filter(p=>p.status===k).length;
  const chip=(g,v,l)=>`<button type="button" data-grp="${g}" data-v="${esc(v)}" aria-pressed="${PF[g]===v}">${esc(l)}</button>`;
  return `<section class="card pad" style="display:flex;flex-direction:column;gap:10px">
@@ -1324,16 +1327,20 @@ function hParts(H){
   <p class="sub" style="margin:0">打平、只差成本、負面的發現都是零件:可以反向操作、當過濾器、或當風險警示。</p>
   <input type="search" id="pq" placeholder="搜尋現象、數字、來源…" value="${esc(PF.q)}" aria-label="搜尋零件">
   <div class="seg" style="flex-wrap:wrap">${chip('status','all','全部狀態')}${Object.entries(SPL).map(([k,v])=>chip('status',k,v[1])).join('')}</div>
-  <div class="seg" style="flex-wrap:wrap">${chip('type','all','全部類型')}${types.map(t=>chip('type',t,t)).join('')}<button type="button" id="pneg" aria-pressed="${PF.neg}">只看負面發現</button></div>
+  <div class="seg" style="flex-wrap:wrap"><button type="button" id="pneg" aria-pressed="${PF.neg}">只看負面發現</button></div>
   <span class="sub" id="pcount"></span></section><section class="card pad" id="plist"></section>`}
 function drawParts(){const H=HUB,q=PF.q.trim().toLowerCase();
- const xs=H.parts.filter(p=>(PF.status==='all'||p.status===PF.status)&&(PF.type==='all'||ptype(p.type)===PF.type)&&(!PF.neg||p.negative)
-  &&(!q||[p.id,p.text,p.mag,p.gap,p.src,p.type].join(' ').toLowerCase().includes(q)));
+ const xs=H.parts.filter(p=>(PF.status==='all'||p.status===PF.status)&&(!PF.neg||p.negative)
+  &&(!q||[p.id,p.text,p.mag,p.gap,p.src,p.type,...p.tree].join(' ').toLowerCase().includes(q)));
  $('#pcount').textContent=`顯示 ${xs.length} / ${H.parts.length} 條`;
- $('#plist').innerHTML=xs.length?xs.map(p=>`<div class="part ${p.negative?'neg':''}"><div class="pid">${esc(p.id)}</div><div class="b">
+ const row=p=>`<div class="part ${p.negative?'neg':''}"><div class="pid">${esc(p.id)}</div><div class="b">
   <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="pill ${SPL[p.status][0]}" style="font-size:11px;padding:1px 7px">${esc(p.status_raw)}</span><span class="ptype">${esc(p.type)}</span></div>
   <span class="t">${esc(p.text)}</span><span class="m">${esc(p.mag)}</span><span>${esc(p.gap)}</span>
-  <span class="num" style="font-size:11px;color:var(--mute2)">${esc(p.round)}・${esc(p.probe)}・${esc(p.src)}</span></div></div>`).join(''):'<p class="sub">沒有符合條件的零件。</p>'}
+  <span class="num" style="font-size:11px;color:var(--mute2)">${esc(p.round)}・${esc(p.probe)}・${esc(p.src)}</span></div></div>`;
+ const filtered=q||PF.status!=='all'||PF.neg;
+ const level=(ps,d)=>{const g=new Map();ps.forEach(p=>{const k=p.tree[d];g.has(k)||g.set(k,[]);g.get(k).push(p)});
+  return [...g].map(([k,v])=>`<details class="ptree l${d}"${filtered||(d===0&&k!=='其他研究線')?' open':''}><summary><b>${esc(k)}</b><span class="num sub">${v.length} 條</span></summary><div>${d<2?level(v,d+1):v.map(row).join('')}</div></details>`).join('')};
+ $('#plist').innerHTML=xs.length?level(xs,0):'<p class="sub">沒有符合條件的零件。</p>'}
 function hReports(H){
  const by={};H.reports.forEach(r=>(by[r.probe]=by[r.probe]||[]).push(r));
  const probes=Object.keys(by).sort().reverse().map(pr=>{const g={};by[pr].forEach(r=>(g[r.kind]=g[r.kind]||[]).push(r));

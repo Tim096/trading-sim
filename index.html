@@ -1299,7 +1299,7 @@ document.addEventListener('click',e=>{const t=e.target;let x;
 tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')renderTrader()},30000);
 
 // ---- research hub tabs(資料 data/hub.json 由 research-trunk 的 python research_lab/hub/publish_hub.py 發佈)----
-const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['trader','操盤手'],['strategies','策略看板'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論'],['ops','控制']];
+const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢循環'],['trader','操盤手'],['strategies','策略看板'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論'],['ops','控制']];
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
 const STG=[['live','實盤','t-ok'],['paper','監看中','t-info'],['candidate','研究候選','t-disp'],['paused','停用 / 暫停',''],['archived','封存','']];
 const PF={q:'',status:'all',neg:false};
@@ -1435,7 +1435,7 @@ $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[
   else if(b.dataset.op==='reboot'){if(prompt('輸入 REBOOT 確認重開整台機器')!=='REBOOT')return;j=await opPost('api/reboot',{confirm:'REBOOT'});m=j.msg}
   renderOps(m)}catch(err){renderOps('❌ '+err.message)}});
 
-async function renderHub(){if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
+async function renderHub(){if(curV==='cycle'){$('#v-hub').innerHTML='<p class="sub"><a href="cycle.html" target="_blank" rel="noopener">開啟完整循環觀測頁 ↗</a></p><iframe src="cycle.html" title="大盤循環觀測" style="width:100%;height:1200px;border:0;border-radius:12px"></iframe>';return}if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
  const views={strategies:hStrat,parts:hParts,reports:hReports,factory:hFactory,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
  box.innerHTML=`<div class="hub"><span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>${views[curV](H)}</div>`;

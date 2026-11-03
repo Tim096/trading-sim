@@ -37,6 +37,21 @@ button{font:inherit;color:inherit}
 .sub{font-size:12px;color:var(--mute)}
 .row{display:flex;flex-wrap:wrap;gap:16px;align-items:stretch}
 .between{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.hvtip{position:fixed;z-index:60;pointer-events:none;display:none;background:var(--panel2);border:1px solid var(--btn);border-radius:8px;padding:6px 10px;font-size:12px;line-height:1.5;color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.28);white-space:nowrap}
+.hvtip i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}.hvtip .r{display:flex;justify-content:space-between;gap:14px}
+.hvline{position:fixed;z-index:59;pointer-events:none;display:none;width:1px;background:var(--mute);opacity:.7}
+[data-hv]{cursor:crosshair}
+.th-cards{display:grid;grid-template-columns:1fr repeat(3,1.15fr);gap:10px;margin:14px 0 10px}
+.th-card,.th-date{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.th-date{display:flex;flex-direction:column;gap:2px}.th-date b{font-size:20px}
+.th-row{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}.th-row b{font-size:20px}
+.th-pill{border-radius:7px;padding:2px 12px;font-weight:700;font-size:14px}
+#th_cv{width:100%;display:block;cursor:crosshair;touch-action:pan-y}
+.th-leg{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;margin-top:6px}.th-leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.th-det{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.th-ind{display:grid;grid-template-columns:76px 1fr 28px;gap:8px;align-items:center;font-size:12px;padding:2px 0}
+.th-bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.th-bar i{display:block;height:100%;border-radius:4px}
+@media(max-width:760px){.th-cards{grid-template-columns:1fr 1fr}.th-det{grid-template-columns:1fr}}
 body.pub .priv{display:none!important}
 
 /* ---- 小元件 ---- */
@@ -564,7 +579,7 @@ const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim
 let names={},dispo=new Set(),selDay=null,dayPinned=false,state=null,bench={},range='ALL',ofilter='all';
 try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t;
  ['c_ov','c_ct','part'].forEach(id=>{const v=localStorage.getItem(id);if(v)$('#'+id).value=v});$('#l4h_on').checked=localStorage.getItem('l4h_on')==='1'}catch(e){}
-$('#theme').onclick=()=>{const r=document.documentElement;const n=r.dataset.theme==='light'?'dark':'light';r.dataset.theme=n;try{localStorage.setItem('theme',n)}catch(e){};render()};
+$('#theme').onclick=()=>{const r=document.documentElement;const n=r.dataset.theme==='light'?'dark':'light';r.dataset.theme=n;try{localStorage.setItem('theme',n)}catch(e){};render();if(curV==='cycle'&&TH)renderThermo()};
 $('#refresh').onclick=()=>{const b=$('#refresh');b.classList.remove('spin');void b.offsetWidth;b.classList.add('spin');tick()};
 ['c_ov','c_ct','part'].forEach(id=>$('#'+id).addEventListener('change',e=>{try{localStorage.setItem(id,e.target.value)}catch(_){}integ();render()}));
 $('#l4h_on').addEventListener('change',e=>{try{localStorage.setItem('l4h_on',e.target.checked?'1':'0')}catch(_){}integ();render()});
@@ -584,14 +599,32 @@ function nightCard(){const S_=YQN&&YQN.series;if(!S_||!/夜盤/.test(S_.session|
  const age=(Date.now()-new Date((YQN.updated||'').replace(' ','T')))/1000,live=age<120;
  return `<div class="mk"><div class="l"><span>台指期 夜盤・元大</span><span class="num">${esc(S_.symbol||'')}${live?'':` <span title="最後更新 ${esc(YQN.updated||'')}">停 ${esc((YQN.updated||'').slice(11,16))}</span>`}</span></div>
    <div class="v num">${q.last?q.last.toLocaleString():'—'} <small class="${cls(chg)}">${chg==null?'':pct(chg)}</small></div>
-   <div class="ch">${sessChart(S_.points||[],'15:00','05:00',q.ref,css(chg>=0?'--up':'--dn'))}</div></div>`}
+   <div class="ch">${sessChart(S_.points||[],'15:00','05:00',q.ref,css(chg>=0?'--up':'--dn'),'s_night',v=>pxTip(v,q.ref))}</div></div>`}
+// ---- 走勢圖互動:svg 標 data-hv=key,HV[key]={x:[0..1 遞增],y?:[0..1],tip:i=>html};滑過顯示最近一點(重繪後仍有效)----
+const HV={},hvTip=document.createElement('div'),hvLine=document.createElement('div'),hvDot=document.createElement('div');let hvEv=null;
+hvTip.className='hvtip';hvLine.className='hvline';hvDot.className='hvline';Object.assign(hvDot.style,{width:'7px',height:'7px',borderRadius:'50%',opacity:1,background:'var(--ink)',transform:'translate(-50%,-50%)'});
+document.body.append(hvLine,hvDot,hvTip);
+const pxTip=(v,ref)=>`<b class="num">${v.toLocaleString()}</b>`+(ref?` <span class="num ${cls(v-ref)}">${v-ref>=0?'+':''}${Math.round(v-ref).toLocaleString()}(${pct(v/ref-1)})</span>`:'');
+function hvShow(e){hvEv=e;const el=e&&document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-hv]'),S=el&&HV[el.dataset.hv];
+ if(!S||!S.x.length){hvTip.style.display=hvLine.style.display=hvDot.style.display='none';return}
+ let r=el.getBoundingClientRect();const vb=el.viewBox&&el.viewBox.baseVal;
+ if(vb&&vb.width&&el.getAttribute('preserveAspectRatio')!=='none'){const s=Math.min(r.width/vb.width,r.height/vb.height),w=vb.width*s,h=vb.height*s,t=r.top+(r.height-h)/2;r={left:r.left+(r.width-w)/2,top:t,width:w,height:h,bottom:t+h}}
+ const f=(e.clientX-r.left)/r.width;let lo=0,hi=S.x.length-1;while(hi-lo>1){const m=(lo+hi)>>1;S.x[m]<f?lo=m:hi=m}
+ const i=Math.abs(S.x[lo]-f)<=Math.abs(S.x[hi]-f)?lo:hi,x=r.left+S.x[i]*r.width;
+ Object.assign(hvLine.style,{display:'block',left:x+'px',top:r.top+'px',height:r.height+'px'});
+ if(S.y&&S.y[i]!=null)Object.assign(hvDot.style,{display:'block',left:x+'px',top:(r.top+S.y[i]*r.height)+'px'});else hvDot.style.display='none';
+ hvTip.innerHTML=S.tip(i);hvTip.style.display='block';const tw=hvTip.offsetWidth,th=hvTip.offsetHeight;
+ hvTip.style.left=(x+14+tw>innerWidth-8?Math.max(8,x-14-tw):x+14)+'px';hvTip.style.top=Math.max(8,Math.min(innerHeight-th-8,r.top-th-6<8?r.bottom+6:r.top-th-6))+'px'}
+document.addEventListener('pointermove',hvShow,{passive:true});document.addEventListener('scroll',()=>hvEv&&hvShow(hvEv),{passive:true,capture:true});
+document.documentElement.addEventListener('mouseleave',()=>hvShow(null));setInterval(()=>hvEv&&hvShow(hvEv),1000);
 // 小走勢圖:x 軸固定開盤 → 收盤(跨午夜也可),線只畫到現在;虛線 = 基準(昨收 / 0% / 50%);底下標開、收盤時間
-function sessChart(P,start,end,base,color){const W=240,H=40,PH=26,mn=hm=>{const [h,m]=hm.split(':').map(Number);return h*60+m};
+function sessChart(P,start,end,base,color,key,fmt){const W=240,H=40,PH=26,mn=hm=>{const [h,m]=hm.split(':').map(Number);return h*60+m};
  const s0=mn(start),span=((mn(end)-s0)+1440)%1440||1440,X=hm=>((mn(hm)-s0+1440)%1440)/span*W;
  const pts=(P||[]).filter(p=>p&&p[1]!=null&&(mn(p[0])-s0+1440)%1440<=span),vs=pts.map(p=>p[1]).concat(base!=null?[base]:[]);
  const lo=vs.length?Math.min(...vs):0,hi=vs.length?Math.max(...vs):1,r=hi-lo||1,Y=v=>2+(hi-v)/r*(PH-4);
  const mid=(()=>{const m=(s0+Math.round(span/2))%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')})();
- return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true" style="width:100%;height:40px;display:block;overflow:visible">
+ if(key)HV[key]={x:pts.map(p=>X(p[0])/W),y:pts.map(p=>Y(p[1])/H),tip:i=>`<div class="sub">${pts[i][0]}</div>${(fmt||(v=>`<b class="num">${v}</b>`))(pts[i][1])}`};
+ return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true" ${key?`data-hv="${key}"`:''} style="width:100%;height:40px;display:block;overflow:visible">
   ${base!=null&&pts.length?`<line x1="0" x2="${W}" y1="${Y(base).toFixed(1)}" y2="${Y(base).toFixed(1)}" stroke="var(--mute)" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke"/>`:`<line x1="0" x2="${W}" y1="${PH/2}" y2="${PH/2}" stroke="var(--line)" stroke-dasharray="3 3"/>`}
   ${pts.length>1?`<path d="${pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ')}" stroke="${color}" stroke-width="1.5" fill="none" vector-effect="non-scaling-stroke"/>`:''}
   <text x="0" y="${H-1}" font-size="9" fill="var(--mute)">${start}</text><text x="${W/2}" y="${H-1}" font-size="9" fill="var(--mute2)" text-anchor="middle">${mid}</text><text x="${W}" y="${H-1}" font-size="9" fill="var(--mute)" text-anchor="end">${end}</text></svg>`}
@@ -624,13 +657,15 @@ function chart(rows){const W=800,H=250,box=$('#chart');
  const cp=ser.combo.map((v,i)=>(i?'L':'M')+X(i)+' '+Y(v)).join(' ');
  paths+=`<path d="${cp} L${X(n)} ${H} L0 ${H} Z" fill="var(--c-all)" fill-opacity=".08"/>`;
  keys.slice().reverse().forEach(([k,c,,w,da])=>paths+=`<path d="${ser[k].map((v,i)=>(i?'L':'M')+X(i)+' '+Y(v)).join(' ')}" stroke="var(${c})" stroke-width="${w}" ${da?`stroke-dasharray="${da}"`:''} vector-effect="non-scaling-stroke" fill="none"/>`);
- box.innerHTML=`<div style="position:relative;height:270px">${ticks}<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="累積績效曲線" style="position:absolute;left:58px;top:10px;height:250px;width:calc(100% - 58px);overflow:visible">${paths}</svg></div>`;
+ HV.eq={x:ser.combo.map((_,i)=>i/n),y:ser.combo.map(v=>+Y(v)/H),tip:i=>`<div class="sub">${i?rows[i-1].d+' 收盤':'起點'}</div>`+keys.map(([k,c,l])=>`<div class="r"><span><i style="background:var(${c})"></i>${l}</span><b class="num ${cls(ser[k][i])}">${pct(ser[k][i])}</b></div>`).join('')};
+ HV.bars={x:rows.map((_,i)=>(i+.5)/n),tip:i=>`<div class="sub">${rows[i].d}</div>合體當日 <b class="num ${cls(rows[i].combo)}">${pct(rows[i].combo)}</b>`+(rows[i].b0050!=null?`<div class="sub">0050 <span class="num ${cls(rows[i].b0050)}">${pct(rows[i].b0050)}</span></div>`:'')};
+ box.innerHTML=`<div style="position:relative;height:270px">${ticks}<svg data-hv="eq" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="累積績效曲線" style="position:absolute;left:58px;top:10px;height:250px;width:calc(100% - 58px);overflow:visible">${paths}</svg></div>`;
  $('#legend').innerHTML=keys.map(([k,c,l,,da])=>`<span><i style="background:${da?'none':`var(${c})`};${da?`border-top:2px dashed var(${c});height:0`:''}"></i>${l} <span class="num ${cls(ser[k][n])}">${pct(ser[k][n])}</span></span>`).join('');
  // daily bars
  const v=rows.map(r=>r.combo||0),m=Math.max(1e-5,...v.map(Math.abs)),bw=W/n;let pos='',neg='';
  v.forEach((x,i)=>{const x0=(i*bw+bw*.18).toFixed(1),x1=((i+1)*bw-bw*.18).toFixed(1),y=(36-x/m*32).toFixed(1),s=`M${x0} 36 V${y} H${x1} V36 Z `;x>=0?pos+=s:neg+=s});
  const lab=n>6?[rows[0].d,rows[Math.floor(n/2)].d,rows[n-1].d]:[rows[0].d,rows[n-1].d];
- $('#bars').innerHTML=`<div style="padding-left:58px"><svg viewBox="0 0 ${W} 72" preserveAspectRatio="none" role="img" aria-label="合體每日報酬" style="width:100%;height:72px;background:var(--card2);border-radius:6px"><path d="M0 36 H${W}" stroke="var(--btn)" vector-effect="non-scaling-stroke"/><path d="${pos||'M0 0'}" fill="var(--up)"/><path d="${neg||'M0 0'}" fill="var(--dn)"/></svg><div class="num" style="display:flex;justify-content:space-between;font-size:11px;color:var(--mute2)">${lab.map(d=>`<span>${d.slice(5)}</span>`).join('')}</div></div>`;
+ $('#bars').innerHTML=`<div style="padding-left:58px"><svg data-hv="bars" viewBox="0 0 ${W} 72" preserveAspectRatio="none" role="img" aria-label="合體每日報酬" style="width:100%;height:72px;background:var(--card2);border-radius:6px"><path d="M0 36 H${W}" stroke="var(--btn)" vector-effect="non-scaling-stroke"/><path d="${pos||'M0 0'}" fill="var(--up)"/><path d="${neg||'M0 0'}" fill="var(--dn)"/></svg><div class="num" style="display:flex;justify-content:space-between;font-size:11px;color:var(--mute2)">${lab.map(d=>`<span>${d.slice(5)}</span>`).join('')}</div></div>`;
  $('#rangeDays').textContent=n;{const b=rows.filter(r=>r.b0050!=null);$('#winrate').textContent=b.length?`${b.filter(r=>r.combo>r.b0050).length}/${b.length} 天(${Math.round(b.filter(r=>r.combo>r.b0050).length/b.length*100)}%)`:'—'}
  return ser}
 
@@ -782,14 +817,14 @@ async function render(){
  $('#mk_t').textContent=nightLive?'夜盤中・夜盤走勢由元大即時行情(日盤數字停在 13:30 收盤)':state.market_open?'盤中・走勢每分鐘一點':'未開盤 / 已收盤';
  $('#mkstrip').innerHTML=`
   <div class="mk"><div class="l"><span>等權平均漲跌</span><span class="num">${n.toLocaleString()} 檔</span></div>
-   <div class="v num ${cls(m.ew_change)}">${m.ew_change==null?'—':pct(m.ew_change/100)}</div><div class="ch">${sessChart(sp.ew,'09:00','13:30',0,css(m.ew_change>=0?'--up':'--dn'))}</div></div>
+   <div class="v num ${cls(m.ew_change)}">${m.ew_change==null?'—':pct(m.ew_change/100)}</div><div class="ch">${sessChart(sp.ew,'09:00','13:30',0,css(m.ew_change>=0?'--up':'--dn'),'s_ew',v=>`<b class="num ${cls(v)}">${pct(v/100)}</b>`)}</div></div>
   <div class="mk"><div class="l"><span>台指期 日盤・${tx&&tx.src==='元大'?'元大':'FinMind'}</span><span class="num">${tx?tx.contract:''}</span></div>
-   <div class="v num">${tx?tx.last.toLocaleString():'—'} <small class="${cls(tx&&tx.chg)}">${tx&&tx.chg!=null?pct(tx.chg/100):''}</small></div><div class="ch">${sessChart(txPts,'08:45','13:45',tx&&tx.ref,css(tx&&tx.chg>=0?'--up':'--dn'))}</div></div>
+   <div class="v num">${tx?tx.last.toLocaleString():'—'} <small class="${cls(tx&&tx.chg)}">${tx&&tx.chg!=null?pct(tx.chg/100):''}</small></div><div class="ch">${sessChart(txPts,'08:45','13:45',tx&&tx.ref,css(tx&&tx.chg>=0?'--up':'--dn'),'s_tx',v=>pxTip(v,tx&&tx.ref))}</div></div>
   ${nightCard()}
   <div class="mk"><div class="l"><span>漲跌家數</span><span class="num">上漲比 ${Math.round(up/((up+dn)||1)*100)}%</span></div>
    <div class="v num"><span class="up">${up.toLocaleString()}</span><small class="mute">/ ${fl.toLocaleString()} /</small><span class="dn">${dn.toLocaleString()}</span></div>
    <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px;margin-top:4px"><div style="width:${up/tot*100}%;background:var(--up)"></div><div style="width:${fl/tot*100}%;background:var(--btn)"></div><div style="width:${dn/tot*100}%;background:var(--dn)"></div></div>
-   <div class="ch">${sessChart(sp.br,'09:00','13:30',0.5,css('--acc'))}</div></div>
+   <div class="ch">${sessChart(sp.br,'09:00','13:30',0.5,css('--acc'),'s_br',v=>`上漲比 <b class="num">${Math.round(v*100)}%</b>`)}</div></div>
   <div class="mk blk"><div class="l"><span>阻擋名單</span><span>處置 / 暫停當沖</span></div>
    <div class="v num" style="color:var(--warn)">${state.blocked??'—'} <small class="mute">檔不做 L1</small></div>
    <div class="sub" style="margin-top:6px">L4 入選處置股 <span class="num warn">${((state.cap&&state.cap.l4_picks)||[]).filter(x=>dispo.has(x.sid)).length}</span> 檔・需預繳</div></div>`;
@@ -1092,7 +1127,9 @@ function igChart(){const W=800,H=180,sc=SCH(),ks=['old','rec','ewv','all'].filte
  const X=d=>(DI.get(d)/(n-1)*W).toFixed(1),Y=v=>(H-(L(v)-lo)/(hi-lo||1)*H).toFixed(1);
  let p=`<path d="M0 ${Y(0)} H${W}" stroke="var(--btn)" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
  ks.forEach(k=>p+=`<path d="${sc[k].curve.map((q,i)=>(i?'L':'M')+X(q[0])+' '+Y(q[1])).join(' ')}" stroke="var(${col[k]})" stroke-width="${k===igScheme?2.4:1.3}" fill="none" vector-effect="non-scaling-stroke"/>`);
- $('#ig_chart').innerHTML=`<div class="between sub"><span>各方案累積報酬(對數刻度,回測 ${IG.window[0]} ~ ${IG.window[1]})</span><span class="num">${ks.map(k=>pct(sc[k].curve.at(-1)[1],0)).join(' / ')}</span></div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="資金分配方案累積報酬" style="width:100%;height:180px;background:var(--card2);border-radius:6px">${p}</svg>`;
+ const CV=Object.fromEntries(ks.map(k=>[k,new Map(sc[k].curve)]));
+ HV.ig={x:D.map((_,i)=>i/(n-1)),tip:i=>`<div class="sub">${D[i]}</div>`+ks.map(k=>{const v=CV[k].get(D[i]);return `<div class="r"><span><i style="background:var(${col[k]})"></i>${esc(sc[k].label)}</span><b class="num ${cls(v)}">${v==null?'—':pct(v,0)}</b></div>`}).join('')};
+ $('#ig_chart').innerHTML=`<div class="between sub"><span>各方案累積報酬(對數刻度,回測 ${IG.window[0]} ~ ${IG.window[1]})</span><span class="num">${ks.map(k=>pct(sc[k].curve.at(-1)[1],0)).join(' / ')}</span></div><svg data-hv="ig" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="資金分配方案累積報酬" style="width:100%;height:180px;background:var(--card2);border-radius:6px">${p}</svg>`;
  $('#ig_legend').innerHTML=ks.map(k=>`<span><i style="background:var(${col[k]})"></i>${sc[k].label} <span class="num">Sharpe ${sc[k].sharpe.toFixed(2)}</span></span>`).join('')}
 function integ(){
  if(!IG)return;
@@ -1299,7 +1336,7 @@ document.addEventListener('click',e=>{const t=e.target;let x;
 tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')renderTrader()},30000);
 
 // ---- research hub tabs(資料 data/hub.json 由 research-trunk 的 python research_lab/hub/publish_hub.py 發佈)----
-const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢循環'],['trader','操盤手'],['strategies','策略看板'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論'],['ops','控制']];
+const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢溫度'],['trader','操盤手'],['strategies','策略看板'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論'],['ops','控制']];
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
 const STG=[['live','實盤','t-ok'],['paper','監看中','t-info'],['candidate','研究候選','t-disp'],['paused','停用 / 暫停',''],['archived','封存','']];
 const PF={q:'',status:'all',neg:false};
@@ -1435,7 +1472,66 @@ $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[
   else if(b.dataset.op==='reboot'){if(prompt('輸入 REBOOT 確認重開整台機器')!=='REBOOT')return;j=await opPost('api/reboot',{confirm:'REBOOT'});m=j.msg}
   renderOps(m)}catch(err){renderOps('❌ '+err.message)}});
 
-async function renderHub(){if(curV==='cycle'){$('#v-hub').innerHTML='<p class="sub"><a href="cycle_oracle.html" target="_blank" rel="noopener">開啟循環參考與當下提醒 ↗</a></p><iframe src="cycle_oracle.html" title="循環參考與當下提醒" style="width:100%;height:1200px;border:0;border-radius:12px"></iframe>';return}if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
+// ---- 盤勢溫度(data/thermo.json 由 research-trunk 的 research_lab/probes/2026-11-03_cycle_turns/export_thermo.py 發佈)----
+// 溫度 = 8 個指標相對該尺度近期歷史的熱向分位平均(VIX 反向);趨勢 = 當時可知的方向判斷(短 A / 中 D / 長 B)
+let TH=null,THR=null,THk='2025',THhov=null,THdrag=null;
+const THN=['酷寒','冰','溫','熱','滾'],THB=[20,35,65,80],THSC=[['short','短線','約 3 週'],['medium','中線','約 3 個月'],['long','長線','約 3 年']];
+const THK={return:'漲跌',gap:'乖離',breadth:'廣度',drawdown:'回撤',margin_change:'融資變化',maintenance:'維持率',volume:'量能',vix:'VIX(反向)'};
+const THRG=[['1y','近 1 年'],['2025','2025 起'],['3y','近 3 年'],['10y','近 10 年'],['all','全部'],['2008','2007–09'],['2020','2019–22']];
+const thLight=()=>document.documentElement.dataset.theme==='light';
+const thCol=()=>thLight()?['#2f5597','#9dc3e6','#e3ded4','#f2a65a','#d9534f']:['#3b6fd4','#86b6e8','#3a424d','#e8924a','#e0544c'];
+const thTxt=()=>['#fff','#10202e',thLight()?'#1f2a37':'#e6e9ee','#1f2a37','#fff'];
+const thLv=t=>t==null?null:THB.filter(b=>t>=b).length;
+const thSeg=()=>seg($('#th_rg'),THRG,THk,k=>{THk=k;THR=thRange(k);THhov=null;renderThermo()});
+function thRange(k){const D=TH.dates,last=D.at(-1),y=+last.slice(0,4),ago=n=>`${y-n}${last.slice(4)}`;
+ const [a,b]={'1y':[ago(1),last],'2025':['2025-01-01',last],'3y':[ago(3),last],'10y':[ago(10),last],all:[D[0],last],'2008':['2007-01-01','2009-12-31'],'2020':['2019-07-01','2022-12-31']}[k];
+ let i0=D.findIndex(d=>d>=a),i1=D.length-1;while(i1>0&&D[i1]>b)i1--;return [Math.max(0,i0),i1]}
+async function renderThermo(){const box=$('#v-hub');
+ if(!TH){box.innerHTML='<section class="card pad sub">載入盤勢溫度…</section>';try{TH=await (await fetch('data/thermo.json?'+Date.now())).json()}catch(e){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/thermo.json</h2><p class="sub">在 research-trunk 執行 python research_lab/probes/2026-11-03_cycle_turns/export_thermo.py 發佈。</p></section>';return}if(curV!=='cycle')return}
+ if(!THR)THR=thRange(THk);const C=thCol();
+ box.innerHTML=`<section class="card pad"><div class="between" style="align-items:flex-start"><div><h2 class="h2" style="font-size:20px">盤勢溫度</h2><div class="sub">資料截至 ${TH.asof}・顏色=相對該尺度近期歷史的冷熱・▲▼=當時可知的趨勢翻向・滑過看當天讀數,拖曳框選放大,雙擊還原</div></div><div class="seg" id="th_rg"></div></div>
+  <div class="th-cards" id="th_cards"></div><canvas id="th_cv" role="img" aria-label="加權指數與短中長三尺度溫度帶"></canvas>
+  <div class="th-leg">${THN.map((n,k)=>`<span><i style="background:${C[k]}"></i>${n} <span class="sub num">${['<20','20–35','35–65','65–80','80+'][k]}</span></span>`).join('')}<span class="sub" style="margin-left:auto">指標:漲跌・乖離・廣度・回撤・融資變化・維持率・量能・VIX</span></div>
+  <div id="th_det"></div></section>`;
+ thSeg();
+ const cv=$('#th_cv'),ix=e=>{const g=thGeo(),r=cv.getBoundingClientRect();return Math.max(g.i0,Math.min(g.i1,g.I(e.clientX-r.left)))};
+ cv.onpointermove=e=>{const i=ix(e);if(THdrag!=null)THdrag[1]=i;if(i!==THhov||THdrag){THhov=i;requestAnimationFrame(()=>{thDraw();thInfo(THhov)})}};
+ cv.onpointerleave=()=>{if(THdrag)return;THhov=null;thDraw();thInfo(THR[1])};
+ cv.onpointerdown=e=>{const i=ix(e);THdrag=[i,i];try{cv.setPointerCapture(e.pointerId)}catch(_){}};
+ cv.onpointerup=()=>{const d=THdrag;THdrag=null;if(d&&Math.abs(d[1]-d[0])>=10){THR=[Math.min(...d),Math.max(...d)];THk=null;thSeg()}thDraw()};
+ cv.ondblclick=()=>{THk=THk||'2025';THR=thRange(THk);renderThermo()};
+ thDraw();thInfo(THR[1])}
+function thGeo(){const cv=$('#th_cv'),w=cv.clientWidth||cv.parentElement.clientWidth,h=Math.round(Math.max(400,Math.min(540,w*.5))),L=w<600?46:70,R=10,[i0,i1]=THR,n=Math.max(1,i1-i0),sh=26,gap=22,pB=h-26-3*(sh+gap),pT=10;
+ return {cv,w,h,L,R,i0,i1,n,sh,gap,pT,pB,X:i=>L+(i-i0)/n*(w-L-R),I:x=>Math.round(i0+(x-L)/(w-L-R)*n),sy:j=>pB+gap+j*(sh+gap)}}
+function thDraw(){const cv=$('#th_cv');if(!cv)return;const g=thGeo(),{w,h,L,R,i0,i1}=g,dpr=devicePixelRatio||1,C=thCol(),ink=css('--ink'),mute=css('--mute2'),line=css('--line'),F='"Noto Sans TC","Microsoft JhengHei",sans-serif';
+ cv.width=w*dpr;cv.height=h*dpr;cv.style.height=h+'px';const c=cv.getContext('2d');c.scale(dpr,dpr);c.font='11px '+F;
+ const px=TH.close.slice(i0,i1+1);let lo=Math.min(...px),hi=Math.max(...px);const pd=(hi-lo)*.06||1;lo-=pd;hi+=pd;const Y=v=>g.pB-(v-lo)/(hi-lo)*(g.pB-g.pT);
+ const r0=(hi-lo)/5,p10=10**Math.floor(Math.log10(r0)),st=(r0/p10<1.5?1:r0/p10<3?2:r0/p10<7?5:10)*p10;
+ c.textAlign='right';c.textBaseline='middle';c.strokeStyle=line;c.fillStyle=mute;c.lineWidth=1;
+ for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st){const y=Math.round(Y(v))+.5;c.beginPath();c.moveTo(L,y);c.lineTo(w-R,y);c.stroke();c.fillText(Math.round(v).toLocaleString(),L-8,y)}
+ c.beginPath();for(let i=i0;i<=i1;i++){const x=g.X(i),y=Y(TH.close[i]);i===i0?c.moveTo(x,y):c.lineTo(x,y)}c.strokeStyle=ink;c.lineWidth=1.5;c.stroke();
+ c.lineTo(g.X(i1),g.pB);c.lineTo(g.X(i0),g.pB);c.closePath();c.globalAlpha=.07;c.fillStyle=ink;c.fill();c.globalAlpha=1;
+ const half=(w-L-R)/g.n/2;
+ THSC.forEach(([s,lab,sub],j)=>{const S=TH.scales[s],y=g.sy(j);c.textAlign='right';c.fillStyle=ink;c.font='bold 12.5px '+F;c.fillText(lab,L-8,y+g.sh/2-6);c.font='10px '+F;c.fillStyle=mute;c.fillText(sub,L-8,y+g.sh/2+8);
+  c.fillStyle=line;c.fillRect(L,y,w-L-R,g.sh);
+  for(let a=i0,i=i0+1;i<=i1+1;i++){if(i<=i1&&thLv(S.t[i])===thLv(S.t[a]))continue;const k=thLv(S.t[a]);if(k!=null){const x0=Math.max(L,g.X(a)-half),x1=Math.min(w-R,g.X(i-1)+half);c.fillStyle=C[k];c.fillRect(x0,y,Math.max(1,x1-x0),g.sh)}a=i}
+  for(let i=i0+1;i<=i1;i++){const a=S.tr[i-1],b=S.tr[i];if(a==null||b==null||a===b)continue;const x=g.X(i),t=y-5;c.fillStyle=css(b>0?'--up':'--dn');c.beginPath();
+   if(b>0){c.moveTo(x,t-7);c.lineTo(x-4.5,t);c.lineTo(x+4.5,t)}else{c.moveTo(x,t);c.lineTo(x-4.5,t-7);c.lineTo(x+4.5,t-7)}c.fill()}});
+ // x 軸:跨度長標年,短標月
+ const D=TH.dates,yr=g.n>1100,ty=g.h-8;c.textAlign='center';c.textBaseline='alphabetic';c.fillStyle=mute;c.font='11px '+F;let lastX=-1e9;
+ for(let i=i0+1;i<=i1;i++){const p=D[i-1],d=D[i];if(yr?d.slice(0,4)===p.slice(0,4):d.slice(0,7)===p.slice(0,7))continue;const x=g.X(i);if(x-lastX<(yr?44:58)||x<L+16||x>w-R-16)continue;lastX=x;c.fillText(yr?d.slice(0,4):d.slice(0,7),x,ty)}
+ if(THdrag&&THdrag[0]!==THdrag[1]){const x0=g.X(Math.min(...THdrag)),x1=g.X(Math.max(...THdrag));c.globalAlpha=.15;c.fillStyle=css('--acc');c.fillRect(x0,g.pT,x1-x0,g.sy(2)+g.sh-g.pT);c.globalAlpha=1}
+ if(THhov!=null){const x=Math.round(g.X(THhov))+.5;c.strokeStyle=mute;c.setLineDash([3,3]);c.beginPath();c.moveTo(x,g.pT);c.lineTo(x,g.sy(2)+g.sh);c.stroke();c.setLineDash([]);
+  c.fillStyle=ink;c.beginPath();c.arc(x,Y(TH.close[THhov]),3.5,0,7);c.fill()}}
+function thInfo(i){const C=thCol(),T=thTxt(),last=i===TH.dates.length-1;
+ $('#th_cards').innerHTML=`<div class="th-date"><span class="sub">${last?'最新交易日':'滑鼠所在日'}</span><b class="num">${TH.dates[i]}</b><span class="sub">加權指數 <b class="num" style="font-size:14px;color:var(--ink)">${Math.round(TH.close[i]).toLocaleString()}</b></span></div>`+
+  THSC.map(([s,lab,sub])=>{const S=TH.scales[s],t=S.t[i],k=thLv(t),tr=S.tr[i];
+   return `<div class="th-card"><div class="sub">${lab}(${sub})</div><div class="th-row"><span class="th-pill" style="background:${k==null?'var(--btn)':C[k]};color:${k==null?'var(--mute)':T[k]}">${k==null?'暖機中':THN[k]}</span><b class="num">${t??'—'}</b><span class="sub">分</span><span class="${tr>0?'up':tr<0?'dn':'mute'}" style="margin-left:auto;font-weight:700">${tr>0?'趨勢向上 ▲':tr<0?'趨勢向下 ▼':'—'}</span></div></div>`}).join('');
+ $('#th_det').innerHTML=`<div class="between sub" style="margin:16px 0 8px"><span>各指標讀數:相對該尺度歷史的分位,越右越熱(VIX 已反向)</span><span class="num">融資維持率 ${TH.raw.maintenance[i]==null?'—':TH.raw.maintenance[i]+'%'}・VIX ${TH.raw.vix[i]??'—'}</span></div><div class="th-det">`+
+  THSC.map(([s,lab])=>{const P=TH.scales[s].p;return `<div><div class="h2" style="font-size:13px;margin-bottom:6px">${lab}</div>`+TH.keys.map(k=>{const v=P[k][i],lv=thLv(v);
+   return `<div class="th-ind"><span class="sub">${THK[k]}</span><span class="th-bar">${v==null?'':`<i style="width:${Math.max(3,v)}%;background:${lv===2?'var(--mute2)':C[lv]}"></i>`}</span><b class="num" style="text-align:right">${v??'—'}</b></div>`}).join('')+'</div>'}).join('')+'</div>'}
+addEventListener('resize',()=>{if(curV==='cycle'&&TH&&$('#th_cv'))thDraw()});
+async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
  const views={strategies:hStrat,parts:hParts,reports:hReports,factory:hFactory,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
  box.innerHTML=`<div class="hub"><span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>${views[curV](H)}</div>`;

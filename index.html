@@ -1482,6 +1482,10 @@ const thLight=()=>document.documentElement.dataset.theme==='light';
 const thCol=()=>thLight()?['#2f5597','#9dc3e6','#e3ded4','#f2a65a','#d9534f']:['#3b6fd4','#86b6e8','#3a424d','#e8924a','#e0544c'];
 const thTxt=()=>['#fff','#10202e',thLight()?'#1f2a37':'#e6e9ee','#1f2a37','#fff'];
 const thLv=t=>t==null?null:THB.filter(b=>t>=b).length;
+// 連續漸層:各級顏色錨在該級中心分數,中間線性內插
+const THA=[10,27.5,50,72.5,90];
+function thGrad(t,C){if(t==null)return null;const h=C.map(x=>[1,3,5].map(o=>parseInt(x.slice(o,o+2),16)));let k=0;while(k<3&&t>THA[k+1])k++;
+ const f=Math.max(0,Math.min(1,(t-THA[k])/(THA[k+1]-THA[k])));return `rgb(${h[k].map((v,m)=>Math.round(v+(h[k+1][m]-v)*f)).join(',')})`}
 const thSeg=()=>seg($('#th_rg'),THRG,THk,k=>{THk=k;THR=thRange(k);THhov=null;renderThermo()});
 function thRange(k){const D=TH.dates,last=D.at(-1),y=+last.slice(0,4),ago=n=>`${y-n}${last.slice(4)}`;
  const [a,b]={'1y':[ago(1),last],'2025':['2025-01-01',last],'3y':[ago(3),last],'10y':[ago(10),last],all:[D[0],last],'2008':['2007-01-01','2009-12-31'],'2020':['2019-07-01','2022-12-31']}[k];
@@ -1491,7 +1495,7 @@ async function renderThermo(){const box=$('#v-hub');
  if(!THR)THR=thRange(THk);const C=thCol();
  box.innerHTML=`<section class="card pad"><div class="between" style="align-items:flex-start"><div><h2 class="h2" style="font-size:20px">盤勢溫度</h2><div class="sub">資料截至 ${TH.asof}・顏色=相對該尺度近期歷史的冷熱・▲▼=當時可知的趨勢翻向・滑過看當天讀數,拖曳框選放大,雙擊還原</div></div><div class="seg" id="th_rg"></div></div>
   <div class="th-cards" id="th_cards"></div><canvas id="th_cv" role="img" aria-label="加權指數與短中長三尺度溫度帶"></canvas>
-  <div class="th-leg">${THN.map((n,k)=>`<span><i style="background:${C[k]}"></i>${n} <span class="sub num">${['<20','20–35','35–65','65–80','80+'][k]}</span></span>`).join('')}<span class="sub" style="margin-left:auto">指標:漲跌・乖離・廣度・回撤・融資變化・維持率・量能・VIX</span></div>
+  <div class="th-leg"><span style="display:flex;flex-direction:column;gap:3px;min-width:min(320px,100%)"><span style="height:10px;border-radius:5px;background:linear-gradient(90deg,${[0,10,20,27.5,35,50,65,72.5,80,90,100].map(t=>thGrad(t,C)+' '+t+'%').join(',')})"></span><span class="sub num" style="position:relative;height:14px;font-size:11px">${[[10,'酷寒'],[27.5,'冰'],[50,'溫'],[72.5,'熱'],[90,'滾']].map(([t,n])=>`<span style="position:absolute;left:${t}%;transform:translateX(-50%)">${n}</span>`).join('')}</span></span><span class="sub" style="margin-left:auto">指標:漲跌・乖離・廣度・回撤・融資變化・維持率・量能・VIX</span></div>
   <div id="th_det"></div></section>`;
  thSeg();
  const cv=$('#th_cv'),ix=e=>{const g=thGeo(),r=cv.getBoundingClientRect();return Math.max(g.i0,Math.min(g.i1,g.I(e.clientX-r.left)))};
@@ -1514,7 +1518,7 @@ function thDraw(){const cv=$('#th_cv');if(!cv)return;const g=thGeo(),{w,h,L,R,i0
  const half=(w-L-R)/g.n/2;
  THSC.forEach(([s,lab,sub],j)=>{const S=TH.scales[s],y=g.sy(j);c.textAlign='right';c.fillStyle=ink;c.font='bold 12.5px '+F;c.fillText(lab,L-8,y+g.sh/2-6);c.font='10px '+F;c.fillStyle=mute;c.fillText(sub,L-8,y+g.sh/2+8);
   c.fillStyle=line;c.fillRect(L,y,w-L-R,g.sh);
-  for(let a=i0,i=i0+1;i<=i1+1;i++){if(i<=i1&&thLv(S.t[i])===thLv(S.t[a]))continue;const k=thLv(S.t[a]);if(k!=null){const x0=Math.max(L,g.X(a)-half),x1=Math.min(w-R,g.X(i-1)+half);c.fillStyle=C[k];c.fillRect(x0,y,Math.max(1,x1-x0),g.sh)}a=i}
+  for(let a=i0,i=i0+1;i<=i1+1;i++){if(i<=i1&&S.t[i]===S.t[a])continue;const col=thGrad(S.t[a],C);if(col){const x0=Math.max(L,g.X(a)-half),x1=Math.min(w-R,g.X(i-1)+half);c.fillStyle=col;c.fillRect(x0,y,Math.max(1,x1-x0)+.5,g.sh)}a=i}
   for(let i=i0+1;i<=i1;i++){const a=S.tr[i-1],b=S.tr[i];if(a==null||b==null||a===b)continue;const x=g.X(i),t=y-5;c.fillStyle=css(b>0?'--up':'--dn');c.beginPath();
    if(b>0){c.moveTo(x,t-7);c.lineTo(x-4.5,t);c.lineTo(x+4.5,t)}else{c.moveTo(x,t);c.lineTo(x-4.5,t-7);c.lineTo(x+4.5,t-7)}c.fill()}});
  // x 軸:跨度長標年,短標月

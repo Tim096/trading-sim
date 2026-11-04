@@ -1356,6 +1356,7 @@ async function tick(){try{MS=await (await fetch('data/market_status.json?'+Date.
  try{state=await (await fetch('state.json?'+Date.now())).json();try{bench=await (await fetch('bench.json?'+Date.now())).json()}catch(_){}$('#upd').textContent=state.updated.slice(11);liveMark();render()}
  catch(e){$('#hb_txt').textContent='讀不到 state.json';$('#hb_dot').style.background=css('--bad')}}
 // ---- 版面(2026-10-27 重新設計):今天時間軸、策略總表、分頁、警示收合 ----
+const setH=(el,h)=>{if(el&&el._h!==h){el.innerHTML=h;el._h=h}};   // 內容沒變就不重寫:避免 3 秒重繪讓淡入動畫重播(閃爍)
 const flash=el=>{if(!el)return;el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')};
 const mnt=hm=>{const [h,m]=hm.split(':').map(Number);return h*60+m};
 const nowHM=()=>new Date().toTimeString().slice(0,5);
@@ -1399,7 +1400,7 @@ function drawFlow(){const F=FLOW;if(!F)return;
  $('#focus').innerHTML=f1+f2+f3;
  $('#flowToggle').textContent=$('#flowbox').hidden?`展開完整流程 ${n} 步 ▾`:'收起完整流程 ▴';
  const sg=selStep&&G.find(c=>c.tm===selStep),card=sg&&$('#sched').children[sg.i];
- $('#drawer').innerHTML=card?`<div class="drawer"><button type="button" class="ibtn x" aria-label="關閉" data-close-step>✕</button>${card.outerHTML}</div>`:''}
+ setH($('#drawer'),card?`<div class="drawer"><button type="button" class="ibtn x" aria-label="關閉" data-close-step>✕</button>${card.outerHTML}</div>`:'')}
 function openStep(tm,scroll){if(!tm)return;selStep=selStep===tm&&!scroll?null:tm;drawFlow();if(scroll)$('#today').scrollIntoView({block:'start'})}
 function toggleFlow(){const f=$('#flowbox');f.hidden=!f.hidden;drawFlow();if(!f.hidden)f.scrollIntoView({block:'nearest'})}
 
@@ -1466,10 +1467,10 @@ const AG={open:new Set(),all:new Set(),init:false,last:[]};
 const AGN={漲停:'漲停 / 回補',L1:'L1 放空 / 回補',L4:'L4 隔夜部位',TXN:'TXN 隔夜',處置:'處置 / 阻擋',風險:'失敗 / 錯誤',結算:'結算出場',資訊:'資訊'};
 function drawAlerts(al){AG.last=al;const GR=[];al.forEach(e=>{const [k,c]=alertKind(e.msg);let g=GR.find(g=>g.k===k);if(!g)GR.push(g={k,c,items:[]});g.items.push(e)});
  if(!AG.init&&GR.length){AG.open.add(GR[0].k);AG.init=true}
- $('#alertlist').innerHTML=GR.length?GR.map(g=>{const o=AG.open.has(g.k),all=AG.all.has(g.k),its=all?g.items:g.items.slice(0,3);
+ setH($('#alertlist'),GR.length?GR.map(g=>{const o=AG.open.has(g.k),all=AG.all.has(g.k),its=all?g.items:g.items.slice(0,3);
   const r=g.items.map(e=>{const m=bp2pct(e.msg).match(/報酬\s*([+−\-]?[\d.]+)%/);return m?parseFloat(m[1].replace('−','-')):null}).filter(x=>x!=null),av=r.length?r.reduce((a,b)=>a+b,0)/r.length/100:null;
   return `<div class="ag ${o?'open':''}"><button type="button" class="agh" data-g="${g.k}" aria-expanded="${o}"><span class="tag ${g.c}">${g.k}</span><b>${AGN[g.k]||g.k}</b><span class="sum mute">×${g.items.length}</span>${av==null?'':`<span class="sum ${cls(av)}">平均 ${pct(av)}</span>`}<span class="t">${g.items[0].t.slice(0,5)}</span><span class="chev">▾</span></button>
-  ${o?`<div class="agb">${its.map(e=>`<div><span>${bp2pct(e.msg)}</span><span class="t">${e.t.slice(0,5)}</span></div>`).join('')}${g.items.length>3?`<div><button type="button" class="link" data-gall="${g.k}">${all?'收起 ▴':`再 ${g.items.length-3} 條 ▾`}</button></div>`:''}</div>`:''}</div>`}).join(''):'<div class="sub">今天沒有警示</div>'}
+  ${o?`<div class="agb">${its.map(e=>`<div><span>${bp2pct(e.msg)}</span><span class="t">${e.t.slice(0,5)}</span></div>`).join('')}${g.items.length>3?`<div><button type="button" class="link" data-gall="${g.k}">${all?'收起 ▴':`再 ${g.items.length-3} 條 ▾`}</button></div>`:''}</div>`:''}</div>`}).join(''):'<div class="sub">今天沒有警示</div>')}
 $('#alertlist').addEventListener('click',e=>{const a=e.target.closest('[data-gall]');if(a){const k=a.dataset.gall;AG.all.has(k)?AG.all.delete(k):AG.all.add(k);drawAlerts(AG.last);return}
  const h=e.target.closest('.agh');if(h){const k=h.dataset.g;AG.open.has(k)?AG.open.delete(k):AG.open.add(k);drawAlerts(AG.last)}});
 
@@ -1897,7 +1898,7 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
   ${r.report_md?`<span class="sub">完整優化報告(含架構與各組流程的問題)在:Agent 組織 → 組織飛輪 → 檢討會</span>`:''}</div>`}).join('')}</section>`}
 async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
  const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();
- if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#ochart'))return;c.innerHTML=oChart(HUB.agency)}
+ if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#ochart'))return;setH(c,oChart(HUB.agency))}
 setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
@@ -1912,7 +1913,7 @@ const oPick=id=>{ORGSEL=ORGSEL===id?null:id;document.querySelectorAll('#ochart .
 $('#v-hub').addEventListener('keydown',e=>{const n=e.target.closest&&e.target.closest('.onode[data-role]');if(n&&(e.key==='Enter'||e.key===' ')){e.preventDefault();oPick(n.dataset.role)}});
 async function noteSend(body,msgEl){try{const r=await fetch('api/agency_note',{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});
  const j=await r.json();if(!r.ok||j.error)throw new Error(j.error||r.status);INBOX.push(j);return j}catch(e){if(msgEl){msgEl.textContent='送不出去:'+e.message+'(只能在本機或 Tailscale 開的頁面送)';msgEl.style.color='var(--bad)'}return null}}
-const reloop=()=>{const c=$('#ochart');if(c&&HUB&&HUB.agency)c.innerHTML=oChart(HUB.agency);const o=$('#orgsel');if(o&&ORGSEL)o.innerHTML=oSel(HUB.agency,ORGSEL)};
+const reloop=()=>{const c=$('#ochart');if(c&&HUB&&HUB.agency)setH(c,oChart(HUB.agency));const o=$('#orgsel');if(o&&ORGSEL)o.innerHTML=oSel(HUB.agency,ORGSEL)};
 $('#v-hub').addEventListener('click',async e=>{const lp=e.target.closest('[data-loop]');if(lp){LOOPSEL=LOOPSEL===lp.dataset.loop?null:lp.dataset.loop;reloop();const ls=$('#loopsel');if(ls&&LOOPSEL)ls.scrollIntoView({behavior:'smooth',block:'nearest'});return}
  const sg=e.target.closest('[data-sug]');if(sg){const w=sg.closest('.osug'),ta=w.querySelector('textarea'),m=w.querySelector('.osug-msg');if(!ta.value.trim()){ta.focus();return}
   sg.disabled=true;const j=await noteSend({kind:'suggest',target:w.dataset.target,text:ta.value},m);sg.disabled=false;if(j){ta.value='';m.style.color='';reloop();const nb=document.querySelector(`.osug[data-target="${CSS.escape(j.target)}"] .osug-msg`);if(nb)nb.textContent='已送出,下一輪開工時收件'}return}

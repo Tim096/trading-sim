@@ -1822,7 +1822,7 @@ function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.r
    `<div class="md" style="max-height:420px;overflow:auto">${mdh(A.toolbox_md||'(還沒有目錄)')}</div>`,['loop:lib','缺什麼共用工具?例:統一的成本模型、資料缺檔檢查'])
  const pend=(A.teach||[]).filter(t=>t.status==='pending');
  return wrap('等你核可','改方法論、組織、角色定義的提案。按核可後,下一輪開工時由總指揮套用,之後比較改動前後的流程 KPI,變差就退回。',
-  pend.length?pend.map(t=>`<div class="oerr" style="align-items:center"><span class="pill t-disp">${esc(t.id)}</span><span style="flex:1;min-width:14em">${esc(t.text)}<br><span class="meta">${esc(t.target)}${t.evidence?'・依據:'+esc(t.evidence):''}</span></span>${pendBtns(t)}</div>`).join(''):'<p class="sub">沒有待核可的項目。</p>',
+  pend.length?pend.map(t=>`<div class="oerr" style="align-items:center"><span class="pill t-disp">${esc(t.id)}</span><span style="flex:1;min-width:14em">${esc(t.text).replace(/\n/g,"<br>")}<br><span class="meta">${esc(t.target)}${t.evidence?'・依據:'+esc(t.evidence):''}</span></span>${pendBtns(t)}</div>`).join(''):'<p class="sub">沒有待核可的項目。</p>',
   ['loop:pending','對這些提案有其他想法?'])}
 function oChanges(A){const C=A.changelog||[];if(!C.length)return '';
  const one=(c,i)=>`<div class="ochg${i?'':' latest'}"><div class="hd"><b>${i?'':'<span class="pill t-info">最新</span> '}${esc(c.title)}</b><span class="meta">${esc(c.id)}・${esc(c.date)}</span></div>

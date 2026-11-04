@@ -1491,7 +1491,7 @@ function hFactory(H){const F=H.factory;
  const by={};(F.samples||[]).forEach(r=>(by[r.family]=by[r.family]||[]).push(r));
  const samp=Object.entries(by).map(([f,rs])=>`<details><summary><b>${esc(f)}</b><span class="sub">${rs.length} 條範例</span></summary><div class="tbl scroll"><table><thead><tr><th>表達式</th><th>需要的資料</th><th>本地</th></tr></thead><tbody>${rs.map(r=>`<tr><td class="num" style="font-size:12px;white-space:normal;word-break:break-all">${esc(r.expression)}</td><td style="font-size:12px">${esc(r.data_needed)}</td><td>${esc(HL[r.have_locally]||r.have_locally)}</td></tr>`).join('')}</tbody></table></div></details>`).join('');
  return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="between"><h2 class="h2">因子工廠</h2><span class="sub">公式清單 ${F.total?F.total.toLocaleString():'—'} 列・MegaFactor 原始池 ${(S.n||0).toLocaleString()} 條</span></div>
-  <p class="sub" style="margin:0">MegaFactor 的因子製造方法:文法樹 + 自適應搜尋,9 種骨架 × 83 個算子 × 14 個視窗 × 1,362 個欄位。原始資料我們沒有,這裡先記下方法、邏輯和表達式;完整清單在 factor_catalog.csv.gz。</p>
+  <p class="sub" style="margin:0">MegaFactor 的因子製造方法:文法樹 + 自適應搜尋,9 種骨架 × 83 個算子 × 14 個視窗 × 1,362 個欄位。分點(2021-07 起)與真 TEJ 財報已到手,自結財報、新聞強度等仍沒有;完整清單在 factor_catalog.csv.gz。</p>
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px">
    <div style="display:flex;flex-direction:column;gap:6px;min-width:0"><span class="sub" style="font-weight:700">原始池的資料家族(一條公式可跨多族)</span>${bars}</div>
    <div style="display:flex;flex-direction:column;gap:8px;min-width:0"><span class="sub" style="font-weight:700">本地資料可得性</span>
@@ -1643,7 +1643,7 @@ const AST={running:['t-info','執行中'],waiting_user:['t-disp','等你裁決']
 const ast=s=>{const a=AST[s]||['',s||'—'];return `<span class="pill ${a[0]}">${a[1]}</span>`};
 const PHN={intake:'選題',ideate:'發想','0':'拆題','A-closed':'閉卷 v0','A-lit':'文獻 L','A-merge':'合併 v1','1':'值不值得','2':'資料','3':'實驗','4':'證偽','5-harvest':'收成','5-publish':'發佈'};
 const STEPS=[['intake','選題'],['0','拆題'],['A','架構'],['1','值不值得'],['G1','你裁決'],['2','資料'],['G2','你裁決'],['3','實驗'],['4','證偽'],['G3','你裁決'],['5','收成']];
-const GROUPS={'想得遠':'發散:提新題目、新架構','做得穩':'驗證:做實驗、抓錯、記帳','越做越好':'收成:零件入庫、改善流程','地基':'資料:定義、時點、防偷看'};
+const GROUPS={'想得遠':'發散:提新題目、新架構','做得穩':'驗證:做實驗、抓錯、記帳','越做越好':'收成:零件入庫、改善流程','地基':'資料:定義、時點、防偷看','門面':'呈現:報告排版、圖表、頁面'};
 function roleLive(id){const out=[];((LIVE&&LIVE.active)||[]).forEach(r=>{const x=r.roles&&r.roles[id];if(x)out.push({...x,run:r.run_id})});return out}
 function oRole(O,id){return id==='commander'?O.commander:id==='pm'?O.pm:O.teams.find(t=>t.id===id)}
 function oHealth(h){if(!h||!h.runs)return ['idle','尚未出勤'];const bad=h.failed+h.blamed,tot=h.done+h.failed+h.rejected;
@@ -1694,7 +1694,7 @@ function oSel(A,id){const O=A.org,r=oRole(O,id);if(!r)return '';
  <div><b style="font-size:13px">錯誤與被退件</b>${h.errors.length?h.errors.slice().reverse().map(e=>`<div class="oerr"><span class="pill t-risk">${esc(e.kind)}</span><span>${esc(e.text)}</span><span class="meta">${esc(e.task||'')}${e.by?'・被'+esc((oRole(O,e.by)||{name:e.by}).name)+'退回':''}・${esc(e.run)}</span></div>`).join(''):'<p class="sub" style="margin:4px 0 0">沒有錯誤紀錄。</p>'}</div>
  <details><summary><b>做過的任務</b><span class="sub">${h.history.length} 筆</span></summary><div class="tbl scroll" style="max-height:320px"><table><thead><tr><th>任務</th><th>階段</th><th>狀態</th><th>重點</th><th>產出檔</th></tr></thead><tbody>${h.history.slice().reverse().map(x=>`<tr><td>${esc(x.task)}</td><td>${esc(PHN[x.stage]||STEPS.find(s=>s[0]===x.stage)?.[1]||x.stage||'')}</td><td>${ast(x.state)}</td><td style="white-space:normal;min-width:16em">${esc(x.note)}</td><td class="meta" style="white-space:normal">${esc(x.artifact||'')}</td></tr>`).join('')}</tbody></table></div></details>
  <details><summary><b>你給這個角色的教學</b><span class="sub">${tc.length} 筆</span></summary>${tc.map(t=>`<div class="oerr"><span class="pill ${t.status==='applied'?'t-ok':'t-disp'}">${t.status==='applied'?'已併入':'待核可'}</span><span>${esc(t.text)}</span><span class="meta">${esc(t.ts)}・${esc(t.gate||'')}</span></div>`).join('')||'<p class="sub">還沒有。在關卡回覆時說「教研究組…」就會記在這裡。</p>'}</details>
- <details><summary><b>角色定義全文</b><span class="sub">${esc(d.path||r.agent_file)}・${esc(d.mtime||'')}</span></summary><div class="md">${mdh(d.md||'')}</div></details></section>`}
+ <details><summary><b>角色定義全文</b><span class="sub">${esc(d.path||r.agent_file)}・${esc(d.mtime||'')}</span></summary><div class="md">${mdh((d.md||'').replace(/^---\r?\n[\s\S]*?\r?\n---\s*\r?\n/,'').replace(/^\s*# .*\r?\n/,''))}</div></details></section>`}
 function hOrg(H){const A=H.agency;
  if(!A)return '<section class="card pad"><h2 class="h2">研究所還沒有組織資料</h2><p class="lede">在 research-trunk 建立 research_lab/agency/org.yaml 後執行 publish_hub.py。</p></section>';
  return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="hd"><h2 class="h2">現在在跑什麼</h2></div><div id="obanner" style="display:flex;flex-direction:column;gap:10px">${oBanner()}</div></section>

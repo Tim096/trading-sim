@@ -332,6 +332,31 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .scards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .scard{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--card2);min-width:0}
 .scard .path{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mute);word-break:break-all}
+.newb{font-size:10.5px;font-weight:700;padding:0 6px;border-radius:999px;background:var(--now);color:#111;line-height:16px;display:inline-block;margin-left:4px;vertical-align:1px}
+.org{display:flex;flex-direction:column;align-items:center;overflow-x:auto}
+.otier{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;width:100%}
+.otier.col{flex-direction:column;align-items:center;gap:8px}
+.olink{width:2px;height:16px;background:var(--line);margin:0 auto;flex:none}
+.onode{border:1px solid var(--line);border-radius:10px;background:var(--card2);padding:10px 12px;display:flex;flex-direction:column;gap:5px;min-width:180px;max-width:300px;cursor:pointer;text-align:left;color:var(--ink);font-size:13px}
+.onode:hover{border-color:var(--acc)}.onode:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.onode.sel{border-color:var(--acc);box-shadow:0 0 0 2px color-mix(in srgb,var(--acc) 30%,transparent)}
+.onode.judge{cursor:default;border-style:dashed;max-width:440px}
+.hdot{width:9px;height:9px;border-radius:50%;background:var(--mute2);flex:none}
+.onode.h-ok .hdot{background:var(--ok)}.onode.h-warn .hdot{background:var(--warn)}.onode.h-bad .hdot{background:var(--bad)}
+.onode.h-bad{border-color:color-mix(in srgb,var(--bad) 55%,var(--line))}
+.ometa{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.obar{height:5px;border-radius:3px;background:var(--line);overflow:hidden}.obar i{display:block;height:100%;background:var(--acc)}
+.olanes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;width:100%}
+.olane{border:1px solid var(--line2);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:2px;font-size:12.5px;min-width:0}
+.olane.proposed{border-style:dashed}.olane.dormant{opacity:.55}
+.ogroups{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;width:100%}
+.ogroup{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--line2);border-radius:10px;min-width:0}
+.ogroup .onode{max-width:none;min-width:0}
+.orun{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:13.5px}
+.ogrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.oedge{display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:4px 0;border-bottom:1px solid var(--line2)}.oedge.bad{color:var(--bad)}
+.oerr{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line2)}
+.ochips{display:flex;gap:4px;flex-wrap:wrap}
 </style>
 <script>window.CTS_PUBLIC=1</script></head>
 <body>
@@ -1336,14 +1361,18 @@ document.addEventListener('click',e=>{const t=e.target;let x;
 tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')renderTrader()},30000);
 
 // ---- research hub tabs(資料 data/hub.json 由 research-trunk 的 python research_lab/hub/publish_hub.py 發佈)----
-const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢溫度'],['trader','操盤手'],['strategies','策略看板'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論'],['ops','控制']];
+const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢溫度'],['trader','操盤手'],['strategies','策略看板'],['lab','研究所'],['ops','控制']];
+// 研究所:原本的零件庫/研究報告/因子工廠/計畫與籃子/方法論合併成子分頁,加上 Agent 組織與飛輪紀錄(research_lab/agency)
+const LT=[['org','Agent 組織'],['runs','飛輪紀錄'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論']];
+let curL=(()=>{try{return localStorage.getItem('ltab')}catch(e){return null}})()||'org',LIVE=null,ORGSEL=null;
+if(!LT.some(x=>x[0]===curL))curL='org';
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
 const STG=[['live','實盤','t-ok'],['paper','監看中','t-info'],['candidate','研究候選','t-disp'],['paused','停用 / 暫停',''],['archived','封存','']];
 const PF={q:'',status:'all',neg:false};
 let HUB=null,curV='monitor';
 const mdh=s=>window.marked?marked.parse(s||''):'<pre>'+esc(s)+'</pre>';
 let HUB_T=0;async function loadHub(){if(HUB&&!HUB.error&&Date.now()-HUB_T<60000)return HUB;try{HUB=await (await fetch('data/hub.json?'+Date.now())).json();HUB_T=Date.now()}catch(e){HUB={error:true}}return HUB}
-function setV(v){if(!VT.some(x=>x[0]===v))v='monitor';curV=v;try{localStorage.setItem('vtab',v)}catch(e){}
+function setV(v){if(LT.some(x=>x[0]===v)){curL=v;v='lab'}if(!VT.some(x=>x[0]===v))v='monitor';curV=v;try{localStorage.setItem('vtab',v)}catch(e){}
  seg($('#vtabs'),VT,v,setV);$('#v-monitor').hidden=v!=='monitor';$('#v-hub').hidden=v==='monitor';if(v!=='monitor')renderHub();window.scrollTo(0,0)}
 function hStrat(H){
  const I=H.integration||{},S=I.strategies||{};
@@ -1371,7 +1400,7 @@ function drawParts(){const H=HUB,q=PF.q.trim().toLowerCase();
   &&(!q||[p.id,p.text,p.mag,p.gap,p.src,p.type,...p.tree].join(' ').toLowerCase().includes(q)));
  $('#pcount').textContent=`顯示 ${xs.length} / ${H.parts.length} 條`;
  const row=p=>`<div class="part ${p.negative?'neg':''}"><div class="pid">${esc(p.id)}</div><div class="b">
-  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="pill ${SPL[p.status][0]}" style="font-size:11px;padding:1px 7px">${esc(p.status_raw)}</span><span class="ptype">${esc(p.type)}</span></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="pill ${SPL[p.status][0]}" style="font-size:11px;padding:1px 7px">${esc(p.status_raw)}</span><span class="ptype">${esc(p.type)}</span>${NEWB(p)}</div>
   <span class="t">${esc(p.text)}</span><span class="m">${esc(p.mag)}</span><span>${esc(p.gap)}</span>
   <span class="num" style="font-size:11px;color:var(--mute2)">${esc(p.round)}・${esc(p.probe)}・${esc(p.src)}</span></div></div>`;
  const filtered=q||PF.status!=='all'||PF.neg;
@@ -1382,12 +1411,12 @@ function hReports(H){
  const by={};H.reports.forEach(r=>(by[r.probe]=by[r.probe]||[]).push(r));
  const probes=Object.keys(by).sort().reverse().map(pr=>{const g={};by[pr].forEach(r=>(g[r.kind]=g[r.kind]||[]).push(r));
   return `<section class="card pad" style="display:flex;flex-direction:column;gap:10px"><div><span class="eyebrow">Research</span><h2 class="h2 num" style="font-size:15px;margin-top:4px">${esc(pr)}</h2></div>
-   ${['總報告','分線結果','過程紀錄'].filter(k=>g[k]).map(k=>`<div><div class="sub" style="font-weight:700;margin-bottom:4px">${k}</div>${g[k].map(r=>`<details data-key="${esc(r.probe+'/'+r.file)}"><summary><b>${esc(r.title)}</b><span class="num sub">${esc(r.file)}・${esc(r.mtime)}</span></summary><div class="md"></div></details>`).join('')}</div>`).join('')}</section>`}).join('');
+   ${['總報告','分線結果','過程紀錄'].filter(k=>g[k]).map(k=>`<div><div class="sub" style="font-weight:700;margin-bottom:4px">${k}</div>${g[k].map(r=>`<details data-key="${esc(r.probe+'/'+r.file)}"><summary><b>${esc(r.title)}</b>${NEWB(r)}<span class="num sub">${esc(r.file)}・${esc(r.mtime)}</span></summary><div class="md"></div></details>`).join('')}</div>`).join('')}</section>`}).join('');
  const ideas=H.registry.ideas,st={};ideas.forEach(i=>st[i.status||'(無)']=(st[i.status||'(無)']||0)+1);
  return probes+`<section class="card pad" style="display:flex;flex-direction:column;gap:10px"><h2 class="h2">舊研究登錄</h2>
   <p class="sub" style="margin:0">research_lab/registry/ideas.jsonl 共 ${ideas.length} 筆想法:${Object.entries(st).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${esc(k)} ${n}`).join('・')}</p>
   <details><summary><b>全部想法清單</b></summary><div class="tbl scroll" style="max-height:420px"><table><thead><tr><th>ID</th><th>標題</th><th>狀態</th><th>建立</th></tr></thead><tbody>
-  ${ideas.slice().reverse().map(i=>`<tr><td class="num">${esc(i.idea_id)}</td><td>${esc(i.title)}</td><td>${esc(i.status)}</td><td class="num">${esc((i.created_at||'').slice(0,10))}</td></tr>`).join('')}</tbody></table></div></details>
+  ${ideas.slice().reverse().map(i=>`<tr><td class="num">${esc(i.idea_id)}</td><td>${esc(i.title)}${NEWB(i)}</td><td>${esc(i.status)}</td><td class="num">${esc((i.created_at||'').slice(0,10))}</td></tr>`).join('')}</tbody></table></div></details>
   <details data-md="failures"><summary><b>失敗紀錄 failures.md</b></summary><div class="md"></div></details></section>`}
 function wireReports(){document.querySelectorAll('#v-hub details').forEach(d=>d.addEventListener('toggle',()=>{const box=d.querySelector('.md');if(!box||!d.open||box.dataset.done)return;
  const r=HUB.reports.find(r=>r.probe+'/'+r.file===d.dataset.key);box.innerHTML=mdh(r?r.md:d.dataset.md==='failures'?HUB.registry.failures_md:'');box.dataset.done=1}))}
@@ -1535,12 +1564,86 @@ function thInfo(i){const C=thCol(),T=thTxt(),last=i===TH.dates.length-1;
   THSC.map(([s,lab])=>{const P=TH.scales[s].p;return `<div><div class="h2" style="font-size:13px;margin-bottom:6px">${lab}</div>`+TH.keys.map(k=>{const v=P[k][i],lv=thLv(v);
    return `<div class="th-ind"><span class="sub">${THK[k]}</span><span class="th-bar">${v==null?'':`<i style="width:${Math.max(3,v)}%;background:${lv===2?'var(--mute2)':C[lv]}"></i>`}</span><b class="num" style="text-align:right">${v??'—'}</b></div>`}).join('')+'</div>'}).join('')+'</div>'}
 addEventListener('resize',()=>{if(curV==='cycle'&&TH&&$('#th_cv'))thDraw()});
+// ── 研究所:Agent 組織圖(除錯用)與飛輪紀錄。組織=hub.json agency(org.yaml + 帳本),即時狀態=data/agency_live.json ──
+const NEWB=x=>x&&x.is_new?'<span class="newb" title="最近一輪新增">新</span>':'';
+function setL(l){curL=l;ORGSEL=null;try{localStorage.setItem('ltab',l)}catch(e){}renderHub()}
+async function loadLive(){try{LIVE=await (await fetch('data/agency_live.json?'+Date.now())).json()}catch(e){LIVE=null}return LIVE}
+const AST={running:['t-info','執行中'],waiting_user:['t-disp','等你裁決'],failed:['t-risk','失敗'],rejected:['t-risk','被退件'],done:['t-ok','完成'],queued:['','排隊'],skipped:['','略過']};
+const ast=s=>{const a=AST[s]||['',s||'—'];return `<span class="pill ${a[0]}">${a[1]}</span>`};
+function roleLive(id){const out=[];((LIVE&&LIVE.active)||[]).forEach(r=>{const x=r.roles&&r.roles[id];if(x)out.push({...x,run:r.run_id})});return out}
+function oRole(O,id){return id==='commander'?O.commander:id==='pm'?O.pm:O.teams.find(t=>t.id===id)}
+function oHealth(h){if(!h||!h.runs)return ['idle','尚未出勤'];const bad=h.failed+h.blamed,tot=h.done+h.failed+h.rejected;
+ return bad===0?['ok','健康']:bad/Math.max(1,tot)>=.3?['bad',`問題多:失敗 ${h.failed}・被退件 ${h.blamed}`]:['warn',`有狀況:失敗 ${h.failed}・被退件 ${h.blamed}`]}
+function oNode(A,r){const h=A.health[r.id],[hc,hl]=oHealth(h),lv=roleLive(r.id),cur=lv.find(x=>x.state==='running'||x.state==='waiting_user')||lv[lv.length-1];
+ return `<div class="onode h-${hc}${ORGSEL===r.id?' sel':''}" role="button" tabindex="0" data-role="${esc(r.id)}" aria-label="${esc(r.name)}:${esc(hl)}">
+  <div class="between" style="gap:8px"><b>${esc(r.name)}</b><span class="hdot" title="${esc(hl)}"></span></div>
+  <span class="sub">${esc(r.mission)}</span>
+  <div class="ometa">${r.engine?`<span class="ptype num">${esc(r.engine)}</span>`:''}${cur?ast(cur.state):''}${cur&&cur.state==='running'&&cur.pct!=null?`<span class="num sub">${Math.round(cur.pct)}%</span>`:''}${h&&h.runs?`<span class="num sub" title="完成 / 失敗 / 被退件">✓${h.done} ✗${h.failed} ↩${h.blamed}</span>`:''}</div>
+  ${cur&&cur.state==='running'&&cur.pct!=null?`<div class="obar"><i style="width:${Math.max(3,cur.pct)}%"></i></div>`:''}${cur&&cur.task?`<span class="num sub">${esc(cur.task)}${cur.note?':'+esc(String(cur.note).slice(0,60)):''}</span>`:''}</div>`}
+function oBanner(){const act=(LIVE&&LIVE.active)||[];
+ return act.length?act.map(r=>`<div class="orun">${r.status==='waiting_user'?`<span class="pill t-disp">等你裁決 ${esc(r.gate||'')}</span>`:'<span class="pill t-info">進行中</span>'}<b>${esc(r.goal)}</b><span class="num sub">${esc(r.run_id)}・${esc(r.mode)}・${esc(r.involvement)}・${esc(r.scale)}・事件 ${r.n_events}</span></div>`).join('')
+  :`<span class="sub">目前沒有進行中的 run。${LIVE?'即時狀態更新於 '+esc(LIVE.updated):'(還沒有 agency_live.json)'}</span>`}
+function oChart(A){const O=A.org,teams=O.teams,grp=[...new Set(teams.filter(t=>t.id!=='data').map(t=>t.group))];
+ const lanes=O.lanes.map(l=>`<div class="olane ${esc(l.status)}"><b>${esc(l.name)}${l.status!=='active'?` <span class="pill t-disp">${l.status==='proposed'?'提議中':'暫停'}</span>`:''}</b><span class="sub">吃:${esc(l.eats)}</span><span style="color:var(--ink3)">${esc(l.question)}</span></div>`).join('');
+ return `<div class="otier"><div class="onode judge"><b>${esc(O.judge.name)}(${esc(O.judge.who)})</b><span class="sub">${esc(O.judge.mission)}</span></div></div><div class="olink"></div>
+ <div class="otier">${oNode(A,O.commander)}</div><div class="olink"></div>
+ <div class="otier col">${oNode(A,O.pm)}<div class="olanes">${lanes}</div><span class="sub">研究線:包含但不限於;任何角色可提議新線,你核可後啟用</span></div><div class="olink"></div>
+ <div class="ogroups">${grp.map(g=>`<div class="ogroup"><span class="eyebrow">${esc(g)}</span>${teams.filter(t=>t.group===g).map(t=>oNode(A,t)).join('')}</div>`).join('')}</div><div class="olink"></div>
+ <div class="otier">${teams.filter(t=>t.id==='data').map(t=>oNode(A,t)).join('')}</div>`}
+function oIssues(A){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name;
+ const keys=new Set([...O.handoffs.map(([u,d])=>u+'>'+d),...Object.keys(A.edges||{})]);
+ const ed=[...keys].map(k=>[k,(A.edges||{})[k]||0]).sort((a,b)=>b[1]-a[1]);
+ const sm=Object.entries(A.stage_minutes||{}),tot=sm.reduce((s,x)=>s+x[1],0)||1,HS=Object.values(A.health);
+ const idle=Object.entries(A.health).filter(([k,h])=>!h.runs).map(([k])=>nm(k));
+ return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><h2 class="h2">組織問題</h2>
+ <p class="sub" style="margin:0">錯誤集中在單一角色 → 修那一組的定義(.claude/agents/ri-*.md);集中在某條交接 → 是架構或交付格式的問題(org.yaml / PROTOCOL.md)。</p>
+ <div class="ogrid"><div><span class="sub" style="font-weight:700">交接連線:上游 → 下游,退件次數</span>${ed.map(([k,n])=>{const[u,d]=k.split('>');return `<div class="oedge ${n?'bad':''}"><span>${esc(nm(u))} → ${esc(nm(d))}</span><b class="num">${n}</b></div>`}).join('')}</div>
+ <div style="display:flex;flex-direction:column;gap:8px"><span class="sub" style="font-weight:700">卡在哪裡:各階段累計分鐘</span>${sm.length?sm.map(([k,v])=>`<div style="display:grid;grid-template-columns:5em 1fr 4em;gap:8px;align-items:center;font-size:13px"><span class="num">${esc(k)}</span><div class="obar"><i style="width:${(v/tot*100).toFixed(0)}%"></i></div><span class="num" style="text-align:right">${v.toFixed(0)}</span></div>`).join(''):'<span class="sub">還沒有紀錄</span>'}
+ <span class="sub" style="font-weight:700;margin-top:6px">總計</span><span class="num" style="font-size:13px">失敗任務 ${HS.reduce((s,h)=>s+h.failed,0)}・被退件 ${HS.reduce((s,h)=>s+h.blamed,0)}・跑過 ${A.runs.length} 輪</span>
+ <span class="sub" style="font-weight:700;margin-top:6px">閒置角色(近 30 輪沒出勤)</span><span style="font-size:13px">${idle.length?idle.map(esc).join('、'):'無'}</span></div></div></section>`}
+function oSel(A,id){const O=A.org,r=oRole(O,id);if(!r)return '';
+ const h=A.health[id]||{errors:[],history:[]},d=(A.defs||{})[id]||{},tc=(A.teach||[]).filter(t=>t.target===id);
+ const tasks=roleLive(id).flatMap(x=>Object.entries(x.tasks||{}).map(([k,v])=>({...v,task:k,run:x.run})));
+ return `<section class="card pad drawer" style="display:flex;flex-direction:column;gap:12px;margin-top:0"><button type="button" class="ibtn x" aria-label="關閉" data-osel>✕</button>
+ <div><span class="eyebrow">${esc(r.team||'')} · engine ${esc(r.engine||'')}</span><h2 class="h2" style="margin-top:4px">${esc(r.name)}</h2></div>
+ <p style="margin:0;color:var(--ink2);font-size:13.5px">${esc(r.mission)}</p>
+ <div class="num sub">uc 階段 ${esc((r.sop_phases||[]).join(', '))}・產出 ${esc((r.outputs||[]).join(', '))}<br>定義檔 ${esc(d.path||r.agent_file)}・最後修改 ${esc(d.mtime||'—')}</div>
+ <div><span class="sub" style="font-weight:700">現在在做什麼</span>${tasks.length?`<div class="tbl scroll"><table><tbody>${tasks.map(t=>`<tr><td class="num">${esc(t.run)}</td><td>${esc(t.task)}</td><td>${ast(t.state)}</td><td class="num">${t.pct!=null?Math.round(t.pct)+'%':''}</td><td style="white-space:normal">${esc(t.error||t.note||'')}</td></tr>`).join('')}</tbody></table></div>`:'<p class="sub" style="margin:4px 0 0">目前沒有任務。</p>'}</div>
+ <div><span class="sub" style="font-weight:700">錯誤與被退件(最近 12 筆)</span>${h.errors.length?h.errors.slice().reverse().map(e=>`<div class="oerr"><span class="pill t-risk">${esc(e.kind)}</span><span class="num sub">${esc(e.run)}・${esc(e.task||'')}${e.by?'・被 '+esc((oRole(O,e.by)||{name:e.by}).name)+' 退回':''}</span><span>${esc(e.text)}</span></div>`).join(''):'<p class="sub" style="margin:4px 0 0">沒有錯誤紀錄。</p>'}</div>
+ <details><summary><b>歷史任務</b><span class="sub">${h.history.length} 筆</span></summary><div class="tbl scroll" style="max-height:320px"><table><thead><tr><th>run</th><th>任務</th><th>階段</th><th>狀態</th><th>產出</th><th>備註</th></tr></thead><tbody>${h.history.slice().reverse().map(x=>`<tr><td class="num">${esc(x.run)}</td><td>${esc(x.task)}</td><td class="num">${esc(x.stage||'')}</td><td>${ast(x.state)}</td><td class="num" style="font-size:11.5px;word-break:break-all;white-space:normal">${esc(x.artifact||'')}</td><td style="white-space:normal">${esc(x.note)}</td></tr>`).join('')}</tbody></table></div></details>
+ <details><summary><b>對這個角色的教學</b><span class="sub">${tc.length} 筆</span></summary>${tc.map(t=>`<div class="oerr"><span class="pill ${t.status==='applied'?'t-ok':'t-disp'}">${esc(t.status)}</span><span class="num sub">${esc(t.ts)}・${esc(t.gate||'')}</span><span>${esc(t.text)}</span></div>`).join('')||'<p class="sub">還沒有。</p>'}</details>
+ <details><summary><b>完整角色定義</b></summary><div class="md">${mdh(d.md||'')}</div></details></section>`}
+function hOrg(H){const A=H.agency;
+ if(!A)return '<section class="card pad"><h2 class="h2">研究所還沒有組織資料</h2><p class="sub">在 research-trunk 建立 research_lab/agency/org.yaml 後執行 publish_hub.py。</p></section>';
+ return `<section class="card pad" style="display:flex;flex-direction:column;gap:8px"><div class="between"><h2 class="h2">Agent 組織</h2><span class="sub">點角色看定義、進度、錯誤與退件;圓點=近 30 輪健康度</span></div><div id="obanner">${oBanner()}</div></section>
+ <section class="card pad org" id="ochart">${oChart(A)}</section><div id="orgsel">${ORGSEL?oSel(A,ORGSEL):''}</div>${oIssues(A)}`}
+const ADDL=[['parts','零件'],['reports','報告'],['ideas','點子'],['factors','因子卡'],['failures','失敗紀錄'],['basket_added','籃子 +'],['basket_removed','籃子 −']];
+function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
+ if(!rs.length)return '<section class="card pad"><h2 class="h2">飛輪紀錄</h2><p class="sub">還沒有 run。說「燒 token」或「研究 X」開始第一輪。</p></section>';
+ const tot={},ST={running:'t-info',waiting_user:'t-disp',done:'t-ok',failed:'t-risk'};rs.forEach(r=>ADDL.forEach(([k])=>tot[k]=(tot[k]||0)+((r.counts||{})[k]||0)));
+ return `<section class="card pad" style="display:flex;flex-direction:column;gap:10px"><div class="between"><h2 class="h2">飛輪紀錄</h2><span class="sub">${rs.length} 輪・累計 ${ADDL.slice(0,4).map(([k,l])=>`${l} +${tot[k]}`).join('・')}</span></div>
+ ${rs.map(r=>{const c=r.counts||{},w=r.waste||{},a=r.added||{};
+  return `<details><summary><span class="pill ${ST[r.status]||''}">${esc(r.status)}</span><b>${esc(r.goal)}</b><span class="num sub">${esc(r.run_id)}・${esc(r.mode)}・${esc(r.involvement)}・${esc(r.scale)}・${esc((r.started||'').slice(5,16))}${r.ended?' → '+esc(r.ended.slice(5,16)):''}</span>
+  <span class="ochips">${ADDL.filter(([k])=>c[k]).map(([k,l])=>`<span class="pill t-ok">${l} ${c[k]}</span>`).join('')}${w.failed?`<span class="pill t-risk">失敗 ${w.failed}</span>`:''}${w.rejected?`<span class="pill t-risk">退件 ${w.rejected}</span>`:''}</span></summary>
+  <div style="display:flex;flex-direction:column;gap:6px;padding:4px 0 10px">${ADDL.filter(([k])=>(a[k]||[]).length).map(([k,l])=>`<div><span class="sub" style="font-weight:700">${l}</span><ul style="margin:2px 0 0;padding-left:20px;font-size:13px">${a[k].map(x=>`<li class="num">${esc(x)}</li>`).join('')}</ul></div>`).join('')||'<span class="sub">這輪沒有新增(或還沒收尾)。</span>'}
+  ${r.stage_minutes&&Object.keys(r.stage_minutes).length?`<span class="num sub">各階段分鐘:${Object.entries(r.stage_minutes).map(([k,v])=>`${esc(k)} ${v}`).join('・')}</span>`:''}${w.blame&&Object.keys(w.blame).length?`<span class="num sub">歸責:${Object.entries(w.blame).map(([k,v])=>`${esc(k)} ${v}`).join('・')}</span>`:''}</div></details>`}).join('')}</section>`}
+async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
+ const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();c.innerHTML=oChart(HUB.agency)}
+setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
- const views={strategies:hStrat,parts:hParts,reports:hReports,factory:hFactory,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
- box.innerHTML=`<div class="hub"><span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>${views[curV](H)}</div>`;
- if(curV==='parts')drawParts();if(curV==='reports')wireReports()}
-$('#v-hub').addEventListener('click',e=>{const c=e.target.closest('button[data-grp]');
+ const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
+ if(v==='lab'&&curL==='org'){await loadLive();if(v!==curV)return}
+ const k=v==='lab'?curL:v;
+ box.innerHTML=`<div class="hub">${v==='lab'?'<div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁" style="align-self:flex-start"></div>':''}<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>${views[k](H)}</div>`;
+ if(v==='lab')seg($('#ltabs'),LT,curL,setL);
+ if(k==='parts')drawParts();if(k==='reports'||k==='org')wireReports()}
+const oPick=id=>{ORGSEL=ORGSEL===id?null:id;document.querySelectorAll('#ochart .onode[data-role]').forEach(n=>n.classList.toggle('sel',n.dataset.role===ORGSEL));
+ const box=$('#orgsel');if(box){box.innerHTML=ORGSEL?oSel(HUB.agency,ORGSEL):'';if(ORGSEL)box.scrollIntoView({behavior:'smooth',block:'nearest'})}};
+$('#v-hub').addEventListener('keydown',e=>{const n=e.target.closest&&e.target.closest('.onode[data-role]');if(n&&(e.key==='Enter'||e.key===' ')){e.preventDefault();oPick(n.dataset.role)}});
+$('#v-hub').addEventListener('click',e=>{const n=e.target.closest('.onode[data-role]');if(n){oPick(n.dataset.role);return}
+ if(e.target.closest('[data-osel]')){oPick(ORGSEL);return}
+ const c=e.target.closest('button[data-grp]');
  if(c){PF[c.dataset.grp]=c.dataset.v;document.querySelectorAll(`#v-hub button[data-grp="${c.dataset.grp}"]`).forEach(x=>x.setAttribute('aria-pressed',x===c));drawParts();return}
  if(e.target.id==='pneg'){PF.neg=!PF.neg;e.target.setAttribute('aria-pressed',PF.neg);drawParts()}});
 $('#v-hub').addEventListener('input',e=>{if(e.target.id==='pq'){PF.q=e.target.value;drawParts()}});

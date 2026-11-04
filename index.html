@@ -424,6 +424,14 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .lane{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);background:var(--panel2);cursor:help}
 .lane.proposed{border-style:dashed;color:var(--now)}.lane.dormant{opacity:.5}
 .on-xp{padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--acc) 12%,var(--panel));color:var(--acc);font-weight:600}
+.oloop-b{font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}.oloop-b:hover{border-color:color-mix(in srgb,var(--acc) 60%,var(--line))}
+.oloop-b.sel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,var(--panel2))}.oloop-b:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.oloop-go{margin-top:4px;color:var(--acc);font-size:11.5px}
+.osug{display:flex;flex-direction:column;gap:6px;margin-top:6px}.osug textarea{font:inherit;font-size:13px;width:100%;box-sizing:border-box;border:1px solid var(--btn);border-radius:8px;background:var(--panel);color:var(--ink);padding:8px 10px;resize:vertical}
+.osug textarea:focus{outline:2px solid var(--acc);outline-offset:0}.osug-ft{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.obtns{display:inline-flex;gap:6px}
+.ochg{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+.ochg.latest{border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}.ochg ul{margin:0;padding-left:20px;font-size:13px;line-height:1.6}
 .oloop{display:flex;flex-direction:column;gap:12px;padding-top:14px;border-top:1px dashed var(--line)}
 .oloop-row{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
 .oloop-row .arrow{display:grid;place-items:center;color:var(--mute2);padding:0 8px;font-size:18px}
@@ -1488,7 +1496,7 @@ tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')rend
 const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢溫度'],['trader','操盤手'],['strategies','策略看板'],['lab','研究所'],['ops','控制']];
 // 研究所:原本的零件庫/研究報告/因子工廠/計畫與籃子/方法論合併成子分頁,加上 Agent 組織與飛輪紀錄(research_lab/agency)
 const LT=[['org','Agent 組織'],['runs','飛輪紀錄'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['data','資料盤點'],['plan','計畫與籃子'],['method','方法論']];
-let curL=(()=>{try{return localStorage.getItem('ltab')}catch(e){return null}})()||'org',LIVE=null,ORGSEL=null;
+let curL=(()=>{try{return localStorage.getItem('ltab')}catch(e){return null}})()||'org',LIVE=null,ORGSEL=null,LOOPSEL=null,INBOX=[];
 if(!LT.some(x=>x[0]===curL))curL='org';
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
 const STG=[['live','實盤','t-ok'],['paper','監看中','t-info'],['candidate','研究候選','t-disp'],['paused','停用 / 暫停',''],['archived','封存','']];
@@ -1740,6 +1748,7 @@ addEventListener('resize',()=>{if(curV==='cycle'&&TH&&$('#th_cv'))thDraw()});
 // ── 研究所:Agent 組織圖(除錯用)與飛輪紀錄。組織=hub.json agency(org.yaml + 帳本),即時狀態=data/agency_live.json ──
 const NEWB=x=>x&&x.is_new?'<span class="newb" title="最近一輪新增">新</span>':'';
 function setL(l){curL=l;ORGSEL=null;try{localStorage.setItem('ltab',l)}catch(e){}renderHub()}
+async function loadInbox(){try{const t=await (await fetch('data/agency_inbox.jsonl?'+Date.now())).text();INBOX=t.split('\n').filter(Boolean).map(l=>{try{return JSON.parse(l)}catch(e){return null}}).filter(Boolean)}catch(e){INBOX=[]}}
 async function loadLive(){try{LIVE=await (await fetch('data/agency_live.json?'+Date.now())).json()}catch(e){LIVE=null}return LIVE}
 const AST={running:['t-info','執行中'],waiting_user:['t-disp','等你裁決'],failed:['t-risk','失敗'],rejected:['t-risk','被退件'],done:['t-ok','完成'],queued:['','排隊'],skipped:['','略過']};
 const ast=s=>{const a=AST[s]||['',s||'—'];return `<span class="pill ${a[0]}">${a[1]}</span>`};
@@ -1775,14 +1784,47 @@ function oChart(A){const O=A.org,teams=O.teams,grp=[...new Set(teams.map(t=>t.gr
  <div style="display:flex;flex-direction:column;gap:6px"><span class="sub">研究線(每條一位 PM;包含但不限於,滑過看細節):</span><div class="lanes">${lanes}</div></div>
  <div class="cols">${grp.map(g=>`<div class="col"><div class="col-hd"><b>${esc(g)}</b><span>${esc(GROUPS[g]||'')}</span></div>${teams.filter(t=>t.group===g).map(t=>oNode(A,t)).join('')}</div>`).join('')}</div>
  ${oLoop(A)}`}
-function oLoop(A){const J=Object.values(A.journals||{}),nj=J.reduce((s,j)=>s+j.n,0),RT=A.retro||[],pend=(A.teach||[]).filter(t=>t.status==='pending'&&t.gate==='retro');
- const nm=k=>(RT.filter(x=>x.kind===k&&x.status==='applied').length);
- const box=(t,n,d)=>`<div class="oloop-b"><b>${t}</b><span class="num">${n}</span><span>${d}</span></div>`;
- return `<div class="oloop"><div class="col-hd"><b>回饋迴圈:每輪結束後,怎麼讓下一輪更好更快</b><span>優化組主持檢討會,把這輪的教訓寫回四個地方;下一輪每個角色開工先讀</span></div>
-  <div class="oloop-row">${box('檢討會',RT.length+' 條提案','每輪收尾,讀全部事件與產出')}<span class="arrow" aria-hidden="true">→</span>
-   <div class="oloop-fan">${box('角色日誌',nj+' 條經驗','寫回各組,下次照做')}${box('籃子',nm('basket')+' 次調整','下一輪選題依據')}${box('共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('等你核可',pend.length+' 條','改方法論、組織、角色定義')}</div>
-   <span class="arrow" aria-hidden="true">→</span>${box('下一輪',' ','開工先讀日誌與共用程式')}</div>
-  ${pend.length?`<div style="display:flex;flex-direction:column;gap:6px"><b style="font-size:13px">等你核可的組織與方法論改動</b>${pend.map(t=>`<div class="oerr"><span class="pill t-disp">${esc(t.id)}</span><span>${esc(t.text)}</span><span class="meta">${esc(t.target)}${t.evidence?'・依據:'+esc(t.evidence):''}</span></div>`).join('')}<span class="sub">在 Claude 對話裡說「核可 T002」或「不要 T003」。核可後會比較改動前後幾輪的流程 KPI,變差就退回。</span></div>`:''}</div>`}
+function sugBox(target,ph){const mine=INBOX.filter(x=>x.kind==='suggest'&&x.target===target);
+ return `<div class="osug" data-target="${esc(target)}"><textarea rows="2" placeholder="${esc(ph||'有什麼建議?例:這一組下次要先…')}"></textarea><div class="osug-ft"><button type="button" class="btn pri" data-sug>送出建議</button><span class="sub osug-msg">${mine.length?`你已送出 ${mine.length} 條,下一輪開工時收件`:'送出後下一輪開工時收件,變成待辦'}</span></div>
+ ${mine.slice(-3).reverse().map(x=>`<div class="oerr"><span class="pill t-info">已送出</span><span>${esc(x.text)}</span><span class="meta">${esc(x.ts)}</span></div>`).join('')}</div>`}
+function decided(id){const d=INBOX.filter(x=>(x.kind==='approve'||x.kind==='reject')&&x.ref===id).pop();return d?d.kind:null}
+function pendBtns(t){const d=decided(t.id);
+ return d?`<span class="pill ${d==='approve'?'t-ok':''}">${d==='approve'?'你已核可,下一輪開工時套用':'你已決定不要'}</span>`:`<span class="obtns"><button type="button" class="btn pri" data-note="approve" data-ref="${esc(t.id)}">核可</button><button type="button" class="btn" data-note="reject" data-ref="${esc(t.id)}">不要</button></span>`}
+function oLoop(A){const J=A.journals||{},nj=Object.values(J).reduce((s,j)=>s+j.n,0),RT=A.retro||[],pend=(A.teach||[]).filter(t=>t.status==='pending');
+ const box=(k,t,n,d)=>`<button type="button" class="oloop-b${LOOPSEL===k?' sel':''}" data-loop="${k}"><b>${t}</b><span class="num">${n}</span><span>${d}</span><span class="oloop-go">點開看 →</span></button>`;
+ return `<div class="oloop"><div class="col-hd"><b>回饋迴圈:每輪結束後,怎麼讓下一輪更好更快</b><span>優化組主持檢討會,把這輪的教訓寫回四個地方;下一輪每個角色開工先讀。每一格都能點開看內容、給建議</span></div>
+  <div class="oloop-row">${box('retro','檢討會',RT.length+' 條提案','每輪收尾,讀全部事件與產出')}<span class="arrow" aria-hidden="true">→</span>
+   <div class="oloop-fan">${box('journal','角色日誌',nj+' 條經驗','寫回各組,下次照做')}${box('basket','籃子',RT.filter(x=>x.kind==='basket').length+' 次調整','下一輪選題依據')}${box('lib','共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('pending','等你核可',pend.filter(t=>!decided(t.id)).length+' 條','方法論、組織、角色定義的改動')}</div></div>
+  <div id="loopsel">${LOOPSEL?oLoopSel(A,LOOPSEL):''}</div></div>`}
+function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.retro||[];
+ const lastRun=((A.runs||[]).find(r=>r.ended)||{}).run_id,isNew=x=>x&&x.indexOf(lastRun||'~')>=0;
+ const wrap=(t,sub,body,sug)=>`<section class="drawer" style="display:flex;flex-direction:column;gap:12px;padding:14px 16px;margin-top:12px"><button type="button" class="ibtn x" aria-label="關閉" data-loop="${k}">✕</button>
+  <div style="padding-right:40px"><b style="font-size:16px">${t}</b><div class="sub">${sub}</div></div>${body}${sugBox(sug[0],sug[1])}</section>`;
+ if(k==='journal'){const J=A.journals||{};
+  return wrap('角色日誌','每個角色出勤前先讀自己的日誌。「新」= 最近一輪寫進來的。',
+   Object.keys(J).length?Object.entries(J).map(([id,j])=>`<div><b style="font-size:13px">${esc(nm(id))}</b><span class="sub">・${j.n} 條</span>${j.essence?`<div class="md">${mdh(j.essence)}</div>`:''}
+    ${j.recent.map(x=>`<div class="oerr">${isNew(x)?'<span class="pill t-info">新</span>':''}<span>${esc(x.replace(/^\S+ `[^`]*`\s*\S*:/,''))}</span><span class="meta">${esc((x.match(/^\S+/)||[''])[0])}</span></div>`).join('')}</div>`).join(''):'<p class="sub">還沒有經驗。</p>',
+   ['loop:journal','想教某一組什麼?例:資料組下次要先查 2026-10-19 之後的缺檔'])}
+ if(k==='retro'){const byRun={};RT.forEach(x=>(byRun[x.run]=byRun[x.run]||[]).push(x));
+  return wrap('檢討會','每輪收尾由優化組主持。已套用 = 直接寫進日誌或籃子;待核可 = 要你決定。',
+   Object.entries(byRun).map(([run,xs])=>`<div><b style="font-size:13px">${esc(((A.runs||[]).find(r=>r.run_id===run)||{goal:run}).goal)}</b>${xs.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(nm(x.target)):''}${x.evidence?'・依據:'+esc(x.evidence):''}</span></div>`).join('')}</div>`).join('')||'<p class="sub">還沒開過檢討會。</p>',
+   ['loop:retro','檢討會要多看什麼、少看什麼?'])}
+ if(k==='basket'){const xs=RT.filter(x=>x.kind==='basket');
+  return wrap('籃子調整','檢討會對想法籃子的調整;完整籃子在「計畫與籃子」分頁。',
+   xs.length?xs.map(x=>`<div class="oerr"><span>${esc(x.text)}</span><span class="meta">${esc(x.run)}</span></div>`).join(''):'<p class="sub">還沒有檢討會調整過籃子(第一輪的籃子是在收成時直接改的)。</p>',
+   ['loop:basket','籃子要優先做什麼、不做什麼?'])}
+ if(k==='lib')return wrap('共用程式','agent 寫程式前先查這份目錄,能 import 就不重寫;兩支以上 probe 寫過的同類程式,檢討會抽進 research_lab/lib/。',
+   `<div class="md" style="max-height:420px;overflow:auto">${mdh(A.toolbox_md||'(還沒有目錄)')}</div>`,['loop:lib','缺什麼共用工具?例:統一的成本模型、資料缺檔檢查'])
+ const pend=(A.teach||[]).filter(t=>t.status==='pending');
+ return wrap('等你核可','改方法論、組織、角色定義的提案。按核可後,下一輪開工時由總指揮套用,之後比較改動前後的流程 KPI,變差就退回。',
+  pend.length?pend.map(t=>`<div class="oerr" style="align-items:center"><span class="pill t-disp">${esc(t.id)}</span><span style="flex:1;min-width:14em">${esc(t.text)}<br><span class="meta">${esc(t.target)}${t.evidence?'・依據:'+esc(t.evidence):''}</span></span>${pendBtns(t)}</div>`).join(''):'<p class="sub">沒有待核可的項目。</p>',
+  ['loop:pending','對這些提案有其他想法?'])}
+function oChanges(A){const C=A.changelog||[];if(!C.length)return '';
+ const one=(c,i)=>`<div class="ochg${i?'':' latest'}"><div class="hd"><b>${i?'':'<span class="pill t-info">最新</span> '}${esc(c.title)}</b><span class="meta">${esc(c.id)}・${esc(c.date)}</span></div>
+  <ul>${(c.what||[]).map(w=>`<li>${esc(w)}</li>`).join('')}</ul><span class="sub">為什麼:${esc(c.why||'')}</span>
+  <details><summary><span class="sub">改了哪些檔・對這次改動給建議</span></summary><span class="meta">${(c.files||[]).map(esc).join('、')}</span>${sugBox('change:'+c.id,'這次改動哪裡不對、想要怎麼改?')}</details></div>`;
+ return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="hd"><h2 class="h2">組織變更紀錄</h2><span class="sub">每次改組織、流程、回饋機制都記在這裡,新的在上面</span></div>
+ ${one(C[0],0)}${C.length>1?`<details><summary><span class="sub">更早的 ${C.length-1} 次變更</span></summary><div style="display:flex;flex-direction:column;gap:10px;padding-top:8px">${C.slice(1).map((c,i)=>one(c,i+1)).join('')}</div></details>`:''}</section>`}
 function oIssues(A){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name;
  const keys=new Set([...O.handoffs.map(([u,d])=>u+'>'+d),...Object.keys(A.edges||{})]);
  const ed=[...keys].map(k=>[k,(A.edges||{})[k]||0]).sort((a,b)=>b[1]-a[1]);
@@ -1806,10 +1848,11 @@ function oSel(A,id){const O=A.org,r=oRole(O,id);if(!r)return '';
  <div><b style="font-size:13px">學到什麼</b><span class="sub">・角色日誌 ${jn?jn.n:0} 條,每次出勤先讀</span>${jn?`${jn.essence?`<div class="md" style="margin-top:4px">${mdh(jn.essence)}</div>`:''}<ul style="margin:4px 0 0;padding-left:20px;font-size:13px">${jn.recent.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p class="sub" style="margin:4px 0 0">還沒有經驗。每次任務結束會寫一句「下次怎麼做更好」。</p>'}</div>
  <details><summary><b>做過的任務</b><span class="sub">${h.history.length} 筆</span></summary><div class="tbl scroll" style="max-height:320px"><table><thead><tr><th>任務</th><th>階段</th><th>狀態</th><th>重點</th><th>產出檔</th></tr></thead><tbody>${h.history.slice().reverse().map(x=>`<tr><td>${esc(x.task)}</td><td>${esc(PHN[x.stage]||STEPS.find(s=>s[0]===x.stage)?.[1]||x.stage||'')}</td><td>${ast(x.state)}</td><td style="white-space:normal;min-width:16em">${esc(x.note)}</td><td class="meta" style="white-space:normal">${esc(x.artifact||'')}</td></tr>`).join('')}</tbody></table></div></details>
  <details><summary><b>你給這個角色的教學</b><span class="sub">${tc.length} 筆</span></summary>${tc.map(t=>`<div class="oerr"><span class="pill ${t.status==='applied'?'t-ok':'t-disp'}">${t.status==='applied'?'已併入':'待核可'}</span><span>${esc(t.text)}</span><span class="meta">${esc(t.ts)}・${esc(t.gate||'')}</span></div>`).join('')||'<p class="sub">還沒有。在關卡回覆時說「教研究組…」就會記在這裡。</p>'}</details>
+ <div><b style="font-size:13px">給這一組建議</b>${sugBox('role:'+id,'例:'+r.name+'下次要先…')}</div>
  <details><summary><b>角色定義全文</b><span class="sub">${esc(d.path||r.agent_file)}・${esc(d.mtime||'')}</span></summary><div class="md">${mdh((d.md||'').replace(/^---\r?\n[\s\S]*?\r?\n---\s*\r?\n/,'').replace(/^\s*# .*\r?\n/,''))}</div></details></section>`}
-function hOrg(H){const A=H.agency;
+function hOrg(H){const A=H.agency;if(A)A.toolbox_md=H.toolbox_md||A.toolbox_md;
  if(!A)return '<section class="card pad"><h2 class="h2">研究所還沒有組織資料</h2><p class="lede">在 research-trunk 建立 research_lab/agency/org.yaml 後執行 publish_hub.py。</p></section>';
- return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="hd"><h2 class="h2">現在在跑什麼</h2></div><div id="obanner" style="display:flex;flex-direction:column;gap:10px">${oBanner()}</div></section>
+ return `${oChanges(A)}<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="hd"><h2 class="h2">現在在跑什麼</h2></div><div id="obanner" style="display:flex;flex-direction:column;gap:10px">${oBanner()}</div></section>
  <section class="card pad" style="display:flex;flex-direction:column;gap:16px"><div class="hd"><h2 class="h2">研究團隊</h2>
   <div class="legend"><span><b class="sdot ok"></b>健康</span><span><b class="sdot warn"></b>有狀況</span><span><b class="sdot bad"></b>問題多</span><span><b class="sdot"></b>尚未出勤</span><span>點角色看細節</span></div></div>
   <p class="lede">你下指令給總指揮,總指揮選題後交給負責那條研究線的 PM;PM 再把工作派給下面四組。每一輪都照同一套研究流程走,結束時把新零件、報告和點子收進庫。</p>
@@ -1836,12 +1879,13 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
   ${w.blame&&Object.keys(w.blame).length?`<span class="sub">退件歸責:${Object.entries(w.blame).map(([k,v])=>`${esc(k)} ${v}`).join('・')}</span>`:''}</div></details>`:''}
   ${(()=>{const rp=RT.filter(x=>x.run===r.run_id);return rp.length?`<details><summary><b>檢討會</b><span class="sub">直接套用 ${rp.filter(x=>x.status==='applied').length}・等你核可 ${rp.filter(x=>x.status!=='applied').length}</span></summary><div style="display:flex;flex-direction:column;gap:6px;padding-top:6px">${rp.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(x.target):''}${x.teach_id?'・'+esc(x.teach_id):''}</span></div>`).join('')}</div></details>`:''})()}</div>`}).join('')}</section>`}
 async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
- const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();c.innerHTML=oChart(HUB.agency)}
+ const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();
+ if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#ochart'))return;c.innerHTML=oChart(HUB.agency)}
 setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
  const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:hData,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
- if(v==='lab'&&(curL==='org'||curL==='runs')){await loadLive();if(v!==curV)return}
+ if(v==='lab'&&(curL==='org'||curL==='runs')){await Promise.all([loadLive(),loadInbox()]);if(v!==curV)return}
  const k=v==='lab'?curL:v;
  box.innerHTML=`<div class="hub">${v==='lab'?`<div class="hd"><div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁"></div><span class="sub">零件 ${H.parts.length}・報告 ${H.reports.length}・資料 ${esc(H.built.slice(5))} 更新</span></div>`:`<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>`}${views[k](H)}</div>`;
  if(v==='lab')seg($('#ltabs'),LT,curL,setL);
@@ -1849,7 +1893,14 @@ async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='tr
 const oPick=id=>{ORGSEL=ORGSEL===id?null:id;document.querySelectorAll('#ochart .onode[data-role]').forEach(n=>n.classList.toggle('sel',n.dataset.role===ORGSEL));
  const box=$('#orgsel');if(box){box.innerHTML=ORGSEL?oSel(HUB.agency,ORGSEL):'';if(ORGSEL)box.scrollIntoView({behavior:'smooth',block:'nearest'})}};
 $('#v-hub').addEventListener('keydown',e=>{const n=e.target.closest&&e.target.closest('.onode[data-role]');if(n&&(e.key==='Enter'||e.key===' ')){e.preventDefault();oPick(n.dataset.role)}});
-$('#v-hub').addEventListener('click',e=>{const n=e.target.closest('.onode[data-role]');if(n){oPick(n.dataset.role);return}
+async function noteSend(body,msgEl){try{const r=await fetch('api/agency_note',{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});
+ const j=await r.json();if(!r.ok||j.error)throw new Error(j.error||r.status);INBOX.push(j);return j}catch(e){if(msgEl){msgEl.textContent='送不出去:'+e.message+'(只能在本機或 Tailscale 開的頁面送)';msgEl.style.color='var(--bad)'}return null}}
+const reloop=()=>{const c=$('#ochart');if(c&&HUB&&HUB.agency)c.innerHTML=oChart(HUB.agency);const o=$('#orgsel');if(o&&ORGSEL)o.innerHTML=oSel(HUB.agency,ORGSEL)};
+$('#v-hub').addEventListener('click',async e=>{const lp=e.target.closest('[data-loop]');if(lp){LOOPSEL=LOOPSEL===lp.dataset.loop?null:lp.dataset.loop;reloop();const ls=$('#loopsel');if(ls&&LOOPSEL)ls.scrollIntoView({behavior:'smooth',block:'nearest'});return}
+ const sg=e.target.closest('[data-sug]');if(sg){const w=sg.closest('.osug'),ta=w.querySelector('textarea'),m=w.querySelector('.osug-msg');if(!ta.value.trim()){ta.focus();return}
+  sg.disabled=true;const j=await noteSend({kind:'suggest',target:w.dataset.target,text:ta.value},m);sg.disabled=false;if(j){ta.value='';m.style.color='';reloop();const nb=document.querySelector(`.osug[data-target="${CSS.escape(j.target)}"] .osug-msg`);if(nb)nb.textContent='已送出,下一輪開工時收件'}return}
+ const nt=e.target.closest('[data-note]');if(nt){nt.disabled=true;const j=await noteSend({kind:nt.dataset.note,ref:nt.dataset.ref,text:''},nt.parentElement);if(j)reloop();else nt.disabled=false;return}
+ const n=e.target.closest('.onode[data-role]');if(n){oPick(n.dataset.role);return}
  if(e.target.closest('[data-osel]')){oPick(ORGSEL);return}
  const sm=e.target.closest('.sc-more');if(sm){const o=sm.parentElement.classList.toggle('open');sm.setAttribute('aria-expanded',o);sm.textContent=o?'收合':'展開全文';return}
  const c=e.target.closest('button[data-grp]');

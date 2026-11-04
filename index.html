@@ -424,6 +424,11 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .lane{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);background:var(--panel2);cursor:help}
 .lane.proposed{border-style:dashed;color:var(--now)}.lane.dormant{opacity:.5}
 .on-xp{padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--acc) 12%,var(--panel));color:var(--acc);font-weight:600}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:6px}
+.kspark{border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:8px 10px;display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--mute)}
+.kspark .hd{display:flex;justify-content:space-between;gap:6px}.kspark b{font-size:18px;color:var(--ink)}.kspark svg{width:100%;height:56px;overflow:visible}
+.kd{font-size:11.5px;margin-left:6px;font-weight:600}.kd.ok{color:var(--ok)}.kd.bad{color:var(--bad)}
+.orep{border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));border-radius:10px;padding:6px 10px;background:var(--panel)}
 .oloop-b{font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}.oloop-b:hover{border-color:color-mix(in srgb,var(--acc) 60%,var(--line))}
 .oloop-b.sel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,var(--panel2))}.oloop-b:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .oloop-go{margin-top:4px;color:var(--acc);font-size:11.5px}
@@ -1865,9 +1870,19 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
  const tot={};rs.forEach(r=>ADDL.forEach(([k])=>tot[k]=(tot[k]||0)+((r.counts||{})[k]||0)));
  const ST={running:['t-info','進行中'],waiting_user:['t-disp','等你裁決'],done:['t-ok','完成'],failed:['t-risk','失敗'],aborted:['','中止']};
  const RT=(H.agency.retro||[]),kr=rs.filter(r=>r.kpi).slice(0,12),f=v=>v==null?'—':v;
- const trend=kr.length?`<div><b style="font-size:13px">飛輪有沒有變快</b><span class="sub">・每輪的流程 KPI,新的在上面;時長、重做、失敗率越低越好,紅隊通過、產出、重用越高越好</span>
+ const KP=[['minutes','總時長(分)',-1],['to_first_number','到第一個數字(分)',-1],['rework','重做次數',-1],['fail_rate','失敗率',-1],['redteam_pass','紅隊通過率',1],['yield_per_task','每任務產出',1],['reuse','程式重用率',1],['lessons','新經驗(條)',1]];
+ const kv=(r,k)=>k==='reuse'?((r.kpi.reuse||{}).rate??null):r.kpi[k];
+ const spark=(k,lab,dir)=>{const pts=kr.slice().reverse().map(r=>({v:kv(r,k),g:r.goal})),vs=pts.map(p=>p.v).filter(v=>v!=null);
+  const W=220,Hh=64,P=8,lo=Math.min(...vs,0),hi=Math.max(...vs,lo+1e-9),n=pts.length,X=i=>n<2?W/2:P+i*(W-2*P)/(n-1),Y=v=>Hh-P-(v-lo)/(hi-lo||1)*(Hh-2*P);
+  const seg=pts.map((p,i)=>p.v==null?null:[X(i),Y(p.v)]),line=seg.filter(Boolean).map(([x,y],i)=>(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)).join(' ');
+  const last=vs.length?vs[vs.length-1]:null,prev=vs.length>1?vs[vs.length-2]:null,dl=last!=null&&prev!=null?last-prev:null,good=dl==null||dl===0?'':(dl*dir>0?'ok':'bad');
+  return `<div class="kspark"><div class="hd"><span>${lab}</span><span class="sub">${dir<0?'越低越好':'越高越好'}</span></div><b class="num">${last==null?'—':+last.toFixed(2)}${dl?`<span class="kd ${good}">${dl>0?'▲':'▼'}${Math.abs(+dl.toFixed(2))}</span>`:''}</b>
+  <svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${lab}走勢"><path d="${line}" fill="none" stroke="var(--acc)" stroke-width="2"/>${seg.map((s,i)=>s?`<circle cx="${s[0].toFixed(1)}" cy="${s[1].toFixed(1)}" r="${i===n-1?4:2.5}" fill="var(--acc)"><title>${esc(pts[i].g)}:${pts[i].v}</title></circle>`:'').join('')}</svg></div>`};
+ const chart=kr.length?`<div><b style="font-size:13px">流程 KPI 走勢</b><span class="sub">・由舊到新,${kr.length} 輪;▲▼ 是和上一輪比,綠色變好、紅色變差。KPI 只量流程,量不到研究價值,研究價值看各輪的優化報告</span>
+  <div class="kgrid">${KP.map(([k,l,d])=>spark(k,l,d)).join('')}</div></div>`:'';
+ const trend=kr.length?`${chart}<details><summary><b style="font-size:13px">KPI 數字表</b></summary><div><span class="sub">・每輪的流程 KPI,新的在上面;時長、重做、失敗率越低越好,紅隊通過、產出、重用越高越好</span>
   <div class="tbl scroll"><table><thead><tr><th>輪</th><th class="num">總時長(分)</th><th class="num">到第一個數字</th><th class="num">重做</th><th class="num">失敗率</th><th class="num">紅隊通過</th><th class="num">每任務產出</th><th class="num">程式重用</th><th class="num">新經驗</th></tr></thead>
-  <tbody>${kr.map(r=>{const k=r.kpi,u=k.reuse||{};return `<tr><td style="white-space:normal;min-width:12em">${esc(r.goal.slice(0,28))}</td><td class="num">${f(k.minutes)}</td><td class="num">${f(k.to_first_number)}</td><td class="num">${f(k.rework)}</td><td class="num">${f(k.fail_rate)}</td><td class="num">${f(k.redteam_pass)}</td><td class="num">${f(k.yield_per_task)}</td><td class="num">${u.py?u.reused+'/'+u.py:'—'}</td><td class="num">${f(k.lessons)}</td></tr>`}).join('')}</tbody></table></div></div>`:'';
+  <tbody>${kr.map(r=>{const k=r.kpi,u=k.reuse||{};return `<tr><td style="white-space:normal;min-width:12em">${esc(r.goal.slice(0,28))}</td><td class="num">${f(k.minutes)}</td><td class="num">${f(k.to_first_number)}</td><td class="num">${f(k.rework)}</td><td class="num">${f(k.fail_rate)}</td><td class="num">${f(k.redteam_pass)}</td><td class="num">${f(k.yield_per_task)}</td><td class="num">${u.py?u.reused+'/'+u.py:'—'}</td><td class="num">${f(k.lessons)}</td></tr>`}).join('')}</tbody></table></div></div></details>`:'';
  return `<section class="card pad" style="display:flex;flex-direction:column;gap:14px">${head}
  <div class="ochips">${ADDL.slice(0,4).map(([k,l])=>`<span class="stat ${tot[k]?'':'zero'}">${l}<b>+${tot[k]}</b></span>`).join('')}<span class="stat">共<b>${rs.length}</b>輪</span></div>${trend}
  ${rs.map(r=>{const c=r.counts||{},w=r.waste||{},a=r.added||{},s=ST[r.status]||['',r.status];
@@ -1877,6 +1892,7 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
   <span class="meta">${esc(r.involvement)}・規模 ${esc(r.scale)}・${esc((r.started||'').slice(5,16))}${r.ended?' → '+esc(r.ended.slice(5,16)):''}・${esc(r.run_id)}</span>
   ${ADDL.some(([k])=>(a[k]||[]).length)?`<details><summary><b>新增清單</b></summary><div style="display:flex;flex-direction:column;gap:8px;padding-top:6px">${ADDL.filter(([k])=>(a[k]||[]).length).map(([k,l])=>`<div><b style="font-size:13px">${l}</b><ul style="margin:2px 0 0;padding-left:20px;font-size:13px">${a[k].map(x=>`<li class="meta" style="font-size:12.5px">${esc(x)}</li>`).join('')}</ul></div>`).join('')}
   ${w.blame&&Object.keys(w.blame).length?`<span class="sub">退件歸責:${Object.entries(w.blame).map(([k,v])=>`${esc(k)} ${v}`).join('・')}</span>`:''}</div></details>`:''}
+  ${r.report_md?`<details class="orep"><summary><b>優化報告</b><span class="sub">優化組寫:效率、品質、KPI 看不到的研究價值、待你決定</span></summary><div class="md">${mdh(r.report_md)}</div>${sugBox('report:'+r.run_id,'對這份優化報告有什麼看法?')}</details>`:''}
   ${(()=>{const rp=RT.filter(x=>x.run===r.run_id);return rp.length?`<details><summary><b>檢討會</b><span class="sub">直接套用 ${rp.filter(x=>x.status==='applied').length}・等你核可 ${rp.filter(x=>x.status!=='applied').length}</span></summary><div style="display:flex;flex-direction:column;gap:6px;padding-top:6px">${rp.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(x.target):''}${x.teach_id?'・'+esc(x.teach_id):''}</span></div>`).join('')}</div></details>`:''})()}</div>`}).join('')}</section>`}
 async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
  const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();

@@ -364,6 +364,28 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .hub details[open]>summary::before{transform:rotate(90deg)}
 .ptree summary::before{content:none}
 .newb{font-size:10.5px;font-weight:700;padding:0 6px;border-radius:999px;background:var(--now);color:#111;line-height:16px;display:inline-block;margin-left:4px;vertical-align:1px}
+/* 資料盤點:每列一條時間軸,四種狀態上色 */
+.dtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.dtile{font:inherit;text-align:left;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card2);color:var(--ink);display:flex;flex-direction:column;gap:2px}
+.dtile b{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600}.dtile span{font-size:12.5px;color:var(--ink2)}
+.dtile[aria-pressed="true"]{border-color:var(--ink2);box-shadow:inset 0 0 0 1px var(--ink2)}
+.dtile .sw{width:22px;height:6px;border-radius:3px;margin-bottom:4px}
+.dchips{display:flex;flex-wrap:wrap;gap:6px}
+.dchips button{font:inherit;font-size:12px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--panel);color:var(--ink2);cursor:pointer}
+.dchips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dfam{display:flex;flex-direction:column}
+.drow{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,1.6fr) minmax(220px,1.4fr);gap:14px;align-items:center;padding:9px 0;border-top:1px solid var(--line2)}
+.drow.axis{border-top:0;padding:0 0 4px}.drow .nm{font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.4}
+.drow .ds{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);word-break:break-all}
+.drow .use{font-size:12px;color:var(--ink2);line-height:1.5}
+.dbar{position:relative;height:14px;border-radius:4px;background:var(--panel2);overflow:hidden}
+.dbar i{position:absolute;top:0;bottom:0}.dbar i.s-have{background:var(--ok)}.dbar i.s-can{background:var(--acc)}.dbar i.s-cant{background:var(--bad);opacity:.75}
+.dbar i.s-unk{background:repeating-linear-gradient(45deg,var(--mute2) 0 3px,transparent 3px 6px)}
+.dbar b{position:absolute;top:0;bottom:0;width:1px;background:var(--bg);opacity:.6}
+.dax{position:relative;height:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--mute)}.dax span{position:absolute;transform:translateX(-50%)}
+.dseg{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink2)}.dseg div{line-height:1.5}.dseg .num{color:var(--ink)}
+.dleg{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink2);align-items:center}.dleg i{display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
+@media (max-width:760px){.drow{grid-template-columns:1fr;gap:6px}.drow.axis{display:none}}
 /* ── 研究所 / 控制 共用 ── */
 .btn{font:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--btn);background:var(--panel2);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background .15s,border-color .15s}
 .btn:hover{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,var(--panel2))}
@@ -1533,6 +1555,36 @@ function hFactory(H){const F=H.factory;
     <span class="sub" style="font-weight:700;margin-top:6px">最常用的算子</span><div style="display:flex;flex-wrap:wrap;gap:4px">${ops.map(([k,n])=>`<span class="ptype num">${esc(k)} ${n}</span>`).join('')}</div></div></div></section>
  <section class="card pad" style="display:flex;flex-direction:column;gap:6px"><h2 class="h2">各家族表達式範例</h2><p class="sub" style="margin:0">每族挑 6 條較短、優先本地有資料的公式;報酬都還沒在我們這邊驗證。</p>${samp}</section>
  <section class="card pad"><div class="md">${mdh(F.md)}</div></section>`}
+// ── 資料盤點(hub.json 的 inventory,來源 research_lab/data/inventory.yaml)──
+const DST={have:['已抓','t-ok'],can:['可抓未抓','t-info'],cant:['抓不到','t-risk'],unk:['未知','t-disp']},DF={st:'all',fam:'all'};
+function hData(H){const I=H.inventory;
+ if(!I)return `<section class="card pad"><div class="md">${H.data_md?mdh(H.data_md):'還沒有資料盤點(research_lab/data/inventory.yaml)。'}</div></section>`;
+ const n=k=>I.items.filter(it=>it.seg.some(s=>s.st===k)).length;
+ const tiles=Object.entries(DST).map(([k,[l]])=>`<button type="button" class="dtile" data-dst="${k}" aria-pressed="${DF.st===k}"><i class="sw dbar-sw s-${k}" style="${k==='unk'?'background:repeating-linear-gradient(45deg,var(--mute2) 0 3px,transparent 3px 6px)':`background:var(--${{have:'ok',can:'acc',cant:'bad'}[k]})`}"></i><b>${n(k)}</b><span>${l}</span></button>`).join('');
+ const fams=[['all','全部'],...I.families.map(f=>[f.id,f.name])].map(([k,l])=>`<button type="button" data-dfam="${k}" aria-pressed="${DF.fam===k}">${esc(l)}</button>`).join('');
+ return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="between"><h2 class="h2">資料盤點</h2><span class="sub">${esc(I.asof)} 實測・${I.items.length} 項・點方塊篩選</span></div>
+  <p class="sub" style="margin:0">每一列是一份資料,橫條是 ${I.axis[0].slice(0,4)}–${I.axis[1].slice(0,4)} 的時間軸。同一份資料的不同年段可能狀態不同,例如前段可抓未抓、中段已抓、最近幾天還沒更新。一項資料可能同時算進多個方塊。</p>
+  <div class="dtiles">${tiles}</div><div class="dchips">${fams}</div>
+  <div class="dleg"><span><i style="background:var(--ok)"></i>已抓</span><span><i style="background:var(--acc)"></i>可抓未抓</span><span><i style="background:var(--bad);opacity:.75"></i>抓不到</span><span><i style="background:repeating-linear-gradient(45deg,var(--mute2) 0 3px,transparent 3px 6px)"></i>未知</span><span><i style="background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)"></i>空白 = 來源在這之前沒有</span><span class="pill t-disp">抓取中</span><span class="pill t-info">A</span> 優先序</div></section>
+ <div id="dlist" style="display:flex;flex-direction:column;gap:12px">${dataList(I)}</div>
+ ${H.data_md?`<section class="card pad"><div class="md">${mdh(H.data_md)}</div></section>`:''}`}
+function dataList(I){const t0=Date.parse(I.axis[0]),t1=Date.parse(I.axis[1]),x=d=>Math.max(0,Math.min(100,(Date.parse(d)-t0)/(t1-t0)*100));
+ const ym=d=>String(d).slice(0,7),yrs=[2005,2010,2015,2020,2025].filter(y=>Date.parse(y+'-01-01')>=t0);
+ const ticks=yrs.map(y=>`<b style="left:${x(y+'-01-01')}%"></b>`).join('');
+ const axis=`<div class="drow axis"><span></span><div class="dax">${yrs.map(y=>`<span style="left:${x(y+'-01-01')}%">${y}</span>`).join('')}</div><span></span></div>`;
+ const row=it=>{const segs=[...it.seg].sort((a,b)=>String(a.from)<String(b.from)?-1:1);
+  const bar=segs.map(s=>{const a=x(s.from),w=Math.max(x(s.to)-a,.8);return `<i class="s-${s.st}" style="left:${a}%;width:${w}%" title="${esc(DST[s.st][0])} ${esc(ym(s.from))} → ${esc(ym(s.to))}${s.where?' ・'+esc(s.where):''}${s.note?' ・'+esc(s.note):''}"></i>`}).join('');
+  const txt=segs.map(s=>`<div><span class="pill ${DST[s.st][1]}">${DST[s.st][0]}</span> <span class="num">${esc(ym(s.from))} → ${esc(ym(s.to))}</span>${s.where?` <span class="sub">${esc(s.where)}</span>`:''}${s.note?` <span class="sub">・${esc(s.note)}</span>`:''}</div>`).join('');
+  return `<div class="drow"><div><div class="nm">${esc(it.name)} ${it.prio?`<span class="pill t-info">${esc(it.prio)}</span>`:''}${it.tag==='fetching'?' <span class="pill t-disp">抓取中</span>':''}</div><div class="ds">${esc(it.ds||'')}${it.src_first?`・來源最早 ${esc(it.src_first)}`:''}</div>${it.use?`<div class="use">${esc(it.use)}</div>`:''}</div>
+   <div class="dbar">${bar}${ticks}</div><div class="dseg">${txt}</div></div>`};
+ const out=I.families.filter(f=>DF.fam==='all'||DF.fam===f.id).map(f=>{const xs=I.items.filter(it=>it.fam===f.id&&(DF.st==='all'||it.seg.some(s=>s.st===DF.st)));if(!xs.length)return '';
+  return `<section class="card pad dfam"><div class="between" style="margin-bottom:6px"><h3 class="h2" style="font-size:15px">${esc(f.name)}</h3><span class="sub">${xs.length} 項</span></div>${axis}${xs.map(row).join('')}</section>`}).join('');
+ return out||'<section class="card pad"><p class="sub" style="margin:0">這個條件沒有資料。</p></section>'}
+$('#v-hub').addEventListener('click',e=>{const t=e.target.closest('[data-dst],[data-dfam]');if(!t||!HUB||!HUB.inventory)return;
+ if(t.dataset.dst)DF.st=DF.st===t.dataset.dst?'all':t.dataset.dst;else DF.fam=t.dataset.dfam;
+ document.querySelectorAll('#v-hub [data-dst]').forEach(b=>b.setAttribute('aria-pressed',DF.st===b.dataset.dst));
+ document.querySelectorAll('#v-hub [data-dfam]').forEach(b=>b.setAttribute('aria-pressed',DF.fam===b.dataset.dfam));
+ $('#dlist').innerHTML=dataList(HUB.inventory)});
 // ── 操盤手分頁(data/trader_<日>.json,由 core/trader_api.export_day 寫)──
 const TZH={am:'早盤',open:'盤中檢查',pre_close:'收盤前',post:'盤後檢查'},KZH={buy:'買',sell:'賣',short:'現沖賣'},
  SZH={sent:'已送出',failed:'失敗',refused:'拒送',unknown:'未知',sending:'送出中'},
@@ -1765,7 +1817,7 @@ async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB
 setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
- const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:H=>`<section class="card pad"><div class="md">${H.data_md?mdh(H.data_md):'還沒有資料盤點(research_lab/data/INVENTORY.md)。'}</div></section>`,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
+ const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:hData,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
  if(v==='lab'&&(curL==='org'||curL==='runs')){await loadLive();if(v!==curV)return}
  const k=v==='lab'?curL:v;
  box.innerHTML=`<div class="hub">${v==='lab'?`<div class="hd"><div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁"></div><span class="sub">零件 ${H.parts.length}・報告 ${H.reports.length}・資料 ${esc(H.built.slice(5))} 更新</span></div>`:`<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>`}${views[k](H)}</div>`;

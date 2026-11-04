@@ -332,6 +332,37 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .scards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .scard{border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--card2);min-width:0}
 .scard .path{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--mute);word-break:break-all}
+/* 策略看板:階段頭、卡片層次(名稱 → 一句話 → 數字區 → 備註 → 路徑) */
+.stg-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.stg-h .h2{font-size:16px}.stg-h .sub{font-size:12.5px}
+.stg-nav{display:flex;flex-wrap:wrap;gap:6px}.stg-nav a{font-size:12px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--panel)}
+.stg-nav a:hover{border-color:var(--mute2)}.stg-nav a b{font-family:'JetBrains Mono',monospace;margin-left:4px;color:var(--ink)}
+.stg{scroll-margin-top:76px}
+.scard{gap:10px}.scard.s-live{box-shadow:inset 0 3px 0 var(--ok)}.scard.s-paper{box-shadow:inset 0 3px 0 var(--acc)}
+.scard .nm{font-size:15px;font-weight:700;color:var(--ink);line-height:1.4}
+.scard .sm{font-size:13px;color:var(--ink2);line-height:1.65;margin:0}
+.sc-kpi{display:flex;flex-direction:column;gap:6px;padding:9px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)}
+.sc-kpi .m{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink);line-height:1.55}
+.sc-kpi .bt{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--ink2)}
+.yrs{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.yr{font-family:'JetBrains Mono',monospace;font-size:11px;border:1px solid var(--line);border-radius:5px;padding:0 5px;color:var(--mute);line-height:18px}.yr b{margin-left:3px;font-weight:600}
+.sc-note p{margin:0;font-size:12px;color:var(--mute);line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sc-note.open p{display:block}
+.sc-more{font:inherit;font-size:11.5px;color:var(--acc);background:none;border:0;padding:2px 0 0;cursor:pointer}
+.scard .path{margin-top:auto;padding-top:8px;border-top:1px dashed var(--line)}
+/* 操盤手分頁 */
+.tr-sum{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-end}
+.tr-sum .tkv{display:flex;flex-direction:column;gap:2px}.tr-sum .tkv span{font-size:11.5px;color:var(--mute)}
+.tr-sum .tkv b{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--ink);font-weight:600}
+.mtg{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.mtg .card{display:flex;flex-direction:column;gap:8px;border-top:3px solid var(--line)}
+.mtg .card.ok{border-top-color:var(--ok)}.mtg .card.warn{border-top-color:var(--warn)}.mtg .card.bad{border-top-color:var(--bad)}.mtg .card.info{border-top-color:var(--acc)}
+.mtg .card.idle{background:transparent;border-style:dashed;border-top-width:1px}
+.mtg .card.idle .h2{color:var(--mute)}
+.mtg .tg{white-space:pre-wrap;font-size:13px;line-height:1.65;color:var(--ink2)}
+.mtg .rv{font-size:12px;color:var(--warn);line-height:1.6;border-left:2px solid var(--warn);padding-left:8px}
+.hub summary::before{content:'▸';color:var(--mute2);font-size:11px;transition:transform .15s;display:inline-block}
+.hub details[open]>summary::before{transform:rotate(90deg)}
+.ptree summary::before{content:none}
 .newb{font-size:10.5px;font-weight:700;padding:0 6px;border-radius:999px;background:var(--now);color:#111;line-height:16px;display:inline-block;margin-left:4px;vertical-align:1px}
 /* ── 研究所 / 控制 共用 ── */
 .btn{font:inherit;font-size:13px;font-weight:600;padding:7px 14px;border-radius:8px;border:1px solid var(--btn);background:var(--panel2);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;line-height:1.2;transition:background .15s,border-color .15s}
@@ -1440,14 +1471,17 @@ function setV(v){if(LT.some(x=>x[0]===v)){curL=v;v='lab'}if(!VT.some(x=>x[0]===v
 function hStrat(H){
  const I=H.integration||{},S=I.strategies||{};
  const st=s=>{const x=S[s.integration];if(!x)return '';
-  const yrs=Object.entries(x.years||{}).map(([y,v])=>`${y.slice(2)}:<b class="${cls(v)}">${v.toFixed(1)}</b>`).join(' ');
-  return `<div class="num" style="font-size:12.5px;color:var(--ink2)">Sharpe ${x.sharpe.toFixed(2)}・年化 ${pct(x.cagr,0)}・MDD ${pct(x.mdd,0)}</div><div class="num sub">逐年 Sharpe ${yrs}(${esc((I.window||[]).join(' ~ '))})</div>`};
- return STG.map(([k,l,c])=>{const xs=H.strategies.filter(s=>s.stage===k);if(!xs.length)return '';
-  return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div style="display:flex;align-items:center;gap:10px"><span class="pill ${c}">${l}</span><span class="sub">${xs.length} 個</span></div>
-  <div class="scards">${xs.map(s=>`<div class="scard"><span style="font-size:15px;font-weight:700;color:var(--ink)">${esc(s.name)}</span>
-   <span style="font-size:13px;color:var(--ink2);line-height:1.6">${esc(s.summary)}</span>
-   ${s.metrics?`<span class="num" style="font-size:12.5px;color:var(--ink)">${esc(s.metrics)}</span>`:''}${s.integration?st(s):''}
-   ${s.notes?`<span class="sub" style="line-height:1.6">${esc(s.notes)}</span>`:''}${s.code?`<span class="path">${esc(s.code)}</span>`:''}</div>`).join('')}</div></section>`}).join('')}
+  const yrs=Object.entries(x.years||{}).map(([y,v])=>`<span class="yr">${y.slice(2)}<b class="${cls(v)}">${v.toFixed(1)}</b></span>`).join('');
+  return `<div class="bt">Sharpe ${x.sharpe.toFixed(2)}・年化 ${pct(x.cagr,0)}・MDD ${pct(x.mdd,0)}</div><div class="yrs"><span class="sub">逐年 Sharpe</span>${yrs}</div><span class="sub num">${esc((I.window||[]).join(' ~ '))}</span>`};
+ const SD={live:'真錢在跑',paper:'每天紙上跟著算,還沒下實單',candidate:'回測有訊號,還沒上線',paused:'先停下來',archived:'結案留檔'};
+ const groups=STG.map(g=>[...g,H.strategies.filter(s=>s.stage===g[0])]).filter(g=>g[3].length);
+ return `<nav class="stg-nav" aria-label="策略階段">${groups.map(([k,l,c,xs])=>`<a href="#stg-${k}">${l}<b>${xs.length}</b></a>`).join('')}</nav>`+groups.map(([k,l,c,xs])=>
+  `<section class="card pad stg" id="stg-${k}" style="display:flex;flex-direction:column;gap:14px"><div class="stg-h"><span class="pill ${c}">${l}</span><span class="sub">${xs.length} 個・${SD[k]||''}</span></div>
+  <div class="scards">${xs.map(s=>`<div class="scard s-${k}"><span class="nm">${esc(s.name)}</span>
+   <p class="sm">${esc(s.summary)}</p>
+   ${s.metrics||(s.integration&&S[s.integration])?`<div class="sc-kpi">${s.metrics?`<div class="m">${esc(s.metrics)}</div>`:''}${s.integration?st(s):''}</div>`:''}
+   ${s.notes?`<div class="sc-note"><p>${esc(s.notes)}</p><button type="button" class="sc-more" aria-expanded="false" hidden>展開全文</button></div>`:''}${s.code?`<span class="path">${esc(s.code)}</span>`:''}</div>`).join('')}</div></section>`).join('')}
+function fitNotes(){document.querySelectorAll('#v-hub .sc-note').forEach(n=>{const p=n.firstElementChild;n.lastElementChild.hidden=p.scrollHeight<=p.clientHeight+2})}
 function hParts(H){
  const cnt=k=>H.parts.filter(p=>p.status===k).length;
  const chip=(g,v,l)=>`<button type="button" data-grp="${g}" data-v="${esc(v)}" aria-pressed="${PF[g]===v}">${esc(l)}</button>`;
@@ -1510,23 +1544,31 @@ async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now
  if(curV!=='trader')return;
  if(!TR){box.innerHTML=`<div class="hub"><section class="card pad"><h2 class="h2">操盤手</h2><p class="sub">${esc(d)} 還沒有開會紀錄。</p></section></div>`;return}
  const M=TR.meetings||{},pill=(t,c)=>`<span class="pill ${c||''}" style="font-size:11px">${esc(t)}</span>`;
- const cards=['am','open','pre_close','post'].map(s=>{const m=M[s];if(!m)return `<section class="card pad" style="flex:1 1 240px"><h3 class="h2" style="font-size:14px">${TZH[s]}</h3><p class="sub">還沒開</p></section>`;
-  const ap=m.approval?(m.approval.decision==='go'?(m.approval.mode==='live'?'已核准(實單)':'已核准(演練)'):'不做'):'';
+ const SC={awaiting:'t-disp',reported:'t-info',review_failed:'t-risk',agent_failed:'t-risk',brief_failed:'t-risk',blocked:'t-risk'};
+ const cards=['am','open','pre_close','post'].map(s=>{const m=M[s];if(!m)return `<section class="card pad idle"><h3 class="h2" style="font-size:14px">${TZH[s]}</h3><p class="sub" style="margin:0">還沒開</p></section>`;
+  const go=m.approval&&m.approval.decision==='go',ap=m.approval?(go?(m.approval.mode==='live'?'已核准(實單)':'已核准(演練)'):'不做'):'';
   const icon={PASS:'✅',CONCERN:'🟡',FAIL:'🔴'}[m.verdict]||'';
-  return `<section class="card pad" style="flex:1 1 240px;display:flex;flex-direction:column;gap:6px">
+  const tone=SC[m.status]==='t-risk'||m.verdict==='FAIL'?'bad':m.verdict==='CONCERN'||(m.approval&&!go)?'warn':go?'ok':'info';
+  return `<section class="card pad ${tone}">
    <div class="between"><h3 class="h2" style="font-size:14px">${TZH[s]} ${icon}</h3><span class="sub num">${esc((m.ended||m.started||'').slice(11,16))}</span></div>
-   <div style="display:flex;gap:6px;flex-wrap:wrap">${m.status==='awaiting'&&ap?'':pill(MSZH[m.status]||m.status||'')}${ap?pill(ap):''}${m.finished?pill('程式已結束'):''}</div>
-   <div style="white-space:pre-wrap;font-size:13px;line-height:1.6">${esc(m.tg||'')}</div>
-   ${m.review&&m.verdict!=='PASS'?`<div class="sub">審查:${esc(m.review)}</div>`:''}</section>`}).join('');
- const rows=(TR.orders||[]).map(o=>`<tr><td class="num">${esc(o.t||'')}</td><td>${TZH[o.session]||esc(o.session||'')}</td><td>${STZH[o.strategy]||esc(o.strategy)}</td>
-  <td>${KZH[o.kind]||esc(o.kind)}</td><td class="num">${esc(o.sid)} ${esc(names[o.sid]||'')}</td><td class="num">${(o.shares||0).toLocaleString()}</td>
-  <td class="num">${o.limit??''}</td><td>${o.state==='sent'?'✅ ':'❌ '}${SZH[o.state]||esc(o.state||'')}${o.error?'<div class="sub">'+esc(o.error)+'</div>':''}</td><td class="sub">${esc(o.why||'')}</td></tr>`).join('');
+   <div style="display:flex;gap:6px;flex-wrap:wrap">${m.status==='awaiting'&&ap?'':pill(MSZH[m.status]||m.status||'',SC[m.status])}${ap?pill(ap,go?(m.approval.mode==='live'?'t-ok':'t-info'):'t-disp'):''}${m.finished?pill('程式已結束'):''}</div>
+   <div class="tg">${esc(m.tg||'')}</div>
+   ${m.review&&m.verdict!=='PASS'?`<div class="rv">審查:${esc(m.review)}</div>`:''}</section>`}).join('');
+ const OS=TR.orders||[],nSent=OS.filter(o=>o.state==='sent').length,nOpen=['am','open','pre_close','post'].filter(s=>M[s]).length;
+ const rows=OS.map(o=>`<tr><td class="num">${esc(o.t||'')}</td><td>${TZH[o.session]||esc(o.session||'')}</td><td>${STZH[o.strategy]||esc(o.strategy)}</td>
+  <td class="${o.kind==='buy'?'up':'dn'}">${KZH[o.kind]||esc(o.kind)}</td><td class="num">${esc(o.sid)} ${esc(names[o.sid]||'')}</td><td class="num r">${(o.shares||0).toLocaleString()}</td>
+  <td class="num r">${o.limit??''}</td><td>${pill(SZH[o.state]||o.state||'',o.state==='sent'?'t-ok':o.state==='sending'?'t-disp':'t-risk')}${o.error?'<div class="sub">'+esc(o.error)+'</div>':''}</td><td class="sub" style="white-space:normal;min-width:16em">${esc(o.why||'')}</td></tr>`).join('');
  const dry=Object.entries(M).filter(([s,m])=>m.dryrun&&m.dryrun.length).map(([s,m])=>`<div class="sub">${TZH[s]} 演練:${m.dryrun.map(o=>`${KZH[o.kind]||o.kind}${o.sid} ${o.shares}股`).join('、')}</div>`).join('');
  const B=TR.books||{},books=Object.entries(B).filter(([k,v])=>v&&Object.keys(v).length).map(([k,v])=>`<div><b>${STZH[k]||esc(k)}</b> <span class="num">${Object.entries(v).map(([s,n])=>`${esc(s)} ${n.toLocaleString()}股`).join('、')}</span></div>`).join('')||'<span class="sub">還沒有正式帳本(books.json)</span>';
  const fixes=Object.entries(M).flatMap(([s,m])=>(m.book_fixes||[]).map(f=>`<div>${STZH[f.strategy]||esc(f.strategy)} ${esc(f.sid)} ${f.delta>0?'+':''}${f.delta}:<span class="sub">${esc(f.reason)}</span></div>`)).join('')||'<span class="sub">沒有</span>';
  const plans=Object.entries(M).filter(([s,m])=>m.plan).map(([s,m])=>`<details><summary>${TZH[s]} 計畫</summary><div class="md">${mdh(m.plan)}</div></details>`).join('');
- box.innerHTML=`<div class="hub"><span class="sub">更新於 ${esc(TR.updated)}</span>
-  <div style="display:flex;flex-wrap:wrap;gap:12px">${cards}</div>
+ const nBook=Object.values(B).reduce((a,v)=>a+(v?Object.keys(v).length:0),0);
+ box.innerHTML=`<div class="hub"><section class="card pad tr-sum"><div class="tkv"><span>交易日</span><b>${esc(TR.day||d)}</b></div>
+   <div class="tkv"><span>會議</span><b>${nOpen}<span class="sub" style="font-size:13px"> / 4</span></b></div>
+   <div class="tkv"><span>實單送出</span><b>${nSent}${OS.length>nSent?`<span class="sub" style="font-size:13px;color:var(--bad)"> 未成功 ${OS.length-nSent}</span>`:''}</b></div>
+   <div class="tkv"><span>帳本部位</span><b>${nBook}<span class="sub" style="font-size:13px"> 筆</span></b></div>
+   <span class="sub" style="margin-left:auto">更新於 ${esc(TR.updated)}</span></section>
+  <div class="mtg">${cards}</div>
   <section class="card pad" style="display:flex;flex-direction:column;gap:10px"><h2 class="h2">今天的實單</h2>
    ${rows?`<div class="tbl"><table><thead><tr><th>時間</th><th>場次</th><th>策略</th><th>買賣</th><th>股票</th><th>股數</th><th>限價</th><th>狀態</th><th>理由</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<span class="sub">今天還沒有送出實單</span>'}${dry}</section>
   <div style="display:flex;flex-wrap:wrap;gap:12px"><section class="card pad" style="flex:1 1 320px;display:flex;flex-direction:column;gap:6px"><h2 class="h2">各策略帳本</h2>${books}</section>
@@ -1728,12 +1770,13 @@ async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='tr
  const k=v==='lab'?curL:v;
  box.innerHTML=`<div class="hub">${v==='lab'?`<div class="hd"><div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁"></div><span class="sub">零件 ${H.parts.length}・報告 ${H.reports.length}・資料 ${esc(H.built.slice(5))} 更新</span></div>`:`<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>`}${views[k](H)}</div>`;
  if(v==='lab')seg($('#ltabs'),LT,curL,setL);
- if(k==='parts')drawParts();if(k==='reports'||k==='org')wireReports()}
+ if(k==='parts')drawParts();if(k==='reports'||k==='org')wireReports();if(k==='strategies')fitNotes()}
 const oPick=id=>{ORGSEL=ORGSEL===id?null:id;document.querySelectorAll('#ochart .onode[data-role]').forEach(n=>n.classList.toggle('sel',n.dataset.role===ORGSEL));
  const box=$('#orgsel');if(box){box.innerHTML=ORGSEL?oSel(HUB.agency,ORGSEL):'';if(ORGSEL)box.scrollIntoView({behavior:'smooth',block:'nearest'})}};
 $('#v-hub').addEventListener('keydown',e=>{const n=e.target.closest&&e.target.closest('.onode[data-role]');if(n&&(e.key==='Enter'||e.key===' ')){e.preventDefault();oPick(n.dataset.role)}});
 $('#v-hub').addEventListener('click',e=>{const n=e.target.closest('.onode[data-role]');if(n){oPick(n.dataset.role);return}
  if(e.target.closest('[data-osel]')){oPick(ORGSEL);return}
+ const sm=e.target.closest('.sc-more');if(sm){const o=sm.parentElement.classList.toggle('open');sm.setAttribute('aria-expanded',o);sm.textContent=o?'收合':'展開全文';return}
  const c=e.target.closest('button[data-grp]');
  if(c){PF[c.dataset.grp]=c.dataset.v;document.querySelectorAll(`#v-hub button[data-grp="${c.dataset.grp}"]`).forEach(x=>x.setAttribute('aria-pressed',x===c));drawParts();return}
  if(e.target.id==='pneg'){PF.neg=!PF.neg;e.target.setAttribute('aria-pressed',PF.neg);drawParts()}});

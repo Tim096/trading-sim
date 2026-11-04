@@ -423,6 +423,14 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .lanes{display:flex;flex-wrap:wrap;gap:6px}
 .lane{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--ink2);background:var(--panel2);cursor:help}
 .lane.proposed{border-style:dashed;color:var(--now)}.lane.dormant{opacity:.5}
+.on-xp{padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--acc) 12%,var(--panel));color:var(--acc);font-weight:600}
+.oloop{display:flex;flex-direction:column;gap:12px;padding-top:14px;border-top:1px dashed var(--line)}
+.oloop-row{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.oloop-row .arrow{display:grid;place-items:center;color:var(--mute2);padding:0 8px;font-size:18px}
+.oloop-fan{flex:3;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;min-width:260px}
+.oloop-b{flex:1;min-width:130px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:10px 12px;display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--mute)}
+.oloop-b b{font-size:13px;color:var(--ink)}.oloop-b .num{font-size:16px;font-weight:700;color:var(--acc)}
+@media (max-width:640px){.oloop-row .arrow{transform:rotate(90deg);width:100%;padding:2px 0}}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
 .col{display:flex;flex-direction:column;gap:8px;min-width:0}
 .col-hd{display:flex;flex-direction:column;gap:2px;padding:0 2px 4px;border-bottom:1px solid var(--line)}
@@ -1752,7 +1760,7 @@ function oNode(A,r){const h=A.health[r.id],[hc,hl]=oHealth(h),lv=roleLive(r.id),
   <p class="on-mis">${esc(r.mission)}</p>
   ${cur&&cur.task?`<div class="on-now">${ast(cur.state)} ${esc(cur.task)}${cur.note?'<br>'+esc(String(cur.note).slice(0,70)):''}</div>`:''}
   ${run&&cur.pct!=null?`<div class="obar"><i style="width:${Math.max(3,cur.pct)}%"></i></div>`:''}
-  <div class="on-ft"><span title="引擎">${esc(r.engine||'')}</span>${h&&h.runs?`<span>・完成 ${h.done}</span>${h.failed?`<span style="color:var(--bad)">・失敗 ${h.failed}</span>`:''}${h.blamed?`<span style="color:var(--bad)">・被退 ${h.blamed}</span>`:''}`:'<span>・尚未出勤</span>'}</div></div>`}
+  <div class="on-ft"><span title="引擎">${esc(r.engine||'')}</span>${(()=>{const j=(A.journals||{})[r.id];return j&&j.n?`<span class="on-xp" title="角色日誌:每次出勤先讀">經驗 ${j.n}</span>`:''})()}${h&&h.runs?`<span>・完成 ${h.done}</span>${h.failed?`<span style="color:var(--bad)">・失敗 ${h.failed}</span>`:''}${h.blamed?`<span style="color:var(--bad)">・被退 ${h.blamed}</span>`:''}`:'<span>・尚未出勤</span>'}</div></div>`}
 function oBanner(){const act=(LIVE&&LIVE.active)||[];
  if(!act.length)return `<p class="lede">目前沒有進行中的研究。說「燒 token」或「研究 X」就會開始一輪${LIVE?`(即時狀態 ${esc(LIVE.updated.slice(11,16))} 更新)`:''}。</p>`;
  return act.map(r=>{const w=r.status==='waiting_user';
@@ -1765,7 +1773,16 @@ function oChart(A){const O=A.org,teams=O.teams,grp=[...new Set(teams.map(t=>t.gr
  return `<div class="chain"><div class="onode judge"><div class="on-hd"><span class="on-av">你</span><span class="on-tt"><b>${esc(O.judge.name)}</b><span>${esc(O.judge.who)}</span></span></div><p class="on-mis">${esc(O.judge.mission)}</p></div>
   <span class="arrow" aria-hidden="true">→</span>${oNode(A,O.commander)}<span class="arrow" aria-hidden="true">→</span>${oNode(A,O.pm)}</div>
  <div style="display:flex;flex-direction:column;gap:6px"><span class="sub">研究線(每條一位 PM;包含但不限於,滑過看細節):</span><div class="lanes">${lanes}</div></div>
- <div class="cols">${grp.map(g=>`<div class="col"><div class="col-hd"><b>${esc(g)}</b><span>${esc(GROUPS[g]||'')}</span></div>${teams.filter(t=>t.group===g).map(t=>oNode(A,t)).join('')}</div>`).join('')}</div>`}
+ <div class="cols">${grp.map(g=>`<div class="col"><div class="col-hd"><b>${esc(g)}</b><span>${esc(GROUPS[g]||'')}</span></div>${teams.filter(t=>t.group===g).map(t=>oNode(A,t)).join('')}</div>`).join('')}</div>
+ ${oLoop(A)}`}
+function oLoop(A){const J=Object.values(A.journals||{}),nj=J.reduce((s,j)=>s+j.n,0),RT=A.retro||[],pend=(A.teach||[]).filter(t=>t.status==='pending'&&t.gate==='retro');
+ const nm=k=>(RT.filter(x=>x.kind===k&&x.status==='applied').length);
+ const box=(t,n,d)=>`<div class="oloop-b"><b>${t}</b><span class="num">${n}</span><span>${d}</span></div>`;
+ return `<div class="oloop"><div class="col-hd"><b>回饋迴圈:每輪結束後,怎麼讓下一輪更好更快</b><span>優化組主持檢討會,把這輪的教訓寫回四個地方;下一輪每個角色開工先讀</span></div>
+  <div class="oloop-row">${box('檢討會',RT.length+' 條提案','每輪收尾,讀全部事件與產出')}<span class="arrow" aria-hidden="true">→</span>
+   <div class="oloop-fan">${box('角色日誌',nj+' 條經驗','寫回各組,下次照做')}${box('籃子',nm('basket')+' 次調整','下一輪選題依據')}${box('共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('等你核可',pend.length+' 條','改方法論、組織、角色定義')}</div>
+   <span class="arrow" aria-hidden="true">→</span>${box('下一輪',' ','開工先讀日誌與共用程式')}</div>
+  ${pend.length?`<div style="display:flex;flex-direction:column;gap:6px"><b style="font-size:13px">等你核可的組織與方法論改動</b>${pend.map(t=>`<div class="oerr"><span class="pill t-disp">${esc(t.id)}</span><span>${esc(t.text)}</span><span class="meta">${esc(t.target)}${t.evidence?'・依據:'+esc(t.evidence):''}</span></div>`).join('')}<span class="sub">在 Claude 對話裡說「核可 T002」或「不要 T003」。核可後會比較改動前後幾輪的流程 KPI,變差就退回。</span></div>`:''}</div>`}
 function oIssues(A){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name;
  const keys=new Set([...O.handoffs.map(([u,d])=>u+'>'+d),...Object.keys(A.edges||{})]);
  const ed=[...keys].map(k=>[k,(A.edges||{})[k]||0]).sort((a,b)=>b[1]-a[1]);

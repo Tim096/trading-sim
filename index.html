@@ -1902,7 +1902,7 @@ async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB
 setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
- const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:hData,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
+ const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:hData,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_user_md||'# 我提出的計畫與想法\n\n(還沒有)')}</div></section><section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
  if(v==='lab'&&(curL==='org'||curL==='runs')){await Promise.all([loadLive(),loadInbox()]);if(v!==curV)return}
  const k=v==='lab'?curL:v;
  box.innerHTML=`<div class="hub">${v==='lab'?`<div class="hd"><div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁"></div><span class="sub">零件 ${H.parts.length}・報告 ${H.reports.length}・資料 ${esc(H.built.slice(5))} 更新</span></div>`:`<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>`}${views[k](H)}</div>`;

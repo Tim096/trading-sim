@@ -1500,7 +1500,7 @@ tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')rend
 // ---- research hub tabs(資料 data/hub.json 由 research-trunk 的 python research_lab/hub/publish_hub.py 發佈)----
 const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢溫度'],['trader','操盤手'],['strategies','策略看板'],['lab','研究所'],['ops','控制']];
 // 研究所:原本的零件庫/研究報告/因子工廠/計畫與籃子/方法論合併成子分頁,加上 Agent 組織與飛輪紀錄(research_lab/agency)
-const LT=[['org','Agent 組織'],['runs','飛輪紀錄'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['data','資料盤點'],['plan','計畫與籃子'],['method','方法論']];
+const LT=[['org','Agent 組織'],['runs','研究飛輪'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['data','資料盤點'],['plan','計畫與籃子'],['method','方法論']];
 let curL=(()=>{try{return localStorage.getItem('ltab')}catch(e){return null}})()||'org',LIVE=null,ORGSEL=null,LOOPSEL=null,INBOX=[];
 if(!LT.some(x=>x[0]===curL))curL='org';
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
@@ -1797,9 +1797,9 @@ function pendBtns(t){const d=decided(t.id);
  return d?`<span class="pill ${d==='approve'?'t-ok':''}">${d==='approve'?'你已核可,下一輪開工時套用':'你已決定不要'}</span>`:`<span class="obtns"><button type="button" class="btn pri" data-note="approve" data-ref="${esc(t.id)}">核可</button><button type="button" class="btn" data-note="reject" data-ref="${esc(t.id)}">不要</button></span>`}
 function oLoop(A){const J=A.journals||{},nj=Object.values(J).reduce((s,j)=>s+j.n,0),RT=A.retro||[],pend=(A.teach||[]).filter(t=>t.status==='pending');
  const box=(k,t,n,d)=>`<button type="button" class="oloop-b${LOOPSEL===k?' sel':''}" data-loop="${k}"><b>${t}</b><span class="num">${n}</span><span>${d}</span><span class="oloop-go">點開看 →</span></button>`;
- return `<div class="oloop"><div class="col-hd"><b>回饋迴圈:每輪結束後,怎麼讓下一輪更好更快</b><span>優化組主持檢討會,把這輪的教訓寫回四個地方;下一輪每個角色開工先讀。每一格都能點開看內容、給建議</span></div>
-  <div class="oloop-row">${box('retro','檢討會',RT.length+' 條提案','每輪收尾,讀全部事件與產出')}<span class="arrow" aria-hidden="true">→</span>
-   <div class="oloop-fan">${box('journal','角色日誌',nj+' 條經驗','寫回各組,下次照做')}${box('basket','籃子',RT.filter(x=>x.kind==='basket').length+' 次調整','下一輪選題依據')}${box('lib','共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('pending','等你核可',pend.filter(t=>!decided(t.id)).length+' 條','方法論、組織、角色定義的改動')}</div></div>
+ return `<div class="oloop"><div class="col-hd"><b>組織飛輪(通用):每輪結束後,讓下一輪的團隊做得更好更快</b><span>不管研究什麼題目都適用。優化組主持檢討會、寫優化報告,把跨題目的通則寫回角色日誌與共用程式;改方法論、組織、角色定義要你核可。零件、因子、籃子是各題目自己的研究飛輪,在「研究飛輪」分頁。每一格都能點開、給建議</span></div>
+  <div class="oloop-row">${box('retro','檢討會',(A.runs||[]).filter(r=>r.report_md).length+' 份優化報告','每輪收尾:效率、品質、提案')}<span class="arrow" aria-hidden="true">→</span>
+   <div class="oloop-fan">${box('journal','角色日誌',nj+' 條經驗','寫回各組,下次照做')}${box('lib','共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('kpi','流程 KPI',(A.runs||[]).filter(r=>r.kpi).length+' 輪','走勢圖;只當參考')}${box('pending','等你核可',pend.filter(t=>!decided(t.id)).length+' 條','方法論、組織、角色定義的改動')}</div></div>
   <div id="loopsel">${LOOPSEL?oLoopSel(A,LOOPSEL):''}</div></div>`}
 function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.retro||[];
  const lastRun=((A.runs||[]).find(r=>r.ended)||{}).run_id,isNew=x=>x&&x.indexOf(lastRun||'~')>=0;
@@ -1811,13 +1811,12 @@ function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.r
     ${j.recent.map(x=>`<div class="oerr">${isNew(x)?'<span class="pill t-info">新</span>':''}<span>${esc(x.replace(/^\S+ `[^`]*`\s*\S*:/,''))}</span><span class="meta">${esc((x.match(/^\S+/)||[''])[0])}</span></div>`).join('')}</div>`).join(''):'<p class="sub">還沒有經驗。</p>',
    ['loop:journal','想教某一組什麼?例:資料組下次要先查 2026-10-19 之後的缺檔'])}
  if(k==='retro'){const byRun={};RT.forEach(x=>(byRun[x.run]=byRun[x.run]||[]).push(x));
-  return wrap('檢討會','每輪收尾由優化組主持。已套用 = 直接寫進日誌或籃子;待核可 = 要你決定。',
-   Object.entries(byRun).map(([run,xs])=>`<div><b style="font-size:13px">${esc(((A.runs||[]).find(r=>r.run_id===run)||{goal:run}).goal)}</b>${xs.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(nm(x.target)):''}${x.evidence?'・依據:'+esc(x.evidence):''}</span></div>`).join('')}</div>`).join('')||'<p class="sub">還沒開過檢討會。</p>',
-   ['loop:retro','檢討會要多看什麼、少看什麼?'])}
- if(k==='basket'){const xs=RT.filter(x=>x.kind==='basket');
-  return wrap('籃子調整','檢討會對想法籃子的調整;完整籃子在「計畫與籃子」分頁。',
-   xs.length?xs.map(x=>`<div class="oerr"><span>${esc(x.text)}</span><span class="meta">${esc(x.run)}</span></div>`).join(''):'<p class="sub">還沒有檢討會調整過籃子(第一輪的籃子是在收成時直接改的)。</p>',
-   ['loop:basket','籃子要優先做什麼、不做什麼?'])}
+  const runs=(A.runs||[]).filter(r=>r.report_md||byRun[r.run_id]);
+  return wrap('檢討會與優化報告','每輪收尾由優化組主持,只談流程的效率與品質(研究結論可不可信歸紅隊)。已套用 = 寫進角色日誌或共用程式;待核可 = 要你決定。',
+   runs.map(r=>({run:r.run_id,xs:byRun[r.run_id]||[],r})).map(({run,xs,r})=>`<div style="display:flex;flex-direction:column;gap:6px"><b style="font-size:13px">${esc(r.goal)}</b>
+    ${r.report_md?`<details class="orep" open><summary><b>優化報告</b></summary><div class="md">${mdh(r.report_md)}</div>${sugBox('report:'+run,'對這份優化報告有什麼看法?')}</details>`:''}${xs.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(nm(x.target)):''}${x.evidence?'・依據:'+esc(x.evidence):''}</span></div>`).join('')}</div>`).join('')||'<p class="sub">還沒開過檢討會。</p>',
+   ['loop:retro','檢討會與優化報告要多看什麼、少看什麼?'])}
+ if(k==='kpi')return wrap('流程 KPI','組織飛輪的量尺:只量流程快不快、穩不穩,量不到研究價值,所以只當參考。',kpiBlock(A),['loop:kpi','想多量什麼、少量什麼?'])
  if(k==='lib')return wrap('共用程式','agent 寫程式前先查這份目錄,能 import 就不重寫;兩支以上 probe 寫過的同類程式,檢討會抽進 research_lab/lib/。',
    `<div class="md" style="max-height:420px;overflow:auto">${mdh(A.toolbox_md||'(還沒有目錄)')}</div>`,['loop:lib','缺什麼共用工具?例:統一的成本模型、資料缺檔檢查'])
  const pend=(A.teach||[]).filter(t=>t.status==='pending');
@@ -1864,12 +1863,8 @@ function hOrg(H){const A=H.agency;if(A)A.toolbox_md=H.toolbox_md||A.toolbox_md;
   <div id="ochart" style="display:flex;flex-direction:column;gap:18px">${oChart(A)}</div></section>
  <div id="orgsel">${ORGSEL?oSel(A,ORGSEL):''}</div>${oIssues(A)}`}
 const ADDL=[['parts','零件'],['reports','報告'],['ideas','點子'],['factors','因子卡'],['failures','失敗紀錄'],['basket_added','籃子新增'],['basket_removed','籃子移出']];
-function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
- const head=`<div class="hd"><h2 class="h2">飛輪紀錄</h2><span class="sub">每一輪研究結束後,新長出來的東西都記在這裡</span></div>`;
- if(!rs.length)return `<section class="card pad" style="display:flex;flex-direction:column;gap:10px">${head}<p class="lede">還沒有紀錄。說「燒 token」或「研究 X」開始第一輪。</p></section>`;
- const tot={};rs.forEach(r=>ADDL.forEach(([k])=>tot[k]=(tot[k]||0)+((r.counts||{})[k]||0)));
- const ST={running:['t-info','進行中'],waiting_user:['t-disp','等你裁決'],done:['t-ok','完成'],failed:['t-risk','失敗'],aborted:['','中止']};
- const RT=(H.agency.retro||[]),kr=rs.filter(r=>r.kpi).slice(0,12),f=v=>v==null?'—':v;
+function kpiBlock(A){
+ const rs=A.runs||[],kr=rs.filter(r=>r.kpi).slice(0,12),f=v=>v==null?'—':v;
  const KP=[['minutes','總時長(分)',-1],['to_first_number','到第一個數字(分)',-1],['rework','重做次數',-1],['fail_rate','失敗率',-1],['redteam_pass','紅隊通過率',1],['yield_per_task','每任務產出',1],['reuse','程式重用率',1],['lessons','新經驗(條)',1]];
  const kv=(r,k)=>k==='reuse'?((r.kpi.reuse||{}).rate??null):r.kpi[k];
  const spark=(k,lab,dir)=>{const pts=kr.slice().reverse().map(r=>({v:kv(r,k),g:r.goal})),vs=pts.map(p=>p.v).filter(v=>v!=null);
@@ -1883,8 +1878,14 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
  const trend=kr.length?`${chart}<details><summary><b style="font-size:13px">KPI 數字表</b></summary><div><span class="sub">・每輪的流程 KPI,新的在上面;時長、重做、失敗率越低越好,紅隊通過、產出、重用越高越好</span>
   <div class="tbl scroll"><table><thead><tr><th>輪</th><th class="num">總時長(分)</th><th class="num">到第一個數字</th><th class="num">重做</th><th class="num">失敗率</th><th class="num">紅隊通過</th><th class="num">每任務產出</th><th class="num">程式重用</th><th class="num">新經驗</th></tr></thead>
   <tbody>${kr.map(r=>{const k=r.kpi,u=k.reuse||{};return `<tr><td style="white-space:normal;min-width:12em">${esc(r.goal.slice(0,28))}</td><td class="num">${f(k.minutes)}</td><td class="num">${f(k.to_first_number)}</td><td class="num">${f(k.rework)}</td><td class="num">${f(k.fail_rate)}</td><td class="num">${f(k.redteam_pass)}</td><td class="num">${f(k.yield_per_task)}</td><td class="num">${u.py?u.reused+'/'+u.py:'—'}</td><td class="num">${f(k.lessons)}</td></tr>`}).join('')}</tbody></table></div></div></details>`:'';
+ return trend||'<p class="sub">跑完第一輪收尾後才有。</p>'}
+function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
+ const head=`<div class="hd"><h2 class="h2">研究飛輪</h2><span class="sub">個別題目的飛輪:每一輪長出的零件、報告、點子、因子、籃子。組織怎麼越做越好,在「Agent 組織 → 組織飛輪」</span></div>`;
+ if(!rs.length)return `<section class="card pad" style="display:flex;flex-direction:column;gap:10px">${head}<p class="lede">還沒有紀錄。說「燒 token」或「研究 X」開始第一輪。</p></section>`;
+ const tot={};rs.forEach(r=>ADDL.forEach(([k])=>tot[k]=(tot[k]||0)+((r.counts||{})[k]||0)));
+ const ST={running:['t-info','進行中'],waiting_user:['t-disp','等你裁決'],done:['t-ok','完成'],failed:['t-risk','失敗'],aborted:['','中止']};
  return `<section class="card pad" style="display:flex;flex-direction:column;gap:14px">${head}
- <div class="ochips">${ADDL.slice(0,4).map(([k,l])=>`<span class="stat ${tot[k]?'':'zero'}">${l}<b>+${tot[k]}</b></span>`).join('')}<span class="stat">共<b>${rs.length}</b>輪</span></div>${trend}
+ <div class="ochips">${ADDL.slice(0,4).map(([k,l])=>`<span class="stat ${tot[k]?'':'zero'}">${l}<b>+${tot[k]}</b></span>`).join('')}<span class="stat">共<b>${rs.length}</b>輪</span></div>
  ${rs.map(r=>{const c=r.counts||{},w=r.waste||{},a=r.added||{},s=ST[r.status]||['',r.status];
   return `<div class="runcard ${r.status==='waiting_user'?'waiting':''}"><div class="hd"><h3>${esc(r.goal)}</h3><span class="pill ${s[0]}">${s[1]}${r.gate?' '+esc(r.gate):''}</span></div>
   ${(()=>{const st=r.stages||(((LIVE&&LIVE.active)||[]).find(x=>x.run_id===r.run_id)||{}).stages;return st?steps(st,r.involvement):''})()}
@@ -1892,8 +1893,7 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
   <span class="meta">${esc(r.involvement)}・規模 ${esc(r.scale)}・${esc((r.started||'').slice(5,16))}${r.ended?' → '+esc(r.ended.slice(5,16)):''}・${esc(r.run_id)}</span>
   ${ADDL.some(([k])=>(a[k]||[]).length)?`<details><summary><b>新增清單</b></summary><div style="display:flex;flex-direction:column;gap:8px;padding-top:6px">${ADDL.filter(([k])=>(a[k]||[]).length).map(([k,l])=>`<div><b style="font-size:13px">${l}</b><ul style="margin:2px 0 0;padding-left:20px;font-size:13px">${a[k].map(x=>`<li class="meta" style="font-size:12.5px">${esc(x)}</li>`).join('')}</ul></div>`).join('')}
   ${w.blame&&Object.keys(w.blame).length?`<span class="sub">退件歸責:${Object.entries(w.blame).map(([k,v])=>`${esc(k)} ${v}`).join('・')}</span>`:''}</div></details>`:''}
-  ${r.report_md?`<details class="orep"><summary><b>優化報告</b><span class="sub">優化組寫:效率、品質、KPI 看不到的研究價值、待你決定</span></summary><div class="md">${mdh(r.report_md)}</div>${sugBox('report:'+r.run_id,'對這份優化報告有什麼看法?')}</details>`:''}
-  ${(()=>{const rp=RT.filter(x=>x.run===r.run_id);return rp.length?`<details><summary><b>檢討會</b><span class="sub">直接套用 ${rp.filter(x=>x.status==='applied').length}・等你核可 ${rp.filter(x=>x.status!=='applied').length}</span></summary><div style="display:flex;flex-direction:column;gap:6px;padding-top:6px">${rp.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(x.target):''}${x.teach_id?'・'+esc(x.teach_id):''}</span></div>`).join('')}</div></details>`:''})()}</div>`}).join('')}</section>`}
+  ${r.report_md||(H.agency.retro||[]).some(x=>x.run===r.run_id)?`<span class="sub">這輪的優化報告與檢討屬於組織飛輪:Agent 組織 → 組織飛輪 → 檢討會</span>`:''}</div>`}).join('')}</section>`}
 async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
  const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();
  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#ochart'))return;c.innerHTML=oChart(HUB.agency)}

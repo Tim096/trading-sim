@@ -1797,8 +1797,8 @@ function pendBtns(t){const d=decided(t.id);
  return d?`<span class="pill ${d==='approve'?'t-ok':''}">${d==='approve'?'你已核可,下一輪開工時套用':'你已決定不要'}</span>`:`<span class="obtns"><button type="button" class="btn pri" data-note="approve" data-ref="${esc(t.id)}">核可</button><button type="button" class="btn" data-note="reject" data-ref="${esc(t.id)}">不要</button></span>`}
 function oLoop(A){const J=A.journals||{},nj=Object.values(J).reduce((s,j)=>s+j.n,0),RT=A.retro||[],pend=(A.teach||[]).filter(t=>t.status==='pending');
  const box=(k,t,n,d)=>`<button type="button" class="oloop-b${LOOPSEL===k?' sel':''}" data-loop="${k}"><b>${t}</b><span class="num">${n}</span><span>${d}</span><span class="oloop-go">點開看 →</span></button>`;
- return `<div class="oloop"><div class="col-hd"><b>組織飛輪(通用):每輪結束後,讓下一輪的團隊做得更好更快</b><span>不管研究什麼題目都適用。優化組主持檢討會、寫優化報告,把跨題目的通則寫回角色日誌與共用程式;改方法論、組織、角色定義要你核可。零件、因子、籃子是各題目自己的研究飛輪,在「研究飛輪」分頁。每一格都能點開、給建議</span></div>
-  <div class="oloop-row">${box('retro','檢討會',(A.runs||[]).filter(r=>r.report_md).length+' 份優化報告','每輪收尾:效率、品質、提案')}<span class="arrow" aria-hidden="true">→</span>
+ return `<div class="oloop"><div class="col-hd"><b>組織飛輪(通用):每輪結束後,讓下一輪的團隊做得更好更快</b><span>不管研究什麼題目都適用。收尾由看得到全貌的優化組檢討結果、架構、各組流程:結果與研究面目標回到研究飛輪(籃子),組織問題與流程面目標寫回這裡(角色日誌、共用程式、等你核可)。零件、因子、籃子在「研究飛輪」分頁。每一格都能點開、給建議</span></div>
+  <div class="oloop-row">${box('retro','收尾檢討',(A.runs||[]).filter(r=>r.report_md).length+' 份優化報告','優化組看全貌:結果、架構、各組流程')}<span class="arrow" aria-hidden="true">→</span>
    <div class="oloop-fan">${box('journal','角色日誌',nj+' 條經驗','寫回各組,下次照做')}${box('lib','共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('kpi','流程 KPI',(A.runs||[]).filter(r=>r.kpi).length+' 輪','走勢圖;只當參考')}${box('pending','等你核可',pend.filter(t=>!decided(t.id)).length+' 條','方法論、組織、角色定義的改動')}</div></div>
   <div id="loopsel">${LOOPSEL?oLoopSel(A,LOOPSEL):''}</div></div>`}
 function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.retro||[];
@@ -1812,7 +1812,7 @@ function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.r
    ['loop:journal','想教某一組什麼?例:資料組下次要先查 2026-10-19 之後的缺檔'])}
  if(k==='retro'){const byRun={};RT.forEach(x=>(byRun[x.run]=byRun[x.run]||[]).push(x));
   const runs=(A.runs||[]).filter(r=>r.report_md||byRun[r.run_id]);
-  return wrap('檢討會與優化報告','每輪收尾由優化組主持,只談流程的效率與品質(研究結論可不可信歸紅隊)。已套用 = 寫進角色日誌或共用程式;待核可 = 要你決定。',
+  return wrap('收尾檢討與優化報告','優化組看得到全貌,一次檢討三件事:結果、整個架構、每一組的流程。報告三節:1 結果、2 可最佳化的目標(研究面 / 流程面)、3 組織現在的問題。結論可不可信歸紅隊。已套用 = 籃子、角色日誌、共用程式;待核可 = 要你決定。',
    runs.map(r=>({run:r.run_id,xs:byRun[r.run_id]||[],r})).map(({run,xs,r})=>`<div style="display:flex;flex-direction:column;gap:6px"><b style="font-size:13px">${esc(r.goal)}</b>
     ${r.report_md?`<details class="orep" open><summary><b>優化報告</b></summary><div class="md">${mdh(r.report_md)}</div>${sugBox('report:'+run,'對這份優化報告有什麼看法?')}</details>`:''}${xs.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(nm(x.target)):''}${x.evidence?'・依據:'+esc(x.evidence):''}</span></div>`).join('')}</div>`).join('')||'<p class="sub">還沒開過檢討會。</p>',
    ['loop:retro','檢討會與優化報告要多看什麼、少看什麼?'])}
@@ -1893,7 +1893,8 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
   <span class="meta">${esc(r.involvement)}・規模 ${esc(r.scale)}・${esc((r.started||'').slice(5,16))}${r.ended?' → '+esc(r.ended.slice(5,16)):''}・${esc(r.run_id)}</span>
   ${ADDL.some(([k])=>(a[k]||[]).length)?`<details><summary><b>新增清單</b></summary><div style="display:flex;flex-direction:column;gap:8px;padding-top:6px">${ADDL.filter(([k])=>(a[k]||[]).length).map(([k,l])=>`<div><b style="font-size:13px">${l}</b><ul style="margin:2px 0 0;padding-left:20px;font-size:13px">${a[k].map(x=>`<li class="meta" style="font-size:12.5px">${esc(x)}</li>`).join('')}</ul></div>`).join('')}
   ${w.blame&&Object.keys(w.blame).length?`<span class="sub">退件歸責:${Object.entries(w.blame).map(([k,v])=>`${esc(k)} ${v}`).join('・')}</span>`:''}</div></details>`:''}
-  ${r.report_md||(H.agency.retro||[]).some(x=>x.run===r.run_id)?`<span class="sub">這輪的優化報告與檢討屬於組織飛輪:Agent 組織 → 組織飛輪 → 檢討會</span>`:''}</div>`}).join('')}</section>`}
+  ${r.report_research_md?`<details class="orep" open><summary><b>這輪的結果與下一步</b><span class="sub">優化組收尾檢討・研究結論可信度看紅隊</span></summary><div class="md">${mdh(r.report_research_md)}</div></details>`:''}
+  ${r.report_md?`<span class="sub">完整優化報告(含架構與各組流程的問題)在:Agent 組織 → 組織飛輪 → 檢討會</span>`:''}</div>`}).join('')}</section>`}
 async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
  const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();
  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#ochart'))return;c.innerHTML=oChart(HUB.agency)}

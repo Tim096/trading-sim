@@ -1457,7 +1457,7 @@ tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')rend
 // ---- research hub tabs(資料 data/hub.json 由 research-trunk 的 python research_lab/hub/publish_hub.py 發佈)----
 const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢溫度'],['trader','操盤手'],['strategies','策略看板'],['lab','研究所'],['ops','控制']];
 // 研究所:原本的零件庫/研究報告/因子工廠/計畫與籃子/方法論合併成子分頁,加上 Agent 組織與飛輪紀錄(research_lab/agency)
-const LT=[['org','Agent 組織'],['runs','飛輪紀錄'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['plan','計畫與籃子'],['method','方法論']];
+const LT=[['org','Agent 組織'],['runs','飛輪紀錄'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['data','資料盤點'],['plan','計畫與籃子'],['method','方法論']];
 let curL=(()=>{try{return localStorage.getItem('ltab')}catch(e){return null}})()||'org',LIVE=null,ORGSEL=null;
 if(!LT.some(x=>x[0]===curL))curL='org';
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
@@ -1765,7 +1765,7 @@ async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB
 setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
- const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
+ const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:H=>`<section class="card pad"><div class="md">${H.data_md?mdh(H.data_md):'還沒有資料盤點(research_lab/data/INVENTORY.md)。'}</div></section>`,plan:H=>`<section class="card pad"><div class="md">${mdh(H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
  if(v==='lab'&&(curL==='org'||curL==='runs')){await loadLive();if(v!==curV)return}
  const k=v==='lab'?curL:v;
  box.innerHTML=`<div class="hub">${v==='lab'?`<div class="hd"><div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁"></div><span class="sub">零件 ${H.parts.length}・報告 ${H.reports.length}・資料 ${esc(H.built.slice(5))} 更新</span></div>`:`<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>`}${views[k](H)}</div>`;

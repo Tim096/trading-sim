@@ -1690,10 +1690,10 @@ $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[
   renderOps(m)}catch(err){renderOps('❌ '+err.message)}});
 
 // ---- 盤勢溫度(data/thermo.json 由 research-trunk 的 research_lab/probes/2026-11-03_cycle_turns/export_thermo.py 發佈)----
-// 溫度 = 8 個指標相對該尺度近期歷史的熱向分位平均(VIX 反向);趨勢 = 當時可知的方向判斷(短 A / 中 D / 長 B)
+// 溫度 = 8 個指標相對該尺度近期歷史的熱向分位平均(台指 VIX 反向;2021-07 前以美 VIX 接);趨勢 = 當時可知的方向判斷(短 A / 中 D / 長 B)
 let TH=null,THR=null,THk='2025',THhov=null,THdrag=null;
 const THN=['酷寒','冰','溫','熱','滾'],THB=[20,35,65,80],THSC=[['short','短線','約 3 週'],['medium','中線','約 3 個月'],['long','長線','約 3 年']];
-const THK={return:'漲跌',gap:'乖離',breadth:'廣度',drawdown:'回撤',margin_change:'融資變化',maintenance:'維持率',volume:'量能',vix:'VIX(反向)'};
+const THK={return:'漲跌',gap:'乖離',breadth:'廣度',drawdown:'回撤',margin_change:'融資變化',maintenance:'維持率',volume:'量能',vix:'台指VIX(反向)'};
 const THRG=[['1y','近 1 年'],['2025','2025 起'],['3y','近 3 年'],['10y','近 10 年'],['all','全部'],['2008','2007–09'],['2020','2019–22']];
 const thLight=()=>document.documentElement.dataset.theme==='light';
 const thCol=()=>thLight()?['#2f5597','#9dc3e6','#e3ded4','#f2a65a','#d9534f']:['#3b6fd4','#86b6e8','#3a424d','#e8924a','#e0544c'];
@@ -1748,7 +1748,7 @@ function thInfo(i){const C=thCol(),T=thTxt(),last=i===TH.dates.length-1;
  $('#th_cards').innerHTML=`<div class="th-date"><span class="sub">${last?'最新交易日':'滑鼠所在日'}</span><b class="num">${TH.dates[i]}</b><span class="sub">加權指數 <b class="num" style="font-size:14px;color:var(--ink)">${Math.round(TH.close[i]).toLocaleString()}</b></span></div>`+
   THSC.map(([s,lab,sub])=>{const S=TH.scales[s],t=S.t[i],k=thLv(t),tr=S.tr[i];
    return `<div class="th-card"><div class="sub">${lab}(${sub})</div><div class="th-row"><span class="th-pill" style="background:${k==null?'var(--btn)':C[k]};color:${k==null?'var(--mute)':T[k]}">${k==null?'暖機中':THN[k]}</span><b class="num">${t??'—'}</b><span class="sub">分</span><span class="${tr>0?'up':tr<0?'dn':'mute'}" style="margin-left:auto;font-weight:700">${tr>0?'趨勢向上 ▲':tr<0?'趨勢向下 ▼':'—'}</span></div></div>`}).join('');
- $('#th_det').innerHTML=`<div class="between sub" style="margin:16px 0 8px"><span>各指標讀數:相對該尺度歷史的分位,越右越熱(VIX 已反向)</span><span class="num">融資維持率 ${TH.raw.maintenance[i]==null?'—':TH.raw.maintenance[i]+'%'}・VIX ${TH.raw.vix[i]??'—'}</span></div><div class="th-det">`+
+ $('#th_det').innerHTML=`<div class="between sub" style="margin:16px 0 8px"><span>各指標讀數:相對該尺度歷史的分位,越右越熱(台指 VIX 已反向)</span><span class="num">融資維持率 ${TH.raw.maintenance[i]==null?'—':TH.raw.maintenance[i]+'%'}・VIX ${TH.raw.vix[i]??'—'}</span></div><div class="th-det">`+
   THSC.map(([s,lab])=>{const P=TH.scales[s].p;return `<div><div class="h2" style="font-size:13px;margin-bottom:6px">${lab}</div>`+TH.keys.map(k=>{const v=P[k][i],lv=thLv(v);
    return `<div class="th-ind"><span class="sub">${THK[k]}</span><span class="th-bar">${v==null?'':`<i style="width:${Math.max(3,v)}%;background:${lv===2?'var(--mute2)':C[lv]}"></i>`}</span><b class="num" style="text-align:right">${v??'—'}</b></div>`}).join('')+'</div>'}).join('')+'</div>'}
 addEventListener('resize',()=>{if(curV==='cycle'&&TH&&$('#th_cv'))thDraw()});

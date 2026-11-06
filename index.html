@@ -1347,7 +1347,7 @@ function integ(){
  // allocation
  seg($('#ig_seg'),Object.entries(SCH()).map(([k,v])=>[k,v.label.split(':').pop()]),igScheme,k=>{igScheme=k;try{localStorage.setItem('ig_scheme_v5',k)}catch(_){}integ();render()});
  if(!SCH()[igScheme])igScheme='all';
- const s=SCH()[igScheme],T=+$('#c_total').value||0,{amt}=igAlloc(s,T),old=SCH().old;IGAMT=amt;$('#ig_cur').textContent=s.label+(HEDGE()?'・L4 避險':'');
+ const s=SCH()[igScheme],T=+$('#c_total').value||0,{amt}=igAlloc(s,T),old=SCH().old;IGAMT=amt;$('#ig_cur').textContent=s.label+(HEDGE()?'・L4 避險':'')+(s.note?'・'+s.note:'');
  $('#ig_kpi').innerHTML=[['方案 Sharpe',s.sharpe.toFixed(2),`現況 ${old.sharpe.toFixed(2)}`],['年化報酬',pct(s.cagr,0),`現況 ${pct(old.cagr,0)}`],['最大回撤',pct(s.mdd,1),`現況 ${pct(old.mdd,1)}`],['最差一年 Sharpe',Math.min(...Object.values(s.years)).toFixed(2),Object.entries(s.years).map(([y,v])=>y.slice(2)+':'+v.toFixed(1)).join(' ')]]
   .map(([l,v,n])=>`<div class="card kpi" style="--kc:var(--c-all)"><div class="sub">${l}</div><div class="v num">${v}</div><div class="sub num">${n}</div></div>`).join('');
  $('#ig_tbl tbody').innerHTML=Object.keys(s.weights).map(k=>{const st=IG.strategies[k];

@@ -337,7 +337,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .stg-nav{display:flex;flex-wrap:wrap;gap:6px}.stg-nav a{font-size:12px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--panel)}
 .stg-nav a:hover{border-color:var(--mute2)}.stg-nav a b{font-family:'JetBrains Mono',monospace;margin-left:4px;color:var(--ink)}
 .stg{scroll-margin-top:76px}
-.scard{gap:10px}.scard.s-live{box-shadow:inset 0 3px 0 var(--ok)}.scard.s-paper{box-shadow:inset 0 3px 0 var(--acc)}
+.scard{gap:10px}.scard.s-live,.scard.s-done{box-shadow:inset 0 3px 0 var(--ok)}.scard.s-paper{box-shadow:inset 0 3px 0 var(--acc)}
 .scard .nm{font-size:15px;font-weight:700;color:var(--ink);line-height:1.4}
 .scard .sm{font-size:13px;color:var(--ink2);line-height:1.65;margin:0}
 .sc-kpi{display:flex;flex-direction:column;gap:6px;padding:9px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)}
@@ -1555,7 +1555,7 @@ let curL=(()=>{try{return localStorage.getItem('ltab')}catch(e){return null}})()
 if(!LT.some(x=>x[0]===curL))curL='org';
 let curP='user';
 const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],confirmed:['t-ok','✅ 確認'],refuted:['t-risk','❌ 新樣本不成立']};
-const STG=[['live','實盤','t-ok'],['paper','監看中','t-info'],['candidate','研究候選','t-disp'],['paused','停用 / 暫停',''],['archived','封存','']];
+const STG=[['done','研究完成版本','t-ok'],['wip','研究中','t-disp']];
 const PF={q:'',status:'all',neg:false};
 let HUB=null,curV='monitor';
 const mdh=s=>window.marked?marked.parse(s||''):'<pre>'+esc(s)+'</pre>';
@@ -1567,7 +1567,7 @@ function hStrat(H){
  const st=s=>{const x=S[s.integration];if(!x)return '';
   const yrs=Object.entries(x.years||{}).map(([y,v])=>`<span class="yr">${y.slice(2)}<b class="${cls(v)}">${v.toFixed(1)}</b></span>`).join('');
   return `<div class="bt">Sharpe ${x.sharpe.toFixed(2)}・年化 ${pct(x.cagr,0)}・MDD ${pct(x.mdd,0)}</div><div class="yrs"><span class="sub">逐年 Sharpe</span>${yrs}</div><span class="sub num">${esc((I.window||[]).join(' ~ '))}</span>`};
- const SD={live:'真錢在跑',paper:'每天紙上跟著算,還沒下實單',candidate:'回測有訊號,還沒上線',paused:'先停下來',archived:'結案留檔'};
+ const SD={done:'剃刀版已定、樣本外驗過,剩實單校準',wip:'還在驗,數字可能再變'};
  const groups=STG.map(g=>[...g,H.strategies.filter(s=>s.stage===g[0])]).filter(g=>g[3].length);
  return `<nav class="stg-nav" aria-label="策略階段">${groups.map(([k,l,c,xs])=>`<a href="#stg-${k}">${l}<b>${xs.length}</b></a>`).join('')}</nav>`+groups.map(([k,l,c,xs])=>
   `<section class="card pad stg" id="stg-${k}" style="display:flex;flex-direction:column;gap:14px"><div class="stg-h"><span class="pill ${c}">${l}</span><span class="sub">${xs.length} 個・${SD[k]||''}</span></div>

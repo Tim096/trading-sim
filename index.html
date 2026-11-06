@@ -1812,8 +1812,24 @@ async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now
    <section class="card pad" style="flex:1 1 320px;display:flex;flex-direction:column;gap:6px"><h2 class="h2">帳本修正</h2>${fixes}</section></div>
   <section class="card pad" style="display:flex;flex-direction:column;gap:8px"><h2 class="h2">計畫與紀錄</h2>${plans}
    ${TR.journal?`<details data-tk="tr-journal"><summary>journal</summary><div class="md">${mdh(TR.journal)}</div></details>`:''}
-   ${TR.lessons?`<details data-tk="tr-lessons"><summary>給操盤手的提醒(lessons)</summary><div class="md">${mdh(TR.lessons)}</div></details>`:''}</section></div>`)}
+   ${TR.lessons?`<details data-tk="tr-lessons"><summary>給操盤手的提醒(lessons)</summary><div class="md">${mdh(TR.lessons)}</div></details>`:''}</section></div>`);renderCapOpts()}
 
+// 操盤手分頁底部:資金方案目標(sharpe / cagr / 11-06 原參數)與 v4.1 參數組;寫 config(serve.py /api/objective)
+async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_options?'+Date.now());O=await r.json()}catch(e){return}
+ if(curV!=='trader'||!O||O.error)return;const hub=document.querySelector('#v-hub .hub');if(!hub)return;
+ let sec=document.getElementById('tr-capopts');if(!sec){sec=document.createElement('section');sec.id='tr-capopts';sec.className='card pad tr-sec';hub.appendChild(sec)}
+ const p=x=>(x*100).toFixed(0)+'%',cards=Object.entries(O.options).map(([k,v])=>{const on=k===O.objective,P=v.params;
+  return `<div class="scard${on?' s-live':''}"><span class="nm">${esc(v.label)}${on?' <span class="pill t-ok" style="font-size:11px">使用中</span>':''}</span>
+   <p class="sm">L1 名目 ${P.l1_notional_x}×・v4.1 ×${(P.sleeve_mult||{}).V41??1}・${(P.drop||[]).length?'拿掉 '+P.drop.join('、'):'全部策略'}・${P.invvol_lookback} 日反波動、${P.rebalance_days} 日換</p>
+   <div class="sc-kpi"><span class="m">本機重算 ${esc(v.local.window[0].slice(0,7))} 起:年化 ${p(v.local.cagr)}・Sharpe ${v.local.sharpe.toFixed(2)}・MDD ${p(v.local.mdd)}</span><span class="bt">研究所 WF:${esc(v.research)}</span></div>
+   ${on?'':`<button type="button" class="btn" data-obj="${k}">改用這個</button>`}</div>`}).join('');
+ sec.innerHTML=`<div class="stg-h"><h2 class="h2">資金方案目標</h2><span class="sub">總資金 ${O.total?Math.round(O.total/1e4).toLocaleString()+' 萬':'0(測試期)'}・換了會重算各策略資本額,隔天早盤生效</span></div>
+  ${msg?`<div class="flash ${msg.startsWith('❌')?'err':'ok'}" role="status">${esc(msg)}</div>`:''}
+  <div class="scards">${cards}</div>
+  <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">v4.1 參數組</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${v==='original'?'原策略':'研究剃刀版'}</button>`).join('')}</div>
+  <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
+ sec.onclick=async e=>{const b=e.target.closest('button[data-obj],button[data-v41]');if(!b)return;
+  try{const j=await opPost('api/objective',{objective:b.dataset.obj||O.objective,v41_preset:b.dataset.v41||O.v41_preset});renderCapOpts(`已改成 ${O.options[j.objective].label}・v4.1 ${j.v41_preset==='original'?'原策略':'研究剃刀版'}`)}catch(err){renderCapOpts('❌ '+err.message)}}}
 // ---- 控制(臨時休市 / 紙上監看開關 / 重開機):serve.py /api/*,只有本機與 tailnet 進得來 ----
 async function opPost(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});
  const j=await r.json().catch(()=>({error:'HTTP '+r.status}));if(!r.ok||j.error)throw new Error(j.error||('HTTP '+r.status));return j}

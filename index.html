@@ -1815,6 +1815,7 @@ async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now
    ${TR.lessons?`<details data-tk="tr-lessons"><summary>給操盤手的提醒(lessons)</summary><div class="md">${mdh(TR.lessons)}</div></details>`:''}</section></div>`);renderCapOpts()}
 
 // 操盤手分頁底部:資金方案目標(sharpe / cagr / 11-06 原參數)與 v4.1 參數組;寫 config(serve.py /api/objective)
+let CAPT=null,CAPIN=null;   // 操盤手分頁的總資金預覽 / 正在輸入的數字(30 秒重畫不洗掉)
 async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_options?'+Date.now());O=await r.json()}catch(e){return}
  if(curV!=='trader'||!O||O.error)return;const hub=document.querySelector('#v-hub .hub');if(!hub)return;
  let sec=document.getElementById('tr-capopts');if(!sec){sec=document.createElement('section');sec.id='tr-capopts';sec.className='card pad tr-sec';hub.appendChild(sec)}
@@ -1825,10 +1826,17 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
    ${on?'':`<button type="button" class="btn" data-obj="${k}">改用這個</button>`}</div>`}).join('');
  sec.innerHTML=`<div class="stg-h"><h2 class="h2">資金方案目標</h2><span class="sub">總資金 ${O.total?Math.round(O.total/1e4).toLocaleString()+' 萬':'0(測試期)'}・換了會重算各策略資本額,隔天早盤生效</span></div>
   ${msg?`<div class="flash ${msg.startsWith('❌')?'err':'ok'}" role="status">${esc(msg)}</div>`:''}
+  <div class="sc-kpi"><span class="m"><b>總資金</b>(你打算投入股票 + 期貨的錢;0 = 測試期,各策略 1 元)</span>
+   <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="tr_cap_in" class="num" type="number" min="0" step="1000000" placeholder="例 10000000" value="${CAPIN??(O.total||'')}" oninput="CAPIN=this.value" aria-label="總資金(元)" style="width:160px"><span class="sub">元</span>
+    <button type="button" class="btn" data-cap="0">預覽分配</button>${CAPT?`<button type="button" class="btn pri" data-cap="1">確認寫入 ${Math.round(CAPT.total/1e4).toLocaleString()} 萬</button>`:''}</div>
+   ${CAPT?`<div style="white-space:pre-wrap;font-size:12.5px;color:var(--ink2);line-height:1.65">${esc(CAPT.text)}</div>`:''}
+   <span class="bt">確認後寫進 config 各策略資本額,隔天早盤生效;每天期貨跑完 TG 兩個帳戶該匯多少(也在「控制」分頁)。TG 也可以打 /capital 1000萬。</span></div>
   <div class="scards">${cards}</div>
   <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">v4.1 參數組</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${v==='original'?'原策略':'研究剃刀版'}</button>`).join('')}</div>
   <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
- sec.onclick=async e=>{const b=e.target.closest('button[data-obj],button[data-v41]');if(!b)return;
+ sec.onclick=async e=>{const c=e.target.closest('button[data-cap]');
+  if(c){try{const go=c.dataset.cap==='1'&&CAPT,t=+(($('#tr_cap_in')||{}).value||0),j=await opPost('api/capital',{total:go?CAPT.total:t,confirm:!!go});CAPT=go?null:j;if(go)CAPIN=null;renderCapOpts(go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入')}catch(err){renderCapOpts('❌ '+err.message)}return}
+  const b=e.target.closest('button[data-obj],button[data-v41]');if(!b)return;
   try{const j=await opPost('api/objective',{objective:b.dataset.obj||O.objective,v41_preset:b.dataset.v41||O.v41_preset});renderCapOpts(`已改成 ${O.options[j.objective].label}・v4.1 ${j.v41_preset==='original'?'原策略':'研究剃刀版'}`)}catch(err){renderCapOpts('❌ '+err.message)}}}
 // ---- 控制(臨時休市 / 紙上監看開關 / 重開機):serve.py /api/*,只有本機與 tailnet 進得來 ----
 async function opPost(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});

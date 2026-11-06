@@ -350,9 +350,57 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .sc-more{font:inherit;font-size:11.5px;color:var(--acc);background:none;border:0;padding:2px 0 0;cursor:pointer}
 .scard .path{margin-top:auto;padding-top:8px;border-top:1px dashed var(--line)}
 /* 操盤手分頁 */
-.tr-sum{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-end}
-.tr-sum .tkv{display:flex;flex-direction:column;gap:2px}.tr-sum .tkv span{font-size:11.5px;color:var(--mute)}
-.tr-sum .tkv b{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--ink);font-weight:600}
+.tr-hero{display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 3px 0 var(--line)}
+.tr-hero.g-good{box-shadow:inset 0 3px 0 var(--ok)}.tr-hero.g-ok{box-shadow:inset 0 3px 0 var(--acc)}.tr-hero.g-bad{box-shadow:inset 0 3px 0 var(--bad)}.tr-hero.g-live{box-shadow:inset 0 3px 0 var(--now)}
+.tr-meta{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:12px;color:var(--mute)}
+.tr-meta b{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--ink2)}
+.tr-meta .tr-upd{margin-left:auto}
+.tr-head{margin:0;font-size:20px;font-weight:700;line-height:1.45;color:var(--ink)}
+.tr-note{margin:0;font-size:12.5px;color:var(--mute);line-height:1.6}
+.tr-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tr-kpi{gap:2px}
+.tr-kpi .l{font-size:11.5px;color:var(--mute)}
+.tr-kpi .v{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600;color:var(--ink);line-height:1.35;font-variant-numeric:tabular-nums}
+.tr-kpi .n{font-size:12px;color:var(--ink3);line-height:1.5}
+.tr-sec{display:flex;flex-direction:column;gap:12px}
+.tr-sec .stg-h .tr-leg{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px}
+.tk-fix{--k:var(--acc)}.tk-anomaly{--k:var(--warn)}.tk-exec{--k:var(--c-l4)}.tk-lead{--k:var(--c-l1)}
+.tr-tag{background:color-mix(in srgb,var(--k) 16%,transparent);color:var(--k)}
+.scard.tr-k{box-shadow:inset 0 3px 0 var(--k)}
+.tr-pts{margin:0;padding-left:1.1em;font-size:12.5px;color:var(--ink3);line-height:1.7}
+.tr-pts li::marker{color:var(--mute2)}
+.tr-cap{margin:0;font-size:12px;color:var(--mute);line-height:1.6}
+.tr-dbody{display:flex;flex-direction:column;gap:10px;padding:2px 0 14px;min-width:0}
+.tr-bys{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.tr-by .k,.tr-lead .k{font-size:13px;font-weight:600;color:var(--ink)}
+.tr-lead{gap:3px}.tr-lead div{font-size:12.5px;color:var(--ink2);line-height:1.6}.tr-lead div span{color:var(--mute)}
+.tr-strip{position:relative;display:grid;grid-template-columns:repeat(var(--n,16),minmax(0,1fr));padding-top:4px}
+.tr-strip::before{content:"";position:absolute;left:0;right:0;top:11px;height:2px;background:var(--line2)}
+.tr-slot{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.tr-slot i{display:block;width:10px;height:10px;margin-top:3px;border-radius:50%;background:color-mix(in srgb,var(--ok) 55%,var(--panel))}
+.tr-slot.hit i,.tr-slot.fail i{width:16px;height:16px;margin-top:0;background:var(--k);box-shadow:0 0 0 3px color-mix(in srgb,var(--k) 22%,transparent)}
+.tr-slot.fail{--k:var(--bad)}
+.tr-slot.run i{background:var(--now);animation:pulse 1.8s cubic-bezier(.22,1,.36,1) infinite}
+.tr-slot.none i{background:var(--panel);border:1.5px dashed var(--mute2)}
+.tr-slot.wait i{background:var(--panel);border:1.5px solid var(--btn)}
+.tr-slot>span{font-family:'JetBrains Mono',monospace;font-size:10.5px;line-height:1;color:var(--mute2);white-space:nowrap}
+.tr-pl{display:flex;flex-direction:column}
+.tr-pr{display:grid;grid-template-columns:3.4em minmax(0,1fr);gap:4px 10px;padding:10px 0 10px 10px;border-top:1px solid var(--line2)}
+.tr-pr.hit,.tr-pr.fail,.tr-pr.run{box-shadow:inset 2px 0 0 var(--k)}
+.tr-pr.fail{--k:var(--bad)}.tr-pr.run{--k:var(--now)}
+.tr-pr>.t{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--ink);line-height:1.55}
+.tr-pr>.b{display:flex;flex-direction:column;gap:6px;min-width:0}
+.tr-pr .ps{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;font-size:13.5px;line-height:1.55;color:var(--ink)}
+.tr-fd{display:flex;gap:8px;align-items:baseline;font-size:12.5px;line-height:1.6;color:var(--ink2)}
+.tr-fx{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;padding:6px 10px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2);font-size:12px;line-height:1.6;color:var(--ink3)}
+.tr-qt{padding:8px 0 8px 10px;border-top:1px solid var(--line2);font-size:12.5px;color:var(--mute)}
+.tr-qt .num{color:var(--ink3);margin-right:8px}.tr-pl>details>summary .num{color:var(--ink3)}
+.tr-pl>:first-child,.hub .tr-pl>details:first-child{border-top:0}
+.hub .tr-pl>details{border:0;border-top:1px solid var(--line2)}
+.tr-pl>details>summary{padding:8px 2px 8px 10px;font-size:12.5px;color:var(--mute)}
+.tr-qs{display:flex;flex-direction:column;gap:2px;padding:0 0 8px 28px;font-size:12.5px;color:var(--ink3)}
+.tr-qs .num{color:var(--mute);margin-right:6px}
+tr.tr-cx>td{color:var(--mute)}
 .mtg{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 .mtg .card{display:flex;flex-direction:column;gap:8px;border-top:3px solid var(--line)}
 .mtg .card.ok{border-top-color:var(--ok)}.mtg .card.warn{border-top-color:var(--warn)}.mtg .card.bad{border-top-color:var(--bad)}.mtg .card.info{border-top-color:var(--acc)}
@@ -360,6 +408,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .mtg .card.idle .h2{color:var(--mute)}
 .mtg .tg{white-space:pre-wrap;font-size:13px;line-height:1.65;color:var(--ink2)}
 .mtg .rv{font-size:12px;color:var(--warn);line-height:1.6;border-left:2px solid var(--warn);padding-left:8px}
+@media (max-width:760px){.tr-head{font-size:18px}.tr-meta .tr-upd{margin-left:0;width:100%}}
 .hub summary::before{content:'▸';color:var(--mute2);font-size:11px;transition:transform .15s;display:inline-block}
 .hub details[open]>summary::before{transform:rotate(90deg)}
 .ptree summary::before{content:none}
@@ -1614,12 +1663,27 @@ const TZH={am:'早盤',open:'盤中檢查',pre_close:'收盤前',post:'盤後檢
  MSZH={awaiting:'等你核准',reported:'已回報',review_failed:'審查沒過',agent_failed:'沒寫完',brief_failed:'資料失敗',blocked:'已擋下'},
  STZH={rgmc:'RGMC',disposition_combined:'處置股',l1:'L1',l4:'L4',manual:'手動'};
 let TR=null;
+
+// ── 操盤手分頁(data/trader_<日>.json,由 core/trader_api.export_day 寫)──
+// 由上到下:今天一句話 + 數字卡 → 每日檢討 → 盤中巡檢時間軸 → 四場會 → 今天的實單 → 帳本 → 計畫與紀錄
 async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10));
  try{const r=await fetch(`data/trader_${d}.json?`+Date.now());TR=r.ok?await r.json():null}catch(e){TR=null}
  if(curV!=='trader')return;
- if(!TR){box.innerHTML=`<div class="hub"><section class="card pad"><h2 class="h2">操盤手</h2><p class="sub">${esc(d)} 還沒有開會紀錄。</p></section></div>`;return}
- const M=TR.meetings||{},pill=(t,c)=>`<span class="pill ${c||''}" style="font-size:11px">${esc(t)}</span>`;
+ // 每 30 秒重畫:記住使用者打開的 details,重畫後再打開
+ const keep=new Set([...box.querySelectorAll('details[data-tk][open]')].map(x=>x.dataset.tk));
+ const paint=h=>{box.innerHTML=h;box.querySelectorAll('details[data-tk]').forEach(x=>{if(keep.has(x.dataset.tk))x.open=true})};
+ const nw=new Date(),p2=n=>String(n).padStart(2,'0'),today=`${nw.getFullYear()}-${p2(nw.getMonth()+1)}-${p2(nw.getDate())}`,hm=`${p2(nw.getHours())}:${p2(nw.getMinutes())}`,isToday=d===today;
+ if(!TR){paint(`<div class="hub"><section class="card pad tr-hero"><div class="tr-meta"><b>${esc(d)}</b><span>操盤手</span></div>
+   <p class="tr-head">${esc(d)} 還沒有開會紀錄</p><p class="tr-note">四場會 08:30 早盤・09:20 盤中檢查・12:40 收盤前・13:40 盤後檢查;盤中巡檢 09:30–13:15;每日檢討 16:50。</p></section></div>`);return}
+ const M=TR.meetings||{},pill=(t,c)=>`<span class="pill ${c||''}" style="font-size:11px">${esc(t)}</span>`,ea=s=>esc(s).replace(/"/g,'&quot;');
  const SC={awaiting:'t-disp',reported:'t-info',review_failed:'t-risk',agent_failed:'t-risk',brief_failed:'t-risk',blocked:'t-risk'};
+ const sessZh=s=>TZH[s]||(/^patrol_\d{4}$/.test(s||'')?`巡檢 ${s.slice(7,9)}:${s.slice(9)}`:esc(s||''));
+ const pc=v=>v==null?'—':`${+(v*100).toFixed(1)}%`,nf=v=>v==null?'—':Number(v).toLocaleString();
+ const bpTxt=v=>v==null?'—':`${v>0?'+':''}${+Number(v).toFixed(1)} bp`;
+ const bpMoney=(v,kind)=>v==null||!v?'':`每 100 萬${v>0?(kind==='buy'?'多付':kind?'少收':'多付'):(kind==='buy'?'少付':kind?'多收':'少付')} ${Math.abs(Math.round(v*100)).toLocaleString()} 元`;
+ const dur=m=>m==null?'—':m<1?`${Math.max(1,Math.round(m*60))} 秒`:`${+Number(m).toFixed(1)} 分`;
+
+ // ── 四場會卡片(內容同舊版)──
  const cards=['am','open','pre_close','post'].map(s=>{const m=M[s];if(!m)return `<section class="card pad idle"><h3 class="h2" style="font-size:14px">${TZH[s]}</h3><p class="sub" style="margin:0">還沒開</p></section>`;
   const go=m.approval&&m.approval.decision==='go',ap=m.approval?(go?(m.approval.mode==='live'?'已核准(實單)':'已核准(演練)'):'不做'):'';
   const icon={PASS:'✅',CONCERN:'🟡',FAIL:'🔴'}[m.verdict]||'';
@@ -1629,28 +1693,126 @@ async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now
    <div style="display:flex;gap:6px;flex-wrap:wrap">${m.status==='awaiting'&&ap?'':pill(MSZH[m.status]||m.status||'',SC[m.status])}${ap?pill(ap,go?(m.approval.mode==='live'?'t-ok':'t-info'):'t-disp'):''}${m.finished?pill('程式已結束'):''}</div>
    <div class="tg">${esc(m.tg||'')}</div>
    ${m.review&&m.verdict!=='PASS'?`<div class="rv">審查:${esc(m.review)}</div>`:''}</section>`}).join('');
- const OS=TR.orders||[],nSent=OS.filter(o=>o.state==='sent').length,nOpen=['am','open','pre_close','post'].filter(s=>M[s]).length;
- const rows=OS.map(o=>`<tr><td class="num">${esc(o.t||'')}</td><td>${TZH[o.session]||esc(o.session||'')}</td><td>${STZH[o.strategy]||esc(o.strategy)}</td>
-  <td class="${o.kind==='buy'?'up':'dn'}">${KZH[o.kind]||esc(o.kind)}</td><td class="num">${esc(o.sid)} ${esc(names[o.sid]||'')}</td><td class="num r">${(o.shares||0).toLocaleString()}</td>
-  <td class="num r">${o.limit??''}</td><td>${pill(SZH[o.state]||o.state||'',o.state==='sent'?'t-ok':o.state==='sending'?'t-disp':'t-risk')}${o.error?'<div class="sub">'+esc(o.error)+'</div>':''}</td><td class="sub" style="white-space:normal;min-width:16em">${esc(o.why||'')}</td></tr>`).join('');
+
+ // ── 今天的實單(刪單紀錄顯示成「刪單」,另加成交欄與送單當下報價)──
+ const OS=TR.orders||[],REAL=OS.filter(o=>o.kind!=='cancel'),CX=OS.filter(o=>o.kind==='cancel'),cxBy={};
+ CX.forEach(o=>{if(o.target)cxBy[o.target]=(cxBy[o.target]||0)+(o.cancelled_shares||0)});
+ const nSent=REAL.filter(o=>o.state==='sent').length,nOpen=['am','open','pre_close','post'].filter(s=>M[s]).length;
+ const cxWhat=o=>{const [ts,rest]=String(o.target||'').split(':'),k=String(rest||'').split('-').find(x=>KZH[x]);return `刪${ts?sessZh(ts):''}的${k?KZH[k]:''}單`};
+ const rows=OS.map(o=>{const cx=o.kind==='cancel';
+  const fill=cx||o.filled==null?'<span class="sub">—</span>':`${nf(o.filled)}${o.pending?`<div class="sub">掛著 ${nf(o.pending)}</div>`:cxBy[o.key]?'<div class="sub">其餘已刪</div>':o.state==='sent'&&o.filled<(o.shares||0)?'<div class="sub">未成交</div>':''}`;
+  return `<tr${cx?' class="tr-cx"':''}><td class="num">${esc(o.t||'')}</td><td>${sessZh(o.session)}</td><td>${STZH[o.strategy]||esc(o.strategy)}</td>
+  <td class="${cx?'':o.kind==='buy'?'up':'dn'}">${cx?pill('刪單','t-info'):KZH[o.kind]||esc(o.kind)}</td><td class="num">${esc(o.sid)} ${esc(names[o.sid]||'')}</td>
+  <td class="num r">${cx?`${nf(o.cancelled_shares||0)}<div class="sub">${esc(cxWhat(o))}</div>`:nf(o.shares||0)}</td><td class="num r">${fill}</td>
+  <td class="num r">${cx?'<span class="sub">—</span>':`${o.limit??''}${o.px!=null?`<div class="sub">當時 ${esc(o.px)}</div>`:''}`}</td>
+  <td>${cx?pill(o.state==='done'?'已刪':SZH[o.state]||o.state||'',o.state==='done'?'t-info':'t-risk'):pill(SZH[o.state]||o.state||'',o.state==='sent'?'t-ok':o.state==='sending'?'t-disp':'t-risk')}${o.error?'<div class="sub">'+esc(o.error)+'</div>':''}</td>
+  <td class="sub" style="white-space:normal;min-width:16em">${esc(o.why||'')}</td></tr>`}).join('');
  const dry=Object.entries(M).filter(([s,m])=>m.dryrun&&m.dryrun.length).map(([s,m])=>`<div class="sub">${TZH[s]} 演練:${m.dryrun.map(o=>`${KZH[o.kind]||o.kind}${o.sid} ${o.shares}股`).join('、')}</div>`).join('');
  const B=TR.books||{},books=Object.entries(B).filter(([k,v])=>v&&Object.keys(v).length).map(([k,v])=>`<div><b>${STZH[k]||esc(k)}</b> <span class="num">${Object.entries(v).map(([s,n])=>`${esc(s)} ${n.toLocaleString()}股`).join('、')}</span></div>`).join('')||'<span class="sub">還沒有正式帳本(books.json)</span>';
  const fixes=Object.entries(M).flatMap(([s,m])=>(m.book_fixes||[]).map(f=>`<div>${STZH[f.strategy]||esc(f.strategy)} ${esc(f.sid)} ${f.delta>0?'+':''}${f.delta}:<span class="sub">${esc(f.reason)}</span></div>`)).join('')||'<span class="sub">沒有</span>';
- const plans=Object.entries(M).filter(([s,m])=>m.plan).map(([s,m])=>`<details><summary>${TZH[s]} 計畫</summary><div class="md">${mdh(m.plan)}</div></details>`).join('');
+ const plans=Object.entries(M).filter(([s,m])=>m.plan).map(([s,m])=>`<details data-tk="tr-plan-${s}"><summary>${TZH[s]} 計畫</summary><div class="md">${mdh(m.plan)}</div></details>`).join('');
  const nBook=Object.values(B).reduce((a,v)=>a+(v?Object.keys(v).length:0),0);
- box.innerHTML=`<div class="hub"><section class="card pad tr-sum"><div class="tkv"><span>交易日</span><b>${esc(TR.day||d)}</b></div>
-   <div class="tkv"><span>會議</span><b>${nOpen}<span class="sub" style="font-size:13px"> / 4</span></b></div>
-   <div class="tkv"><span>實單送出</span><b>${nSent}${OS.length>nSent?`<span class="sub" style="font-size:13px;color:var(--bad)"> 未成功 ${OS.length-nSent}</span>`:''}</b></div>
-   <div class="tkv"><span>帳本部位</span><b>${nBook}<span class="sub" style="font-size:13px"> 筆</span></b></div>
-   <span class="sub" style="margin-left:auto">更新於 ${esc(TR.updated)}</span></section>
-  <div class="mtg">${cards}</div>
-  <section class="card pad" style="display:flex;flex-direction:column;gap:10px"><h2 class="h2">今天的實單</h2>
-   ${rows?`<div class="tbl"><table><thead><tr><th>時間</th><th>場次</th><th>策略</th><th>買賣</th><th>股票</th><th>股數</th><th>限價</th><th>狀態</th><th>理由</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<span class="sub">今天還沒有送出實單</span>'}${dry}</section>
+
+ // ── 盤中巡檢 ──
+ const P=TR.patrols||[],PBy={};P.forEach(p=>{if(p.at)PBy[p.at]=p});
+ const KZ={fix:'修正',anomaly:'異常',exec:'執行',lead:'線索'},KO=['fix','anomaly','exec','lead'];
+ const SLOTS=[];for(let m=570;m<=795;m+=15)SLOTS.push(`${p2(m/60|0)}:${p2(m%60)}`);          // 09:30 → 13:15 每 15 分
+ const times=[...new Set([...SLOTS,...Object.keys(PBy)])].sort(),toMin=t=>+t.slice(0,2)*60+ +t.slice(3,5);
+ const isFix=p=>p.fix||['approved_fix','blocked','review_failed'].includes(p.status);
+ const pcls=p=>{if(!p.status)return isToday&&!p.ended?'run':'fail';if(['agent_failed','brief_failed'].includes(p.status))return 'fail';
+  const ks=(p.findings||[]).map(f=>f.kind);if(isFix(p))ks.unshift('fix');return ks.length?(KO.find(k=>ks.includes(k))||'anomaly'):'quiet'};
+ const st=t=>PBy[t]?pcls(PBy[t]):isToday&&toMin(hm)<=toMin(t)+10?'wait':'none';
+ const nFix=P.filter(p=>p.status==='approved_fix').length,FD=P.flatMap(p=>p.findings||[]),nLead=FD.filter(f=>f.kind==='lead').length;
+ const SZP={quiet:'沒事',run:'進行中',wait:'還沒到',none:'沒有紀錄',fail:'沒跑完'};
+ const strip=`<div class="tr-strip" style="--n:${times.length}" role="img" aria-label="${ea(`巡檢 ${times.length} 輪:已跑 ${P.length},修正 ${nFix},發現 ${FD.length}`)}">${times.map((t,i)=>{const c=st(t),p=PBy[t],hit=KO.includes(c);
+   return `<span class="tr-slot ${hit?'hit tk-'+c:c}" title="${ea(`${t} ${hit?KZ[c]:SZP[c]}${p&&p.summary?':'+p.summary:''}`)}"><i></i><span>${i===0||t.endsWith(':00')?t:''}</span></span>`}).join('')}</div>`;
+ const groups=[];times.forEach(t=>{const c=st(t),k=['quiet','none','wait'].includes(c)?c:'hit',g=groups[groups.length-1];if(k!=='hit'&&g&&g.k===k)g.ts.push(t);else groups.push({k,c,ts:[t]})});
+ const rng=ts=>ts.length>1?`${ts[0]}–${ts[ts.length-1]}`:ts[0];
+ const prow=g=>{const ts=g.ts;
+  if(g.k==='quiet')return `<details data-tk="tr-q-${ts[0]}"><summary><span class="num">${rng(ts)}</span>${ts.length>1?`${ts.length} 輪沒事`:'沒事'}</summary><div class="tr-qs">${ts.map(t=>`<div><span class="num">${t}</span>${esc(PBy[t].summary||'沒事')}</div>`).join('')}</div></details>`;
+  if(g.k==='none')return `<div class="tr-qt"><span class="num">${rng(ts)}</span>${ts.length} 輪沒有紀錄</div>`;
+  if(g.k==='wait')return `<div class="tr-qt"><span class="num">${rng(ts)}</span>${ts.length} 輪還沒到・下一輪 ${ts[0]}</div>`;
+  const t=ts[0],p=PBy[t],c=g.c;
+  const head=c==='fail'?pill(MSZH[p.status]||'沒跑完','t-risk'):c==='run'?pill('進行中','t-disp'):'';
+  const fds=(p.findings||[]).map(f=>{const k=KO.includes(f.kind)?f.kind:'anomaly';return `<div class="tr-fd"><span class="tag tr-tag tk-${k}">${KZ[f.kind]||esc(f.kind||'其他')}</span><span>${f.sid?`<b class="num">${esc(f.sid)}</b> ${esc(names[f.sid]||'')} `:''}${esc(f.text||'')}</span></div>`}).join('');
+  let fx='';
+  if(isFix(p)){const v=p.verdict,ps=[];
+   if(p.status==='approved_fix'){ps.push(pill(v==='PASS'?'審查通過':v==='CONCERN'?'審查有疑慮':'審查完成',v==='PASS'?'t-ok':'t-disp'));ps.push(p.finished?pill(`已送出 ${p.finished.sent??''} 筆`,'t-ok'):pill('範圍內核准,等送出','t-info'))}
+   else if(p.status==='review_failed')ps.push(pill('審查沒過,沒送','t-risk'));
+   else if(p.status==='blocked')ps.push(pill('已擋下,沒送','t-risk'));
+   else ps.push(pill('修正單審查中','t-disp'));
+   const at=p.approval&&p.approval.at?`<span class="sub num">${esc(String(p.approval.at).slice(11,16))} ${p.approval.by==='patrol_scope'?'核准範圍內自動送':'已核准'}</span>`:'';
+   const dr=(p.dryrun||[]).length?`<span class="sub">演練:${p.dryrun.map(o=>`${o.kind==='cancel'?'刪':KZH[o.kind]||esc(o.kind)}${esc(o.sid)}${o.shares?' '+o.shares+'股':''}`).join('、')}</span>`:'';
+   fx=`<div class="tr-fx">${ps.join('')}${at}${p.review?`<span>審查:${esc(p.review)}</span>`:''}${dr}</div>`}
+  const note=p.note?`<details data-tk="tr-pn-${t}"><summary>巡檢筆記</summary><div class="md">${mdh(p.note)}</div></details>`:'';
+  return `<div class="tr-pr ${c==='fail'||c==='run'?c:'hit tk-'+c}"><span class="t">${t}</span><div class="b"><div class="ps">${head}<span>${esc(p.summary||'')}</span></div>${fds}${fx}${note}</div></div>`};
+ const pBody=P.length?`${strip}<div class="tr-pl">${groups.map(prow).join('')}</div>`
+  :isToday&&hm<'13:26'?`${strip}<p class="tr-note">${hm<'09:30'?'09:30 開始第一輪。':'今天還沒有巡檢紀錄。'}</p>`
+  :`<p class="tr-note">${isToday?'今天':'這天'}沒有巡檢紀錄。</p>`;
+ const patrolSec=`<section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">盤中巡檢</h2><span class="sub">09:30–13:15 每 15 分一輪${P.length?`・已跑 ${P.length} 輪・修正 ${nFix} 次・發現 ${FD.length} 件`:''}</span>
+  <span class="tr-leg">${KO.map(k=>`<span class="tag tr-tag tk-${k}">${KZ[k]}</span>`).join('')}</span></div>${pBody}</section>`;
+
+ // ── 每日檢討 ──
+ const R=TR.review,C=R&&R.card,X=R&&R.exec,T0=X&&X.total;
+ const GZ={good:['好','t-ok'],ok:['還可以','t-info'],bad:['要注意','t-risk']},gd=C&&GZ[C.grade];
+ let revSec='';
+ if(R){
+  const SK=t=>/下單|成交/.test(t)?'exec':/盤中/.test(t)?'anomaly':/策略|線索/.test(t)?'lead':/明天/.test(t)?'fix':'';
+  const secs=C&&(C.sections||[]).length?`<div class="scards">${C.sections.map(s=>{const k=SK(s.title||'');
+   return `<div class="scard${k?' tr-k tk-'+k:''}"><span class="nm">${esc(s.title)}</span><p class="sm">${esc(s.verdict||'')}</p>${(s.points||[]).length?`<ul class="tr-pts">${s.points.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}</div>`}).join('')}</div>`
+   :R.report?`<div class="md">${mdh(R.report)}</div>`:`<p class="tr-note">${R.status==='reported'?'檢討沒有內容。':'檢討'+esc(MSZH[R.status]||R.status||'還在寫')}。</p>`;
+  const EX=(X&&X.orders)||[];
+  const exRows=EX.map(o=>`<tr><td>${STZH[o.strategy]||esc(o.strategy)}</td><td class="num">${esc(o.sid)} ${esc(names[o.sid]||'')}</td><td class="${o.kind==='buy'?'up':'dn'}">${KZH[o.kind]||esc(o.kind)}</td>
+   <td class="num r">${pc(o.fill_rate)}<div class="sub">${nf(o.filled)} / ${nf(o.shares)} 股</div></td>
+   <td class="num r">${o.avg_fill??'—'}${o.shared?'<div class="sub">同檔合計均價</div>':''}</td>
+   <td class="num r">${o.bench_px??'—'}<div class="sub">${esc(o.bench||'')}</div></td>
+   <td class="r"><span class="num">${bpTxt(o.slip_vs_bench_bp)}</span><div class="sub">${bpMoney(o.slip_vs_bench_bp,o.kind)}</div>${o.slip_vs_send_bp!=null?`<div class="sub">對送單報價 ${bpTxt(o.slip_vs_send_bp)}</div>`:''}</td>
+   <td class="num r">${dur(o.first_fill_min)}</td></tr>`).join('');
+  const bys=X&&X.by_strategy?Object.entries(X.by_strategy).map(([k,v])=>`<div class="sc-kpi tr-by"><span class="k">${STZH[k]||esc(k)}</span><span class="m">${v.orders??''} 筆・成交 ${pc(v.fill_rate)}・滑價 ${bpTxt(v.slip_bp)}${v.cost_nt!=null?`・成本 ${nf(v.cost_nt)} 元`:''}</span></div>`).join(''):'';
+  const exD=X?`<details data-tk="tr-exec"><summary>執行品質明細<span class="sub">${T0?`${T0.orders??''} 筆・成交金額 ${T0.notional!=null?Math.round(T0.notional/1e4).toLocaleString()+' 萬':'—'}・滑價 ${bpTxt(T0.slip_bp)}${T0.cost_nt!=null?`・成本 ${nf(T0.cost_nt)} 元`:''}`:''}</span></summary>
+   <div class="tr-dbody">${bys?`<div class="tr-bys">${bys}</div>`:''}
+   <p class="tr-cap">bp = 萬分之一。「比回測假設價」正數 = 比回測假設的價格吃虧(買貴了、賣便宜了),負數 = 佔到便宜;下面一行換算成每 100 萬的錢。${X.bars_ready===false?'分 K 還沒到齊,成交時間可能空白。':''}</p>
+   ${exRows?`<div class="tbl"><table><thead><tr><th>策略</th><th>股票</th><th>買賣</th><th class="r">成交率</th><th class="r">成交均價</th><th class="r">回測假設價</th><th class="r">比假設價多付</th><th class="r">第一筆成交</th></tr></thead><tbody>${exRows}</tbody></table></div>`:'<p class="tr-note">沒有逐筆成交明細。</p>'}</div></details>`:'';
+  const LD=Array.isArray(R.leads)?R.leads:[],TM=Array.isArray(R.tomorrow)?R.tomorrow:[];
+  const ldD=LD.length?`<details data-tk="tr-leads"><summary>交給研究所的線索<span class="sub">${LD.length} 個${R.leads_sent?`・這次投進收件匣 ${R.leads_sent} 個`:''}</span></summary><div class="tr-dbody">${LD.map(x=>`<div class="sc-kpi tr-lead"><span class="k">${esc(x.title||'')}</span>${x.what?`<div><span>看到:</span>${esc(x.what)}</div>`:''}${x.why?`<div><span>可能原因:</span>${esc(x.why)}</div>`:''}${x.test?`<div><span>怎麼驗:</span>${esc(x.test)}</div>`:''}</div>`).join('')}</div></details>`:'';
+  const tmD=TM.length?`<details data-tk="tr-tmr"><summary>明天早盤會讀的待辦<span class="sub">${TM.length} 件</span></summary><div class="tr-dbody"><ul class="tr-pts">${TM.map(x=>`<li>${esc(x.what||'')}${x.why?`<span class="sub">(${esc(x.why)})</span>`:''}</li>`).join('')}</ul></div></details>`:'';
+  const rpD=C&&R.report?`<details data-tk="tr-report"><summary>完整報告</summary><div class="md">${mdh(R.report)}</div></details>`:'';
+  revSec=`<section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">每日檢討</h2><span class="sub">收盤後寫給你${R.ended?'・'+esc(String(R.ended).slice(11,16)):''}</span>${R.status&&R.status!=='reported'?pill(MSZH[R.status]||R.status,SC[R.status]||'t-disp'):''}</div>
+   ${secs}<div>${rpD}${exD}${ldD}${tmD}</div></section>`}
+
+ // ── 今天一句話 + 數字卡 ──
+ const FS=REAL.filter(o=>o.state==='sent'&&o.filled!=null);
+ const fDen=FS.reduce((a,o)=>a+Math.max(0,(o.shares||0)-(cxBy[o.key]||0)),0),fNum=FS.reduce((a,o)=>a+(o.filled||0),0),fPend=FS.reduce((a,o)=>a+(o.pending||0),0);
+ const awaitS=['am','pre_close'].filter(s=>M[s]&&M[s].status==='awaiting'&&!M[s].approval);
+ let head=C&&C.headline;
+ if(!head){const bits=[];if(awaitS.length)bits.push(awaitS.map(s=>TZH[s]).join('、')+'等你核准');
+  if(P.length)bits.push(`盤中巡檢 ${P.length} 輪,${nFix?nFix+' 次修正':'沒有修正'}`);
+  if(REAL.length)bits.push(`實單送出 ${nSent} 筆`+(REAL.length>nSent?`,${REAL.length-nSent} 筆沒成功`:''));else if(nOpen)bits.push(`開了 ${nOpen} / 4 場會,沒有實單`);
+  head=bits.join(';')||'今天還沒開始'}
+ const kpis=C&&(C.kpis||[]).length?C.kpis.slice(0,4):[
+  T0&&T0.fill_rate!=null?{label:'成交率',value:pc(T0.fill_rate),note:`${T0.orders??''} 筆單`}
+   :{label:'成交率',value:fDen?pc(fNum/fDen):'—',note:fDen?`${nf(fNum)} / ${nf(fDen)} 股${fPend?`,掛著 ${nf(fPend)}`:''}`:'今天還沒有送出實單'},
+  {label:'滑價',value:T0&&T0.slip_bp!=null?bpTxt(T0.slip_bp):'—',note:T0&&T0.slip_bp!=null?bpMoney(T0.slip_bp)||'和回測假設一樣':'收盤檢討時算(正數 = 多付)'},
+  {label:'巡檢修正',value:`${nFix} 次`,note:P.length?`巡檢 ${P.length} 輪`:'今天沒有巡檢紀錄'},
+  {label:'新線索',value:`${nLead} 個`,note:'收盤檢討時整理給研究所'}];
+ const hNote=C?'':R?'這份檢討沒有結構化摘要,完整內容在下面「每日檢討」。'
+  :isToday?(hm<'16:50'?'收盤後 16:50 寫今天的檢討;寫好後這裡換成檢討結論。':'今天的檢討還沒出來(16:50–19:00 之間會寫)。'):'這天沒有每日檢討。';
+ const hero=`<section class="card pad tr-hero ${C?'g-'+(GZ[C.grade]?C.grade:'ok'):'g-live'}">
+  <div class="tr-meta"><b>${esc(TR.day||d)}</b>${C?`<span>每日檢討${R.ended?' '+esc(String(R.ended).slice(11,16)):''}</span>${gd?pill('今天 '+gd[0],gd[1]):''}`:pill('即時狀態','t-disp')}
+   <span>會議 <b>${nOpen}/4</b></span><span>實單送出 <b>${nSent}</b>${REAL.length>nSent?` <span style="color:var(--bad)">未成功 ${REAL.length-nSent}</span>`:''}</span>${CX.length?`<span>刪單 <b>${CX.length}</b></span>`:''}<span>帳本部位 <b>${nBook}</b> 筆</span>
+   <span class="tr-upd">更新於 ${esc(TR.updated)}</span></div>
+  <p class="tr-head">${esc(head)}</p>${hNote?`<p class="tr-note">${hNote}</p>`:''}
+  <div class="tr-kpis">${kpis.map(k=>`<div class="sc-kpi tr-kpi"><span class="l">${esc(k.label)}</span><b class="v">${esc(k.value)}</b>${k.note?`<span class="n">${esc(k.note)}</span>`:''}</div>`).join('')}</div></section>`;
+
+ paint(`<div class="hub">${hero}${revSec}${patrolSec}
+  <section class="tr-sec"><div class="stg-h"><h2 class="h2">四場會</h2><span class="sub">08:30 早盤・09:20 盤中檢查・12:40 收盤前・13:40 盤後檢查</span></div><div class="mtg">${cards}</div></section>
+  <section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">今天的實單</h2><span class="sub">${REAL.length} 筆${CX.length?`・巡檢刪單 ${CX.length} 筆`:''}</span></div>
+   ${rows?`<div class="tbl"><table><thead><tr><th>時間</th><th>場次</th><th>策略</th><th>買賣</th><th>股票</th><th class="r">股數</th><th class="r">成交</th><th class="r">限價</th><th>狀態</th><th>理由</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<span class="sub">今天還沒有送出實單</span>'}${dry}</section>
   <div style="display:flex;flex-wrap:wrap;gap:12px"><section class="card pad" style="flex:1 1 320px;display:flex;flex-direction:column;gap:6px"><h2 class="h2">各策略帳本</h2>${books}</section>
    <section class="card pad" style="flex:1 1 320px;display:flex;flex-direction:column;gap:6px"><h2 class="h2">帳本修正</h2>${fixes}</section></div>
   <section class="card pad" style="display:flex;flex-direction:column;gap:8px"><h2 class="h2">計畫與紀錄</h2>${plans}
-   ${TR.journal?`<details><summary>journal</summary><div class="md">${mdh(TR.journal)}</div></details>`:''}
-   ${TR.lessons?`<details><summary>給操盤手的提醒(lessons)</summary><div class="md">${mdh(TR.lessons)}</div></details>`:''}</section></div>`}
+   ${TR.journal?`<details data-tk="tr-journal"><summary>journal</summary><div class="md">${mdh(TR.journal)}</div></details>`:''}
+   ${TR.lessons?`<details data-tk="tr-lessons"><summary>給操盤手的提醒(lessons)</summary><div class="md">${mdh(TR.lessons)}</div></details>`:''}</section></div>`)}
 
 // ---- 控制(臨時休市 / 紙上監看開關 / 重開機):serve.py /api/*,只有本機與 tailnet 進得來 ----
 async function opPost(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});

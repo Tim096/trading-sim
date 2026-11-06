@@ -1222,7 +1222,7 @@ function liveMark(){if(!IG||!state)return;const X=state.extra||{},today=state.up
  Object.entries(d.sim||{}).forEach(([s,m])=>mk(m,s,'mark_px','entry_px'))}
 const perL1=day=>(IGAMT.L1||0)/Math.max(1,Object.keys((day&&day.l1)||{}).length||(((state||{}).l1||{}).positions||[]).length);
 const perL4=()=>(IGAMT.L4||0)/5;
-function comboOf(r){if(!IG||!SCH()[igScheme])return r.combo;const w=SCH()[igScheme].weights;let c=0,ws=0;Object.entries(w).forEach(([k,v])=>{const x=r[RK[k]];if(x!=null){c+=v*x;ws+=v}});return ws?c/ws:null}
+function comboOf(r){if(!IG||!SCH()[igScheme])return r.combo;const S=SCH()[igScheme],w=S.weights,ov=S.l1_overlay?'L1':null;let c=0,ws=0;Object.entries(w).forEach(([k,v])=>{if(k===ov)return;const x=r[RK[k]];if(x!=null){c+=v*x;ws+=v}});const l1=ov&&r[RK.L1]!=null?S.l1_overlay*r[RK.L1]:0;return ws?c/ws+l1:null}   // 新方案:L1 是 1.25x 疊加,不在權重裡
 let IGAMT={};
 const th=a=>`<tr>${a.map(([x,r])=>`<th${r?' class="r"':''}>${x}</th>`).join('')}</tr>`;
 function detailStack3(){const x=IG.stack3;if(!x)return;const amt=IGAMT.STACK3||0,per=amt/(x.k||10),rgs=new Set(IG.rgmc.holdings);
@@ -1325,14 +1325,14 @@ function hideStack3(j){delete j.stack3;if(j.strategies)delete j.strategies.STACK
  if(j.recent)Object.values(j.recent).forEach(r=>delete r.STACK3);
  if(j.schemes)Object.values(j.schemes).forEach(v=>{if(v.label)v.label=v.label.replace(/[((]不?含 ?STACK3[))]/g,'')});
  if(j.notes)j.notes=j.notes.map(n=>n.split(/(?<=[。;;])/).filter(x=>!/STACK3/.test(x)).join('')).filter(n=>n.trim());return j}
-let IG=null,igScheme='ew5';
-try{const v=localStorage.getItem('c_total');if(v)$('#c_total').value=v;igScheme=localStorage.getItem('ig_scheme_v4')||'all'}catch(e){}
+let IG=null,igScheme='plan';
+try{const v=localStorage.getItem('c_total');if(v)$('#c_total').value=v;igScheme=localStorage.getItem('ig_scheme_v5')||'plan'}catch(e){}
 $('#c_total').addEventListener('change',e=>{try{localStorage.setItem('c_total',e.target.value)}catch(_){}integ()});
 fetch('integration.json?'+Date.now()).then(r=>r.json()).then(j=>{IG=hideStack3(j);liveMark();integ()}).catch(()=>{$('#ig_note').textContent='讀不到 integration.json:請先執行 python build_integration.py'});
 const IGN={RGMC:['RGMC','動能選股,每 7 個交易日換股'],DISPO:['DISPO','處置股,出關前進場'],V41:['V41','台指期槓桿多單(保證金)'],L1:['L1','跳空股開盤放空・當沖額度'],L4:['L4','籌碼選股隔夜・收盤買開盤賣'],TXN:['TXN','台指期隔夜多單'],STACK3:['STACK3','三模型排名選股・收盤買抱 5 天']};
 const IGC={RGMC:'--c-rg',DISPO:'--c-dp',V41:'--c-v4',L1:'--c-l1',L4:'--c-l4',TXN:'--c-txn',STACK3:'--c-s3'};
 function igAlloc(s,T){const amt={};Object.entries(s.weights).forEach(([k,v])=>amt[k]=v*T);return {amt}}
-function igChart(){const W=800,H=180,sc=SCH(),ks=['old','rec','ewv','all'].filter(k=>sc[k]),col={all:'--c-all',ewv:'--acc',rec:'--c-txn',old:'--mute2'};
+function igChart(){const W=800,H=180,sc=SCH(),ks=['old','rec','ewv','all','plan'].filter(k=>sc[k]),col={all:'--c-all',ewv:'--acc',rec:'--c-txn',old:'--mute2',plan:'--ok'};
  const L=v=>Math.log1p(v);   // log scale so the leveraged old mix does not flatten the others
  const all=ks.flatMap(k=>sc[k].curve.map(p=>L(p[1])));const lo=Math.min(0,...all),hi=Math.max(...all);const D=[...new Set(ks.flatMap(k=>sc[k].curve.map(p=>p[0])))].sort(),DI=new Map(D.map((d,i)=>[d,i])),n=D.length;
  const X=d=>(DI.get(d)/(n-1)*W).toFixed(1),Y=v=>(H-(L(v)-lo)/(hi-lo||1)*H).toFixed(1);
@@ -1345,7 +1345,7 @@ function igChart(){const W=800,H=180,sc=SCH(),ks=['old','rec','ewv','all'].filte
 function integ(){
  if(!IG)return;
  // allocation
- seg($('#ig_seg'),Object.entries(SCH()).map(([k,v])=>[k,v.label.split(':').pop()]),igScheme,k=>{igScheme=k;try{localStorage.setItem('ig_scheme_v4',k)}catch(_){}integ();render()});
+ seg($('#ig_seg'),Object.entries(SCH()).map(([k,v])=>[k,v.label.split(':').pop()]),igScheme,k=>{igScheme=k;try{localStorage.setItem('ig_scheme_v5',k)}catch(_){}integ();render()});
  if(!SCH()[igScheme])igScheme='all';
  const s=SCH()[igScheme],T=+$('#c_total').value||0,{amt}=igAlloc(s,T),old=SCH().old;IGAMT=amt;$('#ig_cur').textContent=s.label+(HEDGE()?'・L4 避險':'');
  $('#ig_kpi').innerHTML=[['方案 Sharpe',s.sharpe.toFixed(2),`現況 ${old.sharpe.toFixed(2)}`],['年化報酬',pct(s.cagr,0),`現況 ${pct(old.cagr,0)}`],['最大回撤',pct(s.mdd,1),`現況 ${pct(old.mdd,1)}`],['最差一年 Sharpe',Math.min(...Object.values(s.years)).toFixed(2),Object.entries(s.years).map(([y,v])=>y.slice(2)+':'+v.toFixed(1)).join(' ')]]
@@ -1818,8 +1818,22 @@ async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now
 async function opPost(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});
  const j=await r.json().catch(()=>({error:'HTTP '+r.status}));if(!r.ok||j.error)throw new Error(j.error||('HTTP '+r.status));return j}
 const PROCN={'serve.py':'網站伺服器','monitor.py':'盤中監看','bench.py':'大盤基準','yuanta_quotes.py':'元大即時行情','spark_quotes.py':'Spark 報價'};
-async function renderOps(msg){const box=$('#v-hub');let O;
+let CAPV=null;   // 總資金預覽(api/capital confirm=false 的回傳)
+function capCard(C){const m=x=>x==null?'—':(Math.abs(x)>=1e5?Math.round(x/1e4).toLocaleString()+' 萬':Math.round(x).toLocaleString()+' 元');
+ const c=C&&C.cts||{},y=C&&C.yuanta||{},tot=C&&C.total||0,p=C&&C.plan;
+ const pay=c.ok?(c.pay>0?`要付 <b class="num">${c.pay.toLocaleString()}</b> 元`:c.pay<0?`會入帳 <b class="num">${(-c.pay).toLocaleString()}</b> 元`:'0 元'):'查不到(看 app)';
+ const mv=y.move==null?(tot?'—':'測試期不算'):Math.abs(y.move)<1?'0 元':`${y.move>0?'匯入':'匯出'} <b class="num">${Math.abs(y.move).toLocaleString()}</b> 元`;
+ const rows=p?Object.entries(p.amounts).map(([k,v])=>`<div><span>${esc({RGMC:'RGMC',DISPO:'處置股',V41:'v4.1',TXN:'TXN',L4:'L4'}[k]||k)} <small>${(p.weights[k]*100).toFixed(0)}%${(p.idle||{})[k]!=null?'・未上線,放中信當 L1 備用金':''}</small></span><b class="num">${m(v)}</b></div>`).join('')+`<div><span>L1 當沖名目 <small>1.25×,不佔資金</small></span><b class="num">${m(p.l1_notional)}</b></div>`:'';
+ return `<section class="card pad"><div class="hd"><h2 class="h2">總資金與今日匯款</h2>${tot?`<span class="pill t-ok">總資金 ${m(tot)}</span>`:'<span class="pill t-disp">測試期(總資金 0)</span>'}</div>
+  <div class="proc"><div><span>中信股票<br><small>今天成交的交割款,${esc((c.settle_on||'').slice(5))} 前要在交割戶</small></span><small>${pay}</small></div>
+   <div><span>元大期貨<br><small>${y.target!=null?`目標 ${m(y.target)},現在 ${m(y.strategy_equity)}`:`現在權益 ${m(y.strategy_equity)}`}</small></span><small>${mv}</small></div></div>
+  ${rows?`<details><summary>各策略分配(權重 ${esc(p.rebal_on||'')} 換,${p.next_rebal_in} 個交易日後再換)</summary><div class="proc">${rows}</div></details>`:''}
+  <div class="row"><input id="cap_in" class="num" type="number" min="0" step="1000000" placeholder="總資金(元)" value="${tot||''}" aria-label="總資金" style="width:150px"><button type="button" class="btn" data-op="cap" data-c="0">預覽</button>${CAPV?`<button type="button" class="btn pri" data-op="cap" data-c="1">確認寫入 ${m(CAPV.total)}</button>`:''}</div>
+  ${CAPV?`<div class="tg" style="white-space:pre-wrap;font-size:12.5px;color:var(--ink2);line-height:1.65">${esc(CAPV.text)}</div>`:''}
+  <p class="sub" style="margin:0">依新方案(60 日反波動、每 20 個交易日換、L1 1.25× 疊加)算各策略資本額,確認後寫進 config,隔天早盤生效;0 = 回測試期。每天期貨跑完會 TG 今日匯款。更新於 ${esc((C&&C.made||'').slice(5,16))}</p></section>`}
+async function renderOps(msg){const box=$('#v-hub');let O,CT=null;
  try{O=await (await fetch('api/ops?'+Date.now())).json()}catch(e){O={error:String(e)}}
+ try{const r=await fetch('data/capital_today.json?'+Date.now());CT=r.ok?await r.json():null}catch(e){}
  if(curV!=='ops')return;
  const flash=msg?`<div class="flash ${msg.startsWith('❌')?'err':'ok'}" role="status">${esc(msg)}</div>`:'';
  if(O.error){box.innerHTML=`<div class="hub">${flash}<section class="card pad"><h2 class="h2">控制</h2><p class="lede">讀不到控制介面(api/ops):${esc(O.error)}。控制只能在這台電腦或 Tailscale 裝置上的本機網址使用。</p></section></div>`;return}
@@ -1834,6 +1848,7 @@ async function renderOps(msg){const box=$('#v-hub');let O;
    <div class="proc">${procs}</div>
    <div class="row">${on?'<button type="button" class="btn" data-op="live" data-on="0">關閉監看與行情</button>':'<button type="button" class="btn pri" data-op="live" data-on="1">開啟(1 分鐘內自動啟動)</button>'}</div>
    <p class="sub" style="margin:0">只影響監看與行情程式,網站伺服器不受影響。</p></section>
+  ${capCard(CT)}
   <section class="card pad"><div class="hd"><h2 class="h2">臨時休市</h2><span class="sub">颱風假等</span></div>
    ${days?`<div class="daychips">${days}</div>`:'<p class="sub" style="margin:0">目前沒有設定休市日。</p>'}
    <div class="row"><button type="button" class="btn" data-op="hadd" data-d="today">今天休市</button><button type="button" class="btn" data-op="hadd" data-d="tomorrow">明天休市</button></div>
@@ -1848,6 +1863,7 @@ $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[
   if(b.dataset.op==='hadd'){const d=b.dataset.d||($('#opday')||{}).value;if(!d)throw new Error('先選日期');j=await opPost('api/holiday',{date:d,closed:true});m=`已設為休市:${j.date}`+(j.stopped?`,停止 ${j.stopped} 個行程`:'')}
   else if(b.dataset.op==='hdel'){j=await opPost('api/holiday',{date:b.dataset.d,closed:false});m=`已取消休市:${j.date}`}
   else if(b.dataset.op==='live'){j=await opPost('api/live',{on:b.dataset.on==='1'});m=j.on?'已開啟,1 分鐘內自動啟動':`已關閉,停止 ${j.stopped} 個行程`}
+  else if(b.dataset.op==='cap'){const t=+(($('#cap_in')||{}).value||0),go=b.dataset.c==='1'&&CAPV;j=await opPost('api/capital',{total:go?CAPV.total:t,confirm:!!go});CAPV=go?null:j;m=go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入'}
   else if(b.dataset.op==='reboot'){if(prompt('輸入 REBOOT 確認重開整台機器')!=='REBOOT')return;j=await opPost('api/reboot',{confirm:'REBOOT'});m=j.msg}
   renderOps(m)}catch(err){renderOps('❌ '+err.message)}});
 

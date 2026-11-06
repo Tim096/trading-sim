@@ -1816,7 +1816,30 @@ async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now
 
 // 操盤手分頁底部:資金方案目標(sharpe / cagr / 11-06 原參數)與 v4.1 參數組;寫 config(serve.py /api/objective)
 let CAPT=null,CAPIN=null;   // 操盤手分頁的總資金預覽 / 正在輸入的數字(30 秒重畫不洗掉)
+// v4.1 兩個參數組的現在槓桿(integration.json v41_presets,build_integration 每天重算)+ 差異 + 第一性原理說明
+function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">v4.1 現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
+ const P=V.presets||{},nm={original:'原策略',sharpe:'研究剃刀版'},f=x=>x==null?'—':(+x).toFixed(2)+'x';
+ const row=(l,k,n)=>`<tr><td>${l}</td>${['original','sharpe'].map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
+ return `<div class="tbl"><table><thead><tr><th>現在槓桿(${esc(V.as_of)})</th>${['original','sharpe'].map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
+  ${row('今天持有','held','理論帳本今天的槓桿')}${row('下一期目標','next','今天收盤訊號算出、15:00 要調到的槓桿(上限 6.5)')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
+  <p class="sub" style="margin:0">訊號:逆價差 z(zb)${V.zb}・大額交易人淨部位 z(zn)${V.zn}・距結算 ${V.dte} 個交易日・逆價差資料 ${esc(V.basis_as_of)}、net10 ${esc(V.net10_as_of)}</p>
+  <div class="tbl"><table><thead><tr><th>差在哪</th><th>原策略</th><th>研究剃刀版</th></tr></thead><tbody>
+   <tr><td>net10 太高時</td><td>越高越加碼,z ≥ 2 最滿</td><td>z > 0.5 起反過來減碼(折返 λ=2)</td></tr>
+   <tr><td>net10 乘數範圍</td><td>0.4–2.0,冪次 0.4</td><td>0.2–2.0,冪次 0.7</td></tr>
+   <tr><td>逆價差乘數下限</td><td>0.25</td><td>0(逆價差不深時可以不做)</td></tr>
+   <tr><td>基礎倍數 k</td><td>4.0</td><td>6.93(讓平均槓桿一樣約 3.5x)</td></tr>
+   <tr><td>不變</td><td colspan="2">200 日趨勢閘門、上限 6.5、結算週減碼</td></tr>
+   <tr><td>成績(2022 起樣本外 WF,滑價 4.5 點)</td><td>年化 128%・Sharpe 1.37・MDD −74%</td><td>年化 217%・Sharpe 1.73・MDD −61%</td></tr></tbody></table></div>
+  <details data-tk="v41-why"><summary>為什麼這樣改(第一性原理)</summary><div class="md" style="font-size:13px;line-height:1.75">
+   <p><b>1. 賺什麼、怎麼活下來。</b>賺台指期長期往上漂的錢(股市長期上漲,加上逆價差換月收斂;後者約 85% 來自除息季的股利),用槓桿放大。跌破 200 日均線就空手,當崩盤保險;上限 6.5 倍是因為台指單日最多跌 10%、史上最壞連兩天 −14.7%,6.5 倍不會爆倉。</p>
+   <p><b>2. 槓桿的真實成本是波動的平方。</b>平均槓桿一樣,把槓桿從「沒有 edge 又波動大」的日子挪到「有 edge」的日子,長期複利會明顯變好。剃刀版只做這件事,整體沒有多開。</p>
+   <p><b>3. 逆價差。</b>期貨比現貨便宜越多,抱期貨本身就多賺,所以深逆價差時加碼合理;但資料顯示只有很深時才有額外好處,不深時沒有 → 剃刀版允許降到 0。</p>
+   <p><b>4. net10(大額交易人淨部位的 z 分數)。</b>原策略假設「大戶越看多越該跟」。資料是倒 U:適度看多(z 0–0.75)隔天平均 +34bp;極端(z > 1.5)反而 −5bp、波動更大。可能是擁擠(該買的都買了)或大戶在避險壓力下,機制還沒證實。原策略剛好在最沒 edge、波動最大的時候開最滿,剃刀版在這時減碼。</p>
+   <p><b>5. 限制。</b>net10 只有 2019 年起,樣本外只考了 5 年;10/08、10/15 那兩天 net10 不高,剃刀版一樣躲不掉;剃刀版頂到 6.5 上限的天數比較多(28% vs 25%),跳空爆倉那條線沒變。選哪一組是你的決定。</p>
+   <p class="sub">來源:CTS-research research_lab/probes/2026-11-06_burn_opt/v41/REPORT_v1.md</p></div></details>`}
+let VP=null;
 async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_options?'+Date.now());O=await r.json()}catch(e){return}
+ try{const r=await fetch('integration.json?'+Date.now());VP=r.ok?(await r.json()).v41_presets:VP}catch(e){}
  if(curV!=='trader'||!O||O.error)return;const hub=document.querySelector('#v-hub .hub');if(!hub)return;
  let sec=document.getElementById('tr-capopts');if(!sec){sec=document.createElement('section');sec.id='tr-capopts';sec.className='card pad tr-sec';hub.appendChild(sec)}
  const p=x=>(x*100).toFixed(0)+'%',cards=Object.entries(O.options).map(([k,v])=>{const on=k===O.objective,P=v.params;
@@ -1832,7 +1855,9 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
    ${CAPT?`<div style="white-space:pre-wrap;font-size:12.5px;color:var(--ink2);line-height:1.65">${esc(CAPT.text)}</div>`:''}
    <span class="bt">確認後寫進 config 各策略資本額,隔天早盤生效;每天期貨跑完 TG 兩個帳戶該匯多少(也在「控制」分頁)。TG 也可以打 /capital 1000萬。</span></div>
   <div class="scards">${cards}</div>
-  <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">v4.1 參數組</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${v==='original'?'原策略':'研究剃刀版'}</button>`).join('')}</div>
+  <h3 class="h2" style="font-size:14px;margin:6px 0 0">v4.1 參數組</h3>
+  ${v41Box(VP)}
+  <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換 v4.1 參數組</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${v==='original'?'原策略':'研究剃刀版'}</button>`).join('')}</div>
   <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
  sec.onclick=async e=>{const c=e.target.closest('button[data-cap]');
   if(c){try{const go=c.dataset.cap==='1'&&CAPT,t=+(($('#tr_cap_in')||{}).value||0),j=await opPost('api/capital',{total:go?CAPT.total:t,confirm:!!go});CAPT=go?null:j;if(go)CAPIN=null;renderCapOpts(go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入')}catch(err){renderCapOpts('❌ '+err.message)}return}

@@ -2078,7 +2078,7 @@ const AST={running:['t-info','執行中'],waiting_user:['t-disp','等你裁決']
 const ast=s=>{const a=AST[s]||['',s||'—'];return `<span class="pill ${a[0]}">${a[1]}</span>`};
 const PHN={intake:'選題',ideate:'發想','0':'拆題','A-closed':'閉卷 v0','A-lit':'文獻 L','A-merge':'合併 v1','1':'值不值得','2':'資料','3':'實驗','4':'證偽','5-harvest':'收成','5-publish':'發佈'};
 const STEPS=[['intake','選題'],['0','拆題'],['A','架構'],['1','值不值得'],['G1','你裁決'],['2','資料'],['G2','你裁決'],['3','實驗'],['4','證偽'],['G3','你裁決'],['5','收成']];
-const GROUPS={'想得遠':'發散:提新題目、新架構','做得穩':'驗證:做實驗、抓錯、記帳','越做越好':'收成:零件入庫、改善流程','地基':'資料:定義、時點、防偷看','門面':'呈現:報告排版、圖表、頁面'};
+const GROUPS={'想得遠':'發散:提新題目、新架構','做得穩':'驗證:做實驗、抓錯、記帳','越做越好':'收成:零件入庫、改善流程','地基':'資料與時局:定義、時點、防偷看、現在是什麼賽局','門面':'呈現:報告排版、圖表、頁面'};
 function roleLive(id){const out=[];((LIVE&&LIVE.active)||[]).forEach(r=>{const x=r.roles&&r.roles[id];if(x)out.push({...x,run:r.run_id})});return out}
 function oRole(O,id){return id==='commander'?O.commander:id==='pm'?O.pm:O.teams.find(t=>t.id===id)}
 function oHealth(h){if(!h||!h.runs)return ['idle','尚未出勤'];const bad=h.failed+h.blamed,tot=h.done+h.failed+h.rejected;

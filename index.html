@@ -62,14 +62,20 @@ button{font:inherit;color:inherit}
 .th-pill{border-radius:7px;padding:2px 12px;font-weight:700;font-size:14px}
 #th_cv{width:100%;display:block;cursor:crosshair;touch-action:pan-y}
 .th-leg{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;margin-top:6px}.th-leg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
-.th-legx{display:grid;grid-template-columns:minmax(240px,.9fr) 1.3fr 1.3fr;gap:10px;margin-top:12px}
+.th-legx{display:grid;grid-template-columns:1.15fr 1.15fr 1.25fr;gap:10px;margin-top:12px}.th-legx .th-note{margin-top:0}
+.th-cold{grid-column:1/-1;--c:#1f6fd1;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 18px;min-height:58px;box-sizing:border-box;padding:8px 16px;border-radius:10px;border:1px solid color-mix(in srgb,var(--c) 45%,transparent);background:color-mix(in srgb,var(--c) 9%,var(--panel2))}
+.th-cold.off{border-color:var(--line);background:var(--panel2)}.th-cold.warn{--c:#c77700}
+.th-cold .th-lpill{background:var(--c)}.th-cold.off .th-lpill{color:var(--mute);background:var(--line)}
+.th-ctxt{font-size:12.5px;line-height:1.55;color:var(--ink)}.th-ctxt b{color:var(--c)}.th-cold.off .th-ctxt{color:var(--mute2)}
+@media(max-width:760px){.th-cold{grid-template-columns:1fr}}
+.th-lg.th-lgrow{margin-top:10px;display:grid;grid-template-columns:minmax(240px,420px) 1fr;gap:6px 28px;align-items:start}
 .th-lg{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:5px;font-size:12.5px;min-width:0}
 .th-lgh{font-size:11px;font-weight:700;color:var(--mute);letter-spacing:.6px}
 .th-li{display:flex;align-items:flex-start;gap:7px;line-height:1.4}.th-li svg{flex:none;margin-top:1px}.th-li .sub{font-size:11.5px;margin-left:2px}
 .th-lbox{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}
 .th-note{margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid #e8890c;font-size:12.5px;color:var(--ink);line-height:1.6}
 .th-note ul{margin:4px 0 0;padding-left:18px;color:var(--mute)}
-@media(max-width:900px){.th-legx{grid-template-columns:1fr}}
+@media(max-width:900px){.th-legx,.th-lg.th-lgrow{grid-template-columns:1fr}}
 .th-det{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .th-ind{display:grid;grid-template-columns:76px 1fr 28px;gap:8px;align-items:center;font-size:12px;padding:2px 0}
 .th-bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}.th-bar i{display:block;height:100%;border-radius:4px}
@@ -1967,11 +1973,11 @@ async function renderThermo(){const box=$('#v-hub');
  box.innerHTML=`<section class="card pad"><div class="between" style="align-items:flex-start"><div><h2 class="h2" style="font-size:20px">盤勢溫度</h2><div class="sub">資料截至 ${TH.asof}・顏色=相對該尺度近期歷史的冷熱・▲▼=當時可知的趨勢翻向・滑過看當天讀數,拖曳框選放大,雙擊還原</div></div><div class="seg" id="th_rg"></div></div>
   <div class="th-cards" id="th_cards"></div><canvas id="th_cv" role="img" aria-label="加權指數與短中長三尺度溫度帶"></canvas>
   <div class="th-legx">
-   <div class="th-lg"><div class="th-lgh">溫度色階</div><span style="height:10px;border-radius:5px;background:linear-gradient(90deg,${[0,10,20,27.5,35,50,65,72.5,80,90,100].map(t=>thGrad(t,C)+' '+t+'%').join(',')})"></span><span class="sub num" style="position:relative;height:14px;font-size:11px">${[[10,'酷寒'],[27.5,'冰'],[50,'溫'],[72.5,'熱'],[90,'滾']].map(([t,n])=>`<span style="position:absolute;left:${t}%;transform:translateX(-50%)">${n}</span>`).join('')}</span></span><div class="th-lgh" style="margin-top:6px">指標</div><span class="sub" style="line-height:1.55">漲跌・乖離・指數均線差・回撤・融資變化・維持率・量能・VIX;中線另加站上 MA60 家數比例</span></div>
-   <div class="th-lg"><div class="th-lgh">線與標記</div>${thLi([['#e8890c','line','過熱(三尺度 ≥65)'],['#1f6fd1','line','酷寒(三尺度 <35 且短線 <20)'],['#2e9e6b','dia','國安基金進場首日'],['#1f6fd1','up','酷寒+下跌爆量(近 5 日收黑且量 ≥ 前 20 日均量 1.3 倍)'],['#1f6fd1','uph','任一尺度酷寒+下跌爆量(任一尺度 <20;研究中,實心之外新增的)']])}</div>
+   <div class="th-lg"><div class="th-lgh">線與標記</div>${thLi([['#e8890c','line','過熱(三尺度 ≥65)'],['#1f6fd1','line','酷寒(三尺度 <35 且短線 <20)'],['#2e9e6b','dia','國安基金進場首日'],['#1f6fd1','up','酷寒+下跌爆量(近 5 日收黑且量 ≥ 前 20 日均量 1.3 倍;20、60 日後 5/5 上漲,但之後仍可能再跌)'],['#1f6fd1','uph','任一尺度酷寒+下跌爆量(任一尺度 <20;研究中,實心之外新增的;多半只是短暫反彈,20 日後上漲 58%)']])}</div>
    <div class="th-lg"><div class="th-lgh">過熱亮燈</div>${thLi([['#d62728','tri','亮燈・之後真的跌 15%'],['#5c6b7d','tri','亮燈・誤報'],['#e8890c','tri','亮燈・進行中']])}<div class="th-lgh" style="margin-top:6px">亮燈期間背景</div><div class="th-lbox">${thLi([['#f9c9d4','box','真・跌 <5%'],['#e06070','box','真・已跌 ≥5%'],['#e4e8ee','box','誤報・跌 <5%'],['#aab4c0','box','誤報・已跌 ≥5%'],['#fbe3b8','box','進行中・跌 <5%'],['#f0a040','box','進行中・已跌 ≥5%']])}</div></div>
+   <div class="th-note"><b>過熱亮燈怎麼讀</b><ul><li>亮燈=過熱後收盤跌破這波高點 5%,隔天亮(過熱結束 60 個交易日內有效);收盤超過高點 2% 解除。</li><li>2007 起 31 盞:真 13、誤報 18(準確率 42%),15% 大跌都有亮。真/誤報是事後才知道(研究中,未回測交易規則)。</li><li>擔心等級=亮燈後最後真跌 15% 的比例:亮燈 0–19 天 ~4 成、20 天以上仍沒創新高 ~3 成</li><li>進度條=離高點跌幅</li></ul></div>
   </div>
-  <div class="th-note"><b>過熱亮燈怎麼讀</b><ul><li>亮燈=過熱後收盤跌破這波高點 5%,隔天亮(過熱結束 60 個交易日內有效);收盤超過高點 2% 解除。</li><li>2007 起 31 盞:真 13、誤報 18(準確率 42%),15% 大跌都有亮。真/誤報是事後才知道(研究中,未回測交易規則)。</li><li>擔心等級=亮燈後最後真跌 15% 的比例:亮燈 0–19 天 ~4 成、20 天以上仍沒創新高 ~3 成</li><li>進度條=離高點跌幅</li></ul></div>
+  <div class="th-lg th-lgrow"><div style="display:flex;flex-direction:column;gap:5px;width:100%;max-width:420px"><div class="th-lgh">溫度色階</div><span style="height:10px;border-radius:5px;background:linear-gradient(90deg,${[0,10,20,27.5,35,50,65,72.5,80,90,100].map(t=>thGrad(t,C)+' '+t+'%').join(',')})"></span><span class="sub num" style="position:relative;height:14px;font-size:11px">${[[10,'酷寒'],[27.5,'冰'],[50,'溫'],[72.5,'熱'],[90,'滾']].map(([t,n])=>`<span style="position:absolute;left:${t}%;transform:translateX(-50%)">${n}</span>`).join('')}</span></div><div style="display:flex;flex-direction:column;gap:5px"><div class="th-lgh">指標</div><span class="sub" style="line-height:1.55">漲跌・乖離・指數均線差・回撤・融資變化・維持率・量能・VIX;中線另加站上 MA60 家數比例</span></div></div>
   <div id="th_det"></div></section>`;
  thSeg();
  const cv=$('#th_cv'),ix=e=>{const g=thGeo(),r=cv.getBoundingClientRect();return Math.max(g.i0,Math.min(g.i1,g.I(e.clientX-r.left)))};
@@ -1988,6 +1994,13 @@ function thGeo(){const cv=$('#th_cv'),w=cv.clientWidth||cv.parentElement.clientW
 // 真/誤 = 解除前從高點跌滿 15%(事後才知道);新酷寒 = 三尺度都 <35 且短線 <20
 function thIco(c,t){const d={line:`<rect x="1" y="6" width="16" height="3" rx="1.5" fill="${c}"/>`,tri:`<path d="M3 3h12l-6 9z" fill="${c}"/>`,up:`<path d="M9 2l6 10H3z" fill="${c}"/>`,uph:`<path d="M9 3l5.2 9H3.8z" fill="none" stroke="${c}" stroke-width="1.6" stroke-linejoin="round"/>`,dia:`<path d="M9 2l5 5.5-5 5.5-5-5.5z" fill="${c}"/>`,box:`<rect x="2" y="3" width="14" height="9" rx="2" fill="${c}"/>`}[t];return `<svg width="18" height="15" viewBox="0 0 18 15" aria-hidden="true">${d}</svg>`}
 function thLi(a){return a.map(([c,t,l])=>{const k=l.indexOf('(');return `<span class="th-li">${thIco(c,t)}<span>${k>0?l.slice(0,k)+`<span class="sub">${l.slice(k)}</span>`:l}</span></span>`}).join('')}
+// 酷寒訊號警示(2026-11-08 計算,2007 起;同訊號 20 日內算一次)
+function thCold(SG,i){const k=SG.KC[i]?'kc':SG.KAC[i]?'kac':'off';
+ const pill={kc:'▲ 酷寒+下跌爆量',kac:'△ 任一尺度酷寒+下跌爆量',off:'未觸發'}[k];
+ const t={kc:'<b>反彈機率高</b>:2007 起 5 次,20 日、60 日後 <b>5 次全部上漲</b>(平均 +10.0%、+18.5%)。<b>但之後仍可能再跌</b>:2020-03-13 訊號後 20 日內最深再跌 14%;2008-01 反彈後半年轉跌 −4.6%,接著金融海嘯。',
+  kac:'<b>小心,這可能只是短暫反彈</b>,歷史上不代表全面性反彈:2007 起 26 次,20 日後上漲機率 58%(平常 60%)、平均 +2.4%。2008-11 訊號後 20 日再跌 13%;2025-03-31 訊號後 5 日跌 16%。',
+  off:'這天沒有酷寒+下跌爆量訊號'}[k];
+ return `<div class="th-cold ${k==='kac'?'warn':k==='off'?'off':''}"><span class="th-lttl">酷寒訊號<span class="th-lpill">${pill}</span></span><div class="th-ctxt">${t}</div></div>`}
 let THS=null;
 function thSig(){if(THS)return THS;const D=TH.dates,C=TH.close,N=C.length,S=TH.scales,v=i=>['short','medium','long'].map(s=>S[s].t[i]).filter(x=>x!=null);
  const W=D.map((_,i)=>{const a=v(i);return a.length>=2&&Math.min(...a)>=65}),K=D.map((d,i)=>{const a=v(i),sh=S.short.t[i];return d>='2007-01-01'&&a.length>0&&Math.max(...a)<35&&sh!=null&&sh<20});
@@ -2048,7 +2061,7 @@ function thInfo(i){const C=thCol(),T=thTxt(),last=i===TH.dates.length-1;
   return `<div class="th-lamp" style="--c:${THLC[L]}"><span class="th-lttl">過熱訊號<span class="th-lpill">${hit?'已跌滿 15%':'亮燈中'}</span></span><span class="th-worry">${hit?'訊號成立':`擔心<b>${k<20?'~4 成':'~3 成'}</b>`}</span><div class="th-mwrap"><div class="th-meter">${seg}</div>${tick}</div><div class="th-lmeta num"><b>${k}</b> 天未創新高・離高 <b>−${(SG.dd[i]*100).toFixed(1)}%</b><br>${TH.dates[cev.s].slice(5).replace('-','/')} 亮燈・站上高點 +2% 解除</div></div>`})();
  $('#th_cards').innerHTML=`<div class="th-date"><span class="sub">${last?'最新交易日':'滑鼠所在日'}</span><b class="num">${TH.dates[i]}</b><span class="sub">加權指數 <b class="num" style="font-size:14px;color:var(--ink)">${Math.round(TH.close[i]).toLocaleString()}</b></span>${SG.KC[i]?'<span class="sub"><b style="color:#1f6fd1;font-size:inherit">▲ 酷寒+下跌爆量</b></span>':SG.KAC[i]?'<span class="sub"><b style="color:#1f6fd1;font-size:inherit">△ 任一尺度酷寒+下跌爆量</b></span>':SG.K[i]?'<span class="sub">新酷寒 <b style="color:#1f6fd1;font-size:inherit">三尺度 &lt;35</b></span>':'<span class="sub">&nbsp;</span>'}</div>`+
   THSC.map(([s,lab,sub])=>{const S=TH.scales[s],t=S.t[i],k=thLv(t),tr=S.tr[i];
-   return `<div class="th-card"><div class="sub">${lab}(${sub})</div><div class="th-row"><span class="th-pill" style="background:${k==null?'var(--btn)':C[k]};color:${k==null?'var(--mute)':T[k]}">${k==null?'暖機中':THN[k]}</span><b class="num">${t??'—'}</b><span class="sub">分</span><span class="${tr>0?'up':tr<0?'dn':'mute'}" style="margin-left:auto;font-weight:700">${tr>0?'趨勢向上 ▲':tr<0?'趨勢向下 ▼':'—'}</span></div></div>`}).join('')+lamp;
+   return `<div class="th-card"><div class="sub">${lab}(${sub})</div><div class="th-row"><span class="th-pill" style="background:${k==null?'var(--btn)':C[k]};color:${k==null?'var(--mute)':T[k]}">${k==null?'暖機中':THN[k]}</span><b class="num">${t??'—'}</b><span class="sub">分</span><span class="${tr>0?'up':tr<0?'dn':'mute'}" style="margin-left:auto;font-weight:700">${tr>0?'趨勢向上 ▲':tr<0?'趨勢向下 ▼':'—'}</span></div></div>`}).join('')+lamp+thCold(SG,i);
  $('#th_det').innerHTML=`<div class="between sub" style="margin:16px 0 8px"><span>各指標讀數:相對該尺度歷史的分位,越右越熱(台指 VIX 已反向)</span><span class="num">融資維持率 ${TH.raw.maintenance[i]==null?'—':TH.raw.maintenance[i]+'%'}・VIX ${TH.raw.vix[i]??'—'}</span></div><div class="th-det">`+
   THSC.map(([s,lab])=>{const P=TH.scales[s].p;return `<div><div class="h2" style="font-size:13px;margin-bottom:6px">${lab}</div>`+Object.keys(P).map(k=>{const v=P[k][i],lv=thLv(v);
    return `<div class="th-ind"><span class="sub">${THK[k]}</span><span class="th-bar">${v==null?'':`<i style="width:${Math.max(3,v)}%;background:${lv===2?'var(--mute2)':C[lv]}"></i>`}</span><b class="num" style="text-align:right">${v??'—'}</b></div>`}).join('')+'</div>'}).join('')+'</div>'}

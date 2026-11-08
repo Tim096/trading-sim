@@ -1855,8 +1855,8 @@ function v41Sel(S){if(!S)return '';const y=S.year,nx=(S.for_year||y)+1,pv=S.prev
 function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">v4.1 現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
  const P=V.presets||{},nm={original:'原策略',sharpe:'研究剃刀版',rolling5y:'確認版(可做空)'},f=x=>x==null?'—':(+x).toFixed(2)+'x',PS=['original','sharpe','rolling5y'].filter(p=>P[p]&&!P[p].error);
  const row=(l,k,n)=>`<tr><td>${l}</td>${PS.map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
- return `<div class="tbl"><table><thead><tr><th>現在槓桿(${esc(V.as_of)})</th>${PS.map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
-  ${row('今天持有','held','理論帳本今天的槓桿')}${row('下一期目標','next','今天收盤訊號算出、15:00 要調到的槓桿(上限 6.5)')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
+ return `<div class="tbl"><table><thead><tr><th>槓桿(訊號日 ${esc(V.as_of)})</th>${PS.map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
+  ${row('今天 15:00 目標','next','今天收盤後的訊號、15:00 下單的槓桿(上限 ±6.5;負 = 空單)')}${row('昨天 15:00 目標','held','前一交易日 15:00 下的部位，持有到今天 15:00')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
   <p class="sub" style="margin:0">訊號:逆價差 z(zb)${V.zb}・大額交易人淨部位 z(zn)${V.zn}・距結算 ${V.dte} 個交易日・逆價差資料 ${esc(V.basis_as_of)}、net10 ${esc(V.net10_as_of)}</p>
   ${v41Sel((P.rolling5y||{}).selection)}
   <div class="tbl"><table><thead><tr><th>差在哪</th><th>原策略</th><th>研究剃刀版</th><th>確認版(可做空)</th></tr></thead><tbody>

@@ -605,7 +605,7 @@ tr.tr-cx>td{color:var(--mute)}
     <div class="focus" id="focus"></div>
     <div class="more">點時間軸上任一點看那一步的說明與每筆單狀態・<span id="rules_now"></span>・<button type="button" class="link" id="flowToggle">展開完整流程 ▾</button></div>
     <div id="flowbox" hidden>
-      <div class="flowhead"><b>每日流程:五個策略今天要做的事</b><span class="sub">各工作做完自己回報狀態・過了時間沒回報標故障・TXN 已併入 v4.1</span></div>
+      <div class="flowhead"><b>每日流程:五個策略今天要做的事</b><span class="sub">各工作做完自己回報狀態・過了時間沒回報標故障・TXN 已併入期貨</span></div>
       <div class="flow" id="sched"></div>
     </div>
   </section>
@@ -632,7 +632,7 @@ tr.tr-cx>td{color:var(--mute)}
         <div class="note">累積績效:五個策略 + 合體 vs 0050;合體依「策略」表右上角選的分配方案計算。</div>
       </div>
       <div class="pbody" data-pane="hist" hidden>
-        <div class="tbl scroll" style="max-height:560px"><table id="hist"><thead><tr><th>日期</th><th class="r">RGMC</th><th class="r">處置股</th><th class="r">v4.1</th><th class="r">TXN</th><th class="r">L1</th><th class="r">L4</th><th class="r">合體</th><th class="r">0050</th><th class="r">超額</th><th class="r">累積</th><th class="r">0050 累積</th></tr></thead><tbody class="num"></tbody></table></div>
+        <div class="tbl scroll" style="max-height:560px"><table id="hist"><thead><tr><th>日期</th><th class="r">RGMC</th><th class="r">處置股</th><th class="r">期貨</th><th class="r">TXN</th><th class="r">L1</th><th class="r">L4</th><th class="r">合體</th><th class="r">0050</th><th class="r">超額</th><th class="r">累積</th><th class="r">0050 累積</th></tr></thead><tbody class="num"></tbody></table></div>
       </div>
       <div class="pbody" data-pane="alloc" id="integ" hidden>
         <div class="sub">資金分配:五個策略怎麼分錢・方案 <b id="ig_cur" style="color:var(--ink)">—</b>(切換在「策略」表右上角,會同時套用到累積績效的合體線)</div>
@@ -762,12 +762,12 @@ tr.tr-cx>td{color:var(--mute)}
     </section>
 
     <section id="fut" class="pbody" data-pane="fut" aria-label="期貨帳戶淨單" hidden>
-      <div class="between"><div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><h2 class="h2"><span class="tag k-V41">期貨</span> <span id="fut_title">期貨帳戶:三個訊號合成一張淨單</span></h2><span class="sub" id="fut_desc">v4.1 槓桿多單 + TXN 隔夜疊加 − L4 避險,同一個帳戶只下淨口數</span></div><span class="sub" id="fut_sub"></span></div>
+      <div class="between"><div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><h2 class="h2"><span class="tag k-V41">期貨</span> <span id="fut_title">期貨帳戶:三個訊號合成一張淨單</span></h2><span class="sub" id="fut_desc">期貨槓桿部位 + TXN 隔夜疊加 − L4 避險,同一個帳戶只下淨口數</span></div><span class="sub" id="fut_sub"></span></div>
       <div class="cfg">TXN 槓桿 <input id="c_ov" class="num" type="number" value="1" step="0.25" min="0" style="width:70px"> 倍 TXN 分配金額・L4 避險依「資金分配」的開關・合約依「策略委託」的設定</div>
       <div id="fut_real" class="priv"></div>
       <div class="strip" id="fut_k"></div>
       <div class="todo" id="fut_sum" style="font-size:14px;line-height:1.7;padding:10px 12px;border-radius:10px;background:var(--panel2)"></div>
-      <div class="tbl scroll"><table id="fut_t"><thead id="fut_th"><tr><th>時間</th><th>這一刻在做什麼</th><th class="r">v4.1</th><th class="r">TXN 疊加</th><th class="r">這筆淨單</th><th class="r">下單後總部位</th></tr></thead><tbody class="num"></tbody></table></div>
+      <div class="tbl scroll"><table id="fut_t"><thead id="fut_th"><tr><th>時間</th><th>這一刻在做什麼</th><th class="r">期貨</th><th class="r">TXN 疊加</th><th class="r">這筆淨單</th><th class="r">下單後總部位</th></tr></thead><tbody class="num"></tbody></table></div>
       <div class="note" id="fut_note"></div>
     </section>
 
@@ -885,7 +885,7 @@ function session(){const now=new Date(),hm=now.toTimeString().slice(0,5),mins=no
 
 // ---- equity chart + daily bars ----
 function chart(rows){const W=800,H=250,box=$('#chart');
- const keys=[['b0050','--mute2','0050 基準',1.5,''],['combo','--c-all','合體(依方案)',2.25,''],['rgmc','--c-rg','RGMC',1.4,'6 4'],['dispo','--c-dp','處置股',1.4,'6 4'],['v41','--c-v4','v4.1',1.4,'6 4'],['txn','--c-txn','TXN',1.4,'6 4'],['l1','--c-l1','L1',1.4,'6 4'],['l4','--c-l4','L4',1.4,'6 4']];
+ const keys=[['b0050','--mute2','0050 基準',1.5,''],['combo','--c-all','合體(依方案)',2.25,''],['rgmc','--c-rg','RGMC',1.4,'6 4'],['dispo','--c-dp','處置股',1.4,'6 4'],['v41','--c-v4','期貨',1.4,'6 4'],['txn','--c-txn','TXN',1.4,'6 4'],['l1','--c-l1','L1',1.4,'6 4'],['l4','--c-l4','L4',1.4,'6 4']];
  if(!rows.length){box.innerHTML='<div class="sub">尚無資料</div>';$('#bars').innerHTML='';return}
  const ser={};keys.forEach(([k])=>{let e=1;ser[k]=[0,...rows.map(r=>(e*=1+(r[k]||0))-1)]});
  const all=Object.values(ser).flat();let lo=Math.min(...all),hi=Math.max(...all);const pd=(hi-lo)*0.08||0.005;lo-=pd;hi+=pd;
@@ -968,13 +968,13 @@ function orders(day,isToday){
 // ---- futures account: one net order ----
 function igToday(){const today=new Date().toISOString().slice(0,10),g=IG.rgmc,dtr=g.days_to_rebal,n=(IG.dispo.notes)||{};
  return {rebalToday:g.pending_action?g.pending_action==='rebalance'&&today>g.as_of:g.regime_on&&dtr!=null&&dtr<=1&&today>g.as_of,dispoOn:(n.capital||0)>=1000,dispoTargets:(n.capital||0)>=1000?Object.entries(IG.dispo.weights).filter(([k])=>k!=='CASH'):[]}}
-// futures sub-rows under v4.1 in the allocation table: TXN overlay and L4 hedge share the v4.1 futures equity
+// futures sub-rows under 期貨 in the allocation table: TXN overlay and L4 hedge share the 期貨 futures equity
 function futRows(amt){const F=futPlan();if(!F)return '';const t=IG.strategies.TXN||{},sub=(k,l,lots,notional,st,why)=>`<tr style="background:var(--card2)"><td style="padding-left:22px">└ ${tag(k)} <span class="sub">${l}</span></td><td class="r sub">共用</td><td class="r">${sm(lots)} 口<div class="sub">名目 ${money(notional)}</div></td>${st}<td style="font-family:inherit;font-size:12px;color:var(--ink3)">${why}</td></tr>`;
  return (F.hedge?sub('L4H','L4 避險',-F.hedge,F.hedge*F.px*F.mul,'<td class="r sub">—</td><td class="r sub">—</td><td class="r sub">—</td>',`空單,抵掉 L4 ${money(amt.L4||0)} 股票的大盤風險(beta 0.9);績效算在 L4 裡`):'')
-  +`<tr style="background:var(--card2)"><td style="padding-left:22px">└ ${tag('ALL')} <span class="sub">期貨淨部位</span></td><td class="r sub">—</td><td class="r"><b>白天 ${F.tgt} / 隔夜 ${F.tgt+F.ovn} 口</b></td><td colspan="3" class="sub">v4.1 ${F.tgt} ${F.txn?'+'+F.txn:''} ${F.hedge?'− '+F.hedge:''}</td><td style="font-family:inherit;font-size:12px;color:var(--ink3)">同一個期貨帳戶只下淨單</td></tr>`}
+  +`<tr style="background:var(--card2)"><td style="padding-left:22px">└ ${tag('ALL')} <span class="sub">期貨淨部位</span></td><td class="r sub">—</td><td class="r"><b>白天 ${F.tgt} / 隔夜 ${F.tgt+F.ovn} 口</b></td><td colspan="3" class="sub">期貨 ${F.tgt} ${F.txn?'+'+F.txn:''} ${F.hedge?'− '+F.hedge:''}</td><td style="font-family:inherit;font-size:12px;color:var(--ink3)">同一個期貨帳戶只下淨單</td></tr>`}
 function futReal(){const today=new Date().toISOString().slice(0,10);return (FT&&FT.date===today&&FT.target_lots!=null)?FT:null}
 function futPlan(){if(!IG)return null;const R=futReal();
- // 有今天的實際下單紀錄 → v4.1 用真實帳戶(權益、持倉、成交,微台等值);否則用研究分配金額估算
+ // 有今天的實際下單紀錄 → 期貨用真實帳戶(權益、持倉、成交,微台等值);否則用研究分配金額估算
  const mul=R?10:+$('#c_ct').value,ctn=R?'微台等值':{10:'微台',50:'小台',200:'大台'}[mul];
  const eq=R?((R.verified||R.before||{}).equity||IGAMT.V41||0):(IGAMT.V41||0);
  const px=R?(R.settle||IG.v41.index_close):((state&&state.tx&&state.tx.last)||IG.v41.index_close),L=x=>Math.round(x*eq/(px*mul));
@@ -982,40 +982,40 @@ function futPlan(){if(!IG)return null;const R=futReal();
  const cur=R?R.current_lots:L(IG.v41.current_lev),tgt=R?R.target_lots:L(IG.v41.execution_target_lev),txn=Math.round(ov*txe/(px*mul)),hedge=hedgeOn?Math.round(0.9*l4n/(px*mul)):0;
  return {mul,ctn,eq,px,ov,txe,hedgeOn,cur,tgt,txn,hedge,ovn:txn-hedge,real:R}}
 function futRender(){const F=futPlan();if(!F)return;const sg=x=>(x>0?'+':x<0?'−':'')+Math.abs(x);
- $('#fut_sub').textContent=F.real?`v4.1 實際帳戶權益 ${money(F.eq)}・結算 ${Math.round(F.px).toLocaleString()}・口數為微台等值`:`v4.1 分配 ${money(F.eq)}・台指 ${Math.round(F.px).toLocaleString()}・${F.ctn}(×${F.mul})`;
+ $('#fut_sub').textContent=F.real?`期貨實際帳戶權益 ${money(F.eq)}・結算 ${Math.round(F.px).toLocaleString()}・口數為微台等值`:`期貨分配 ${money(F.eq)}・台指 ${Math.round(F.px).toLocaleString()}・${F.ctn}(×${F.mul})`;
  const fills=F.real?(F.real.fills||[]).map(f=>`${f.side} ${f.qty} 口 ${f.sym.replace(/J\d$/,'').replace('MXF','小台').replace('TMF','微台').replace('TXF','大台')} @${f.px.toLocaleString()}`).join('、'):'';
  const px_=Math.round(F.px).toLocaleString(),l4amt=IGAMT.L4||0,night=F.tgt+F.ovn,o1330=F.txn-F.hedge;
  $('#fut_k').innerHTML=([
-  ['V41',F.real?'實際:v4.1 目標':'理論:v4.1 今天想持有',`${F.tgt} 口`,F.real?`= 目標槓桿 ${F.real.target_lev}x × 權益 ${money(F.eq)} ÷ (結算 ${px_} × 10);原有 ${F.cur} 口`:`= 目標槓桿 ${IG.v41.execution_target_lev}x × 分配 ${money(F.eq)} ÷ (台指 ${px_} × ${F.mul});目前 ${F.cur} 口`,'--c-v4'],
+  ['V41',F.real?'實際:期貨目標':'理論:期貨今天想持有',`${F.tgt} 口`,F.real?`= 目標槓桿 ${F.real.target_lev}x × 權益 ${money(F.eq)} ÷ (結算 ${px_} × 10);原有 ${F.cur} 口`:`= 目標槓桿 ${IG.v41.execution_target_lev}x × 分配 ${money(F.eq)} ÷ (台指 ${px_} × ${F.mul});目前 ${F.cur} 口`,'--c-v4'],
   ['TXN','TXN 今晚想多買',`+${F.txn} 口`,`= ${F.ov} 倍 × TXN 分配 ${money(F.txe)} ÷ (台指 ${px_} × ${F.mul});13:30 進、明天 09:00 出`,'--c-txn'],
   F.hedge?['L4H','L4 今晚想避險(空)',`−${F.hedge} 口`,`= 0.9 × L4 分配 ${money(IGAMT.L4||0)} ÷ (台指 ${px_} × ${F.mul});13:30 進、明天 09:00 出`,'--c-l4']:null,
   F.real?['ALL','實際帳戶部位',`${F.real.status==='done'?F.tgt:F.cur} 口`,`微台等值・實際`,'--c-all']:['ALL','合起來',`白天 ${F.tgt} / 隔夜 ${night} 口`,`隔夜 = ${F.tgt} ${sg(F.txn)} − ${F.hedge}(TXN 與避險${F.txn===F.hedge?'剛好互相抵銷':'軋差 '+sg(o1330)+' 口'})`,'--c-all']]).filter(c=>c&&(!F.real||c[0]==='V41'||c[0]==='ALL'))
   .map(([k,l,v,n,c])=>`<div class="card kpi" style="--kc:var(${c})"><div class="sub">${tag(k)} ${l}</div><div class="v num">${v}</div><div class="sub">${n}</div></div>`).join('');
- $('#fut_title').textContent=F.real?'期貨帳戶(實際)':'期貨帳戶(理論):v4.1 + TXN'+(HEDGE()?' − L4 避險':'')+' 合成一張淨單';$('#fut_desc').textContent=F.real?'v4.1 自動下單的實際結果(auto_trader)':'v4.1 槓桿多單 + TXN 隔夜疊加 − L4 避險,同一個帳戶只下淨口數';
+ $('#fut_title').textContent=F.real?'期貨帳戶(實際)':'期貨帳戶(理論):期貨 + TXN'+(HEDGE()?' − L4 避險':'')+' 合成一張淨單';$('#fut_desc').textContent=F.real?'期貨自動下單的實際結果(auto_trader)':'期貨槓桿部位 + TXN 隔夜疊加 − L4 避險,同一個帳戶只下淨口數';
  {const c=$('#fut .cfg');if(c)c.style.display=F.real?'none':'';}
  const RD=F.real&&F.real.status==='done',dT=RD?(F.real.done_time||'').slice(0,5):'',dq=F.tgt-F.cur;
  if(F.real){
   $('#fut_sum').innerHTML=(RD?`<b>實際:${dT} 完成今天調倉</b>:${fills||'沒有成交(差額在 deadband 內)'}(微台等值 ${dq>0?'+':''}${dq} 口,${F.cur} → ${F.tgt} 口)`
     :F.real.status==='aborted'?`<b>今天調倉中止</b>:${esc(F.real.abort||'')}`:`<b>今天調倉尚未完成</b>(目標 ${F.tgt} 口,原有 ${F.cur} 口)`)
 ;
-  const R=[['09:00','實際:白天帳戶不動(v4.1 持有)',0,F.cur],
-   [RD?dT:'15:00',RD?`實際:完成今天調倉・${fills||'無成交'}`:'v4.1 夜盤調槓桿(尚未完成)',dq,RD?F.tgt:F.cur]];
-  $('#fut_th').innerHTML='<tr><th>時間</th><th>實際動作</th><th class="r">v4.1</th><th class="r">這筆淨單</th><th class="r">下單後總部位</th></tr>';
+  const R=[['09:00','實際:白天帳戶不動(期貨持有)',0,F.cur],
+   [RD?dT:'15:00',RD?`實際:完成今天調倉・${fills||'無成交'}`:'期貨夜盤調槓桿(尚未完成)',dq,RD?F.tgt:F.cur]];
+  $('#fut_th').innerHTML='<tr><th>時間</th><th>實際動作</th><th class="r">期貨</th><th class="r">這筆淨單</th><th class="r">下單後總部位</th></tr>';
   $('#fut_t tbody').innerHTML=R.map(r=>`<tr class="${r[2]&&RD?'ok-row':''}"><td>${r[0]}</td><td style="font-family:inherit">${r[1]}</td><td class="r">${r[2]?sg(r[2]):'—'}</td><td class="r"><b class="${r[2]>0?'up':r[2]<0?'dn':''}">${r[2]?(r[2]>0?'買 ':'賣 ')+Math.abs(r[2])+' 口':'不下單'}</b></td><td class="r">${r[3]} 口</td></tr>`).join('');
  } else {
-  $('#fut_th').innerHTML='<tr><th>時間</th><th>這一刻在做什麼</th><th class="r">v4.1</th><th class="r">TXN 疊加</th><th class="r">這筆淨單</th><th class="r">下單後總部位</th></tr>';
- $('#fut_sum').innerHTML=(F.real?`<b>今天的期貨單</b><span class="sub">(實際帳戶只做 15:00 的 v4.1;13:30 / 09:00 的 TXN 只算理論部位,沒有實際下單)</span>:`:`<b>今天實際只要下的單:</b>`)
+  $('#fut_th').innerHTML='<tr><th>時間</th><th>這一刻在做什麼</th><th class="r">期貨</th><th class="r">TXN 疊加</th><th class="r">這筆淨單</th><th class="r">下單後總部位</th></tr>';
+ $('#fut_sum').innerHTML=(F.real?`<b>今天的期貨單</b><span class="sub">(實際帳戶只做 15:00 的期貨;13:30 / 09:00 的 TXN 只算理論部位,沒有實際下單)</span>:`:`<b>今天實際只要下的單:</b>`)
   +`13:30 ${o1330?`<b class="${o1330>0?'up':'dn'}">${o1330>0?'買':'賣'} ${Math.abs(o1330)} 口</b>(TXN${F.hedge?' +'+F.txn+'、L4 避險 −'+F.hedge+' 軋差':''})`:'<b>不用下單</b>'}・`
-  +`15:00 ${F.real&&F.real.status==='done'?`<b>已成交</b> ${fills||'無(差額在 deadband 內)'}(v4.1 ${F.cur} → ${F.tgt} 口微台等值)`:F.tgt-F.cur?`<b class="${F.tgt>F.cur?'up':'dn'}">${F.tgt>F.cur?'買':'賣'} ${Math.abs(F.tgt-F.cur)} 口</b>(v4.1 ${F.cur} → ${F.tgt})`:'<b>不用下單</b>(v4.1 不變)'}・`
+  +`15:00 ${F.real&&F.real.status==='done'?`<b>已成交</b> ${fills||'無(差額在 deadband 內)'}(期貨 ${F.cur} → ${F.tgt} 口微台等值)`:F.tgt-F.cur?`<b class="${F.tgt>F.cur?'up':'dn'}">${F.tgt>F.cur?'買':'賣'} ${Math.abs(F.tgt-F.cur)} 口</b>(期貨 ${F.cur} → ${F.tgt})`:'<b>不用下單</b>(期貨不變)'}・`
   +`明天 09:00 ${o1330?`<b class="${o1330>0?'dn':'up'}">${o1330>0?'賣':'買'} ${Math.abs(o1330)} 口</b>(把 13:30 那筆平掉)`:'<b>不用下單</b>'}。`;
  const hm=new Date().toTimeString().slice(0,5);
- const R=[['09:00',F.real?'TXN 平倉(不下單)':'TXN 平倉(白天只留 v4.1)',0,-F.txn,F.hedge,F.cur],
+ const R=[['09:00',F.real?'TXN 平倉(不下單)':'TXN 平倉(白天只留期貨)',0,-F.txn,F.hedge,F.cur],
   ['13:30',F.real?'TXN 進場(不下單)':'TXN 進場',0,F.txn,-F.hedge,F.cur+F.ovn],
-  ['15:00',F.real&&F.real.status==='done'?`v4.1 夜盤調槓桿・實際成交:${fills||'無'}`:'v4.1 夜盤調槓桿(疊加口數不動)',F.tgt-F.cur,0,0,F.tgt+F.ovn]];
+  ['15:00',F.real&&F.real.status==='done'?`期貨夜盤調槓桿・實際成交:${fills||'無'}`:'期貨夜盤調槓桿(疊加口數不動)',F.tgt-F.cur,0,0,F.tgt+F.ovn]];
  let cur=-1;R.forEach((r,i)=>{if(hm>=r[0])cur=i});
  $('#fut_t tbody').innerHTML=R.map((r,i)=>{const net=r[2]+r[3]+r[4];return `<tr class="${i===cur?'ok-row':''}"><td>${r[0]}</td><td style="font-family:inherit">${r[1]}</td><td class="r">${r[2]?sg(r[2]):'—'}</td><td class="r">${r[3]?sg(r[3]):'—'}</td><td class="r"><b class="${net>0?'up':net<0?'dn':''}">${net?(net>0?'買 ':'賣 ')+Math.abs(net)+' 口':'不下單'}</b></td><td class="r">${r[5]} 口</td></tr>`}).join('');
  }
- $('#fut_note').style.display=F.real?'none':'';$('#fut_note').textContent='為什麼這樣合:v4.1 不動、晚上多疊 1 倍 TXN,回測(2020-01 ~ 2026-04,v4.1 有部位期間,扣成本,疊加上限 6.5 倍)Sharpe 1.79 → 1.84、年化 179% → 217%、MDD −64% → −62%。把 v4.1 改成只抱晚上反而變差(1.11~1.24;13:45 進 08:45 出 0.95),因為 v4.1 白天也賺(每天 +9bp)。實作要點:15:00 auto_trader 的目標口數 = v4.1 目標 + 當時還沒平的疊加口數,否則它會把 TXN 口數當成多的賣掉。'}
+ $('#fut_note').style.display=F.real?'none':'';$('#fut_note').textContent='為什麼這樣合:期貨(研究時是 v4)不動、晚上多疊 1 倍 TXN,回測(2020-01 ~ 2026-04,v4 有部位期間,扣成本,疊加上限 6.5 倍)Sharpe 1.79 → 1.84、年化 179% → 217%、MDD −64% → −62%。把 v4 改成只抱晚上反而變差(1.11~1.24;13:45 進 08:45 出 0.95),因為 v4 白天也賺(每天 +9bp)。實作要點:15:00 auto_trader 的目標口數 = 期貨目標 + 當時還沒平的疊加口數,否則它會把 TXN 口數當成多的賣掉。'}
 
 // ---- capacity ----
 function capacity(day){const p=+$('#part').value;const rows=[];
@@ -1025,11 +1025,11 @@ function capacity(day){const p=+$('#part').value;const rows=[];
  const lots=(state.cap&&state.cap.tx_lots)||0,nl=(state.cap&&state.cap.tx_notional_lot)||0;
  if(IG){IG.rgmc.rows.forEach(r=>rows.push({k:'RGMC',s:`<span class="code">${r.sid}</span> ${nm(r.sid)}${dtag(r.sid)}`,amt:r.amt||0,adv:r.adv20||0}));
   Object.entries(IG.dispo.liq||{}).forEach(([sid,x])=>rows.push({k:'DISPO',s:`<span class="code">${sid}</span> ${nm(sid)}${dtag(sid)}`,amt:x.amt||0,adv:x.adv20||0}))}
- rows.push({k:'V41',s:`台指期(今日 ${lots.toLocaleString()} 口・v4.1 + TXN 共用)`,amt:lots*nl,adv:lots*nl});
+ rows.push({k:'V41',s:`台指期(今日 ${lots.toLocaleString()} 口・期貨 + TXN 共用)`,amt:lots*nl,adv:lots*nl});
  const sum=k=>rows.filter(r=>r.k===k).reduce((a,r)=>a+p*(r.amt||r.adv),0);
  const c1=sum('L1'),c4=sum('L4'),ct=sum('V41'),cr=sum('RGMC'),cd=sum('DISPO');
  const al=k=>IGAMT[k]?`分配 ${money(IGAMT[k])}`:'';
- $('#capk').innerHTML=[['RGMC','RGMC 可放',cr,`持股合計・${al('RGMC')}`,'--c-rg'],['DISPO','處置股可放',cd,`候選合計・處置股撮合較慢・${al('DISPO')}`,'--c-dp'],['V41','台指期可放',ct,`v4.1 + TXN 共用・${al('V41')}`,'--c-v4'],['L1','L1 今天可放',c1,'','--c-l1'],['L4','L4 今天可放',c4,`收盤競價,建議用 1%・${al('L4')}`,'--c-l4']]
+ $('#capk').innerHTML=[['RGMC','RGMC 可放',cr,`持股合計・${al('RGMC')}`,'--c-rg'],['DISPO','處置股可放',cd,`候選合計・處置股撮合較慢・${al('DISPO')}`,'--c-dp'],['V41','台指期可放',ct,`期貨 + TXN 共用・${al('V41')}`,'--c-v4'],['L1','L1 今天可放',c1,'','--c-l1'],['L4','L4 今天可放',c4,`收盤競價,建議用 1%・${al('L4')}`,'--c-l4']]
   .map(([k,l,v,n,c])=>`<div class="card kpi" style="--kc:var(${c})"><div class="sub">${tag(k)} ${l}</div><div class="v num">${money(v)}</div><div class="sub">${n}</div></div>`).join('');
  $('#cap tbody').innerHTML=rows.map(r=>`<tr><td>${tag(r.k)}</td><td>${r.s}</td><td class="r">${money(r.amt)}</td><td class="r">${money(r.adv)}</td><td class="r">${money(p*r.amt)}</td><td class="r">${money(p*r.adv)}</td></tr>`).join('')}
 
@@ -1183,7 +1183,7 @@ async function render(){
   ['13:26','空單保險','固定程式,不經核准:所有淨空(含手動單)扣掉已掛的買單,用漲停價買回;13:31 收盤後還有空單 → TG 🔴',['系統','L1'],['13:35','13:40'],'safety',T0],
   ['13:30','TXN 隔夜','監看程式算理論部位:TXN 買進台指期,抱到明天 09:00',['TXN'],['13:35','13:40']],
   ['13:40','盤後檢查','比對成交與計畫、未成交、空單、帳本和券商的差異;帳本修正每筆附理由。只回報',['系統'],['13:50','15:05'],'post',T0],
-  ['15:00','期貨調倉','v4.1 夜盤調整口數(元大,只下淨口數)',['V41'],['15:05','16:05']],
+  ['15:00','期貨調倉','期貨夜盤調整口數(元大,只下淨口數)',['V41'],['15:05','16:05']],
   ['16:10','研究數據更新','當天資料到齊後(17:30 補抓後)自動重算六策略報酬與組合圖,網站畫到今天(約 16 分鐘)',['系統'],['20:00','20:30']],
   ['17:30','收盤資料補抓','15:3x 那次上櫃資料常常還沒上架,17:30 重抓一次,隔天早盤資訊包才不缺檔',['系統'],['17:35','18:00'],'17:30',T0],
   ['21:00','公開頁','auto_daily 把監看台快照(遮掉實單/帳戶)推到 github.io',['系統'],['21:10','21:30'],'21:00',T0]];
@@ -1344,7 +1344,7 @@ function details(){if(!IG)return;detailStack3();detailU15();detailLA();const tod
  $('#d_v41_t2 thead').innerHTML=th([['項目'],['數值','r']]);
  const hist=(v.lev_hist||[]).map(x=>x[1]);
  $('#d_v41_t2 tbody').innerHTML=[['目前槓桿',v.current_lev+'x'],['今天目標槓桿',v.execution_target_lev+'x'],['槓桿上限',v.gap_cap+'x'],['訊號口徑',v.execution_policy],['基差 / net10 資料日',`${v.basis_as_of} / ${v.net10_as_of}`]].map(([a,b])=>`<tr><td>${a}</td><td class="r">${esc(b)}</td></tr>`).join('')+`<tr><td>近 ${hist.length} 天槓桿</td><td>${spark(hist,css('--c-v4'))}</td></tr>`;
- $('#d_v41_note').textContent=`期貨用同一套 8 欄:股數→口數,目前權重 / 換股時目標→槓桿(名目 ÷ 權益),依分配金額→依分配金額換算的口數;成本 = v4.1 理論帳本的平均成本(${v.avg_cost_since||'—'} 換月建倉起算,加碼加權平均、減碼不變;實際帳戶成本未接)。理論值來自 run_v41(13:45 結算價口徑,會高估報酬)。實盤由 futures/auto_trader.py 每天 15:00 依權益算口數。10/15 理論單日 −24.9%(台指 −3.8% × 約 6.5 倍槓桿)。`;
+ $('#d_v41_note').textContent=`期貨用同一套 8 欄:股數→口數,目前權重 / 換股時目標→槓桿(名目 ÷ 權益),依分配金額→依分配金額換算的口數;成本 = 期貨理論帳本的平均成本(${v.avg_cost_since||'—'} 換月建倉起算,加碼加權平均、減碼不變;實際帳戶成本未接)。理論值來自 run_v41(13:45 結算價口徑,會高估報酬)。實盤由 futures/auto_trader.py 每天 15:00 依權益算口數。10/15 理論單日 −24.9%(台指 −3.8% × 約 6.5 倍槓桿)。`;
 }
 
 // STACK3 先不上網頁(使用者 2026-10-19 指示):資料照產生,畫面不顯示
@@ -1383,8 +1383,8 @@ function integ(){
 ;
  igChart();
  // conflict rules + today's checks
- const R=[[true,'期貨只下一張淨單','v4.1、TXN(各自一份資金)和 L4 避險(可開關)在同一個期貨帳戶軋成淨口數;15:00 v4.1 調倉時要把當時未平的疊加與避險口數算進去,否則會被當成多出來的口數修掉'],
-  [true,'資金不互相佔用','L1 用當沖額度(收盤前平倉不佔現金);L4 隔夜佔現金(T+2 交割,隔天賣出回補);v4.1 用期貨帳戶保證金']];
+ const R=[[true,'期貨只下一張淨單','期貨、TXN(各自一份資金)和 L4 避險(可開關)在同一個期貨帳戶軋成淨口數;15:00 期貨調倉時要把當時未平的疊加與避險口數算進去,否則會被當成多出來的口數修掉'],
+  [true,'資金不互相佔用','L1 用當沖額度(收盤前平倉不佔現金);L4 隔夜佔現金(T+2 交割,隔天賣出回補);期貨策略用期貨帳戶保證金']];
  $('#ig_rules').innerHTML=R.map(([ok,t,d])=>`<div><span class="pill ${ok?'t-ok':'t-risk'}" style="font-size:11px;padding:2px 7px">${ok?'OK':'注意'}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:700;color:var(--ink)">${t}</span><span style="font-size:12px;color:var(--ink3);line-height:1.5">${esc(d)}</span></div></div>`).join('');
  // correlation
  const K=['RGMC','DISPO','V41','L1','L4','TXN'];
@@ -1394,7 +1394,7 @@ function integ(){
  $('#ig_note').textContent='回測期間 '+IG.window.join(' ~ ')+'。'+IG.notes.join('。')+'。權重 = 最近一年的平均權重;反波動 = 波動越大的策略分越少。分配是研究建議,實際配置由你決定。';
 }
 
-// ---- 今天 v4.1 期貨實際下單(futures_today.json:serve.py 在 auto_daily 期貨完成後解析 futures/auto_trader.log)----
+// ---- 今天期貨實際下單(futures_today.json:serve.py 在 auto_daily 期貨完成後解析 futures/auto_trader.log)----
 let FT=null;
 async function loadFT(){try{FT=await (await fetch('futures_today.json?'+Date.now())).json()}catch(e){FT=null}renderFT()}
 function renderFT(){const box=$('#fut_real');if(!box)return;const today=new Date().toISOString().slice(0,10);
@@ -1403,7 +1403,7 @@ function renderFT(){const box=$('#fut_real');if(!box)return;const today=new Date
  const mix=s=>(s||'').replace(/[{}' ]/g,'').replace(/MXF:/,'小台 ').replace(/TMF:/,'微台 ').replace(/TXF:/,'大台 ').replace(/,/g,'、');
  const rows=(FT.fills||[]).map(f=>`<tr><td>${f.time}</td><td>${f.side}</td><td>${esc(f.sym)}</td><td class="r">${f.qty}</td><td class="r">${f.px.toLocaleString()}</td></tr>`).join('')||'<tr><td colspan="5" class="sub">沒有成交(差額在 deadband 內或中止)</td></tr>';
  box.innerHTML=`<div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:8px;background:var(--card2)">
-  <div class="between"><b>今天 v4.1 實際下單(auto_trader)</b><span><span class="pill ${st[0]}" style="font-size:11px">${st[1]}</span> <span class="sub num">${FT.done_time||''}・嘗試 ${FT.attempts||0} 次</span></span></div>
+  <div class="between"><b>今天期貨實際下單(auto_trader)</b><span><span class="pill ${st[0]}" style="font-size:11px">${st[1]}</span> <span class="sub num">${FT.done_time||''}・嘗試 ${FT.attempts||0} 次</span></span></div>
   <div class="num" style="font-size:13px;color:var(--ink2);line-height:1.7">目標槓桿 <b>${FT.target_lev??'—'}x</b>(結算價 ${FT.settle?.toLocaleString()??'—'})・目標 ${FT.target_lots??'—'} 口 / 原有 ${FT.current_lots??'—'} 口 / 差 ${FT.diff>0?'+':''}${FT.diff??'—'} 口(微台等值)・拆單 ${esc(FT.split||'—')}<br>
   驗倉:${FT.verified?`${FT.verified.lots_micro} 口(${mix(FT.verified.mix)})・權益 ${money(FT.verified.equity)}`:'—'}${FT.abort?`<br><span class="warn">${esc(FT.abort)}</span>`:''}</div>
   <div class="tbl"><table><thead><tr><th>時間</th><th>方向</th><th>合約</th><th class="r">口數</th><th class="r">成交價</th></tr></thead><tbody class="num">${rows}</tbody></table></div>
@@ -1485,7 +1485,7 @@ function toggleFlow(){const f=$('#flowbox');f.hidden=!f.hidden;drawFlow();if(!f.
 // [key, 名稱, 說明, 顏色, 報酬欄位, 明細區塊 id(null = 由程式產生)]
 const BROWS=[['grp','合起來'],['ALL','合體','','--c-all','combo',null],['BM','0050 基準','同期比較','--c-bm','b0050',''],
  ['grp','每日訊號'],['RGMC','RGMC','動能選股・每 7 交易日換股','--c-rg','rgmc','d_rgmc'],['DISPO','處置股','出關前倒數進場','--c-dp','dispo','d_dispo'],
- ['V41','v4.1','台指期槓桿多單(保證金)','--c-v4','v41','d_v41'],['TXN','TXN','台指期 13:30 買 → 09:00 賣','--c-txn','txn',null],
+ ['V41','期貨','台指期槓桿部位(保證金;v6 可做空)','--c-v4','v41','d_v41'],['TXN','TXN','台指期 13:30 買 → 09:00 賣','--c-txn','txn',null],
  ['L1','L1','跳空 ≥ 6.5% 開盤放空・當沖','--c-l1','l1','l1'],['L4','L4','籌碼前 5 檔・收盤買開盤賣・不避險','--c-l4','l4','d_l4'],
  ['grp','季度 / 手動(不在資金分配方案內)'],['U15','ultra15','季調多因子 15 檔・累積 = 本季','--c-u15','','d_u15'],['LA','long_alloc','雙池配置・永遠手動','--c-la','','d_la']];
 function boardOpen(){try{return new Set(JSON.parse(localStorage.getItem('board_open')||'[]'))}catch(e){return new Set()}}
@@ -1845,22 +1845,22 @@ async function renderTrader(){const box=$('#v-hub');let d=(selDay||new Date(Date
    ${TR.journal?`<details data-tk="tr-journal"><summary>journal</summary><div class="md">${mdh(TR.journal)}</div></details>`:''}
    ${TR.lessons?`<details data-tk="tr-lessons"><summary>給操盤手的提醒(lessons)</summary><div class="md">${mdh(TR.lessons)}</div></details>`:''}</section></div>`);renderCapOpts()}
 
-// 操盤手分頁底部:資金方案目標(sharpe / cagr / 11-06 原參數)與 v4.1 參數組;寫 config(serve.py /api/objective)
+// 操盤手分頁底部:資金方案目標(sharpe / cagr / 11-06 原參數)與期貨版本 v4/v5/v6;寫 config(serve.py /api/objective)
 let CAPT=null,CAPIN=null;   // 操盤手分頁的總資金預覽 / 正在輸入的數字(30 秒重畫不洗掉)
-// v4.1 兩個參數組的現在槓桿(integration.json v41_presets,build_integration 每天重算)+ 差異 + 第一性原理說明
-// 確認版(rolling5y,2026-11-08):每年 1 月用前 5 個完整年度重選參數;選參狀態 + 提醒
+// 期貨三個版本的現在槓桿(integration.json v41_presets,build_integration 每天重算)+ 差異 + 第一性原理說明
+// v6 確認版(舊稱 rolling5y,2026-11-08):每年 1 月用前 5 個完整年度重選參數;選參狀態 + 提醒
 function v41Sel(S){if(!S)return '';const y=S.year,nx=(S.for_year||y)+1,pv=S.preview&&S.preview.pick;
  const warn=S.stale?`<span class="pill t-risk" style="font-size:11px">⚠ ${S.for_year} 年還沒重選,沿用 ${y} 年</span> `:(pv&&pv!==S.pick?`<span class="pill t-disp" style="font-size:11px">最新 5 年窗預覽改選 ${esc(pv)},明年 1 月可能換參數</span> `:'');
- return `<p class="sub" style="margin:0">${warn}確認版選參:<b style="color:var(--ink)">${y} 年用 ${esc(S.pick)}</b>(用 ${esc(S.window[0])}~${esc(S.window[1])} 的 Sharpe 挑;算於 ${esc(S.computed_at)})・下次重選 ${nx} 年 1 月第一個交易日 15:00 前自動跑，結果推 TG${pv?`・目前預覽 ${esc(pv)}`:''}</p>`}
-function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">v4.1 現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
- const P=V.presets||{},nm={original:'原策略',sharpe:'研究剃刀版',rolling5y:'確認版(可做空)'},f=x=>x==null?'—':(+x).toFixed(2)+'x',PS=['original','sharpe','rolling5y'].filter(p=>P[p]&&!P[p].error);
+ return `<p class="sub" style="margin:0">${warn}v6 選參:<b style="color:var(--ink)">${y} 年用 ${esc(S.pick)}</b>(用 ${esc(S.window[0])}~${esc(S.window[1])} 的 Sharpe 挑;算於 ${esc(S.computed_at)})・下次重選 ${nx} 年 1 月第一個交易日 15:00 前自動跑，結果推 TG${pv?`・目前預覽 ${esc(pv)}`:''}</p>`}
+function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">期貨現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
+ const P=V.presets||{},nm={v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)'},f=x=>x==null?'—':(+x).toFixed(2)+'x',PS=['v4','v5','v6'].filter(p=>P[p]&&!P[p].error);
  const row=(l,k,n)=>`<tr><td>${l}</td>${PS.map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
  return `<div class="tbl"><table><thead><tr><th>槓桿(訊號日 ${esc(V.as_of)})</th>${PS.map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
   ${row('今天 15:00 目標','next','今天收盤後的訊號、15:00 下單的槓桿(上限 ±6.5;負 = 空單)')}${row('昨天 15:00 目標','held','前一交易日 15:00 下的部位，持有到今天 15:00')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
   <p class="sub" style="margin:0">訊號:逆價差 z(zb)${V.zb}・大額交易人淨部位 z(zn)${V.zn}・距結算 ${V.dte} 個交易日・逆價差資料 ${esc(V.basis_as_of)}、net10 ${esc(V.net10_as_of)}</p>
-  ${v41Sel((P.rolling5y||{}).selection)}
-  <div class="tbl"><table><thead><tr><th>差在哪</th><th>原策略</th><th>研究剃刀版</th><th>確認版(可做空)</th></tr></thead><tbody>
-   <tr><td>net10 太高時</td><td>越高越加碼,z ≥ 2 最滿</td><td>z > 0.5 起反過來減碼(折返 λ=2)</td><td>同剃刀版;太高時可翻成空單</td></tr>
+  ${v41Sel((P.v6||{}).selection)}
+  <div class="tbl"><table><thead><tr><th>差在哪</th><th>v4 原版</th><th>v5 剃刀版</th><th>v6 確認版(可做空)</th></tr></thead><tbody>
+   <tr><td>net10 太高時</td><td>越高越加碼,z ≥ 2 最滿</td><td>z > 0.5 起反過來減碼(折返 λ=2)</td><td>同 v5;太高時可翻成空單</td></tr>
    <tr><td>net10 乘數範圍</td><td>0.4–2.0,冪次 0.4</td><td>0.2–2.0,冪次 0.7</td><td>−0.4–2.0(負 = 空單),冪次 0.7</td></tr>
    <tr><td>逆價差乘數下限</td><td>0.25</td><td>0(逆價差不深時可以不做)</td><td>0</td></tr>
    <tr><td>基礎倍數 k</td><td>4.0</td><td>6.93(讓平均槓桿一樣約 3.5x)</td><td>6.93</td></tr>
@@ -1870,10 +1870,10 @@ function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">v4.1 �
    <tr><td>成績(2022 起樣本外 WF,滑價 4.5 點)</td><td>年化 128%・Sharpe 1.37・MDD −74%</td><td>年化 217%・Sharpe 1.73・MDD −61%</td></tr></tbody></table></div>
   <details data-tk="v41-why"><summary>為什麼這樣改(第一性原理)</summary><div class="md" style="font-size:13px;line-height:1.75">
    <p><b>1. 賺什麼、怎麼活下來。</b>賺台指期長期往上漂的錢(股市長期上漲,加上逆價差換月收斂;後者約 85% 來自除息季的股利),用槓桿放大。跌破 200 日均線就空手,當崩盤保險;上限 6.5 倍是因為台指單日最多跌 10%、史上最壞連兩天 −14.7%,6.5 倍不會爆倉。</p>
-   <p><b>2. 槓桿的真實成本是波動的平方。</b>平均槓桿一樣,把槓桿從「沒有 edge 又波動大」的日子挪到「有 edge」的日子,長期複利會明顯變好。剃刀版只做這件事,整體沒有多開。</p>
-   <p><b>3. 逆價差。</b>期貨比現貨便宜越多,抱期貨本身就多賺,所以深逆價差時加碼合理;但資料顯示只有很深時才有額外好處,不深時沒有 → 剃刀版允許降到 0。</p>
-   <p><b>4. net10(大額交易人淨部位的 z 分數)。</b>原策略假設「大戶越看多越該跟」。資料是倒 U:適度看多(z 0–0.75)隔天平均 +34bp;極端(z > 1.5)反而 −5bp、波動更大。可能是擁擠(該買的都買了)或大戶在避險壓力下,機制還沒證實。原策略剛好在最沒 edge、波動最大的時候開最滿,剃刀版在這時減碼。</p>
-   <p><b>5. 限制。</b>net10 只有 2019 年起,樣本外只考了 5 年;10/08、10/15 那兩天 net10 不高,剃刀版一樣躲不掉;剃刀版頂到 6.5 上限的天數比較多(28% vs 25%),跳空爆倉那條線沒變。選哪一組是你的決定。</p>
+   <p><b>2. 槓桿的真實成本是波動的平方。</b>平均槓桿一樣,把槓桿從「沒有 edge 又波動大」的日子挪到「有 edge」的日子,長期複利會明顯變好。v5 剃刀版只做這件事,整體沒有多開。</p>
+   <p><b>3. 逆價差。</b>期貨比現貨便宜越多,抱期貨本身就多賺,所以深逆價差時加碼合理;但資料顯示只有很深時才有額外好處,不深時沒有 → v5 剃刀版允許降到 0。</p>
+   <p><b>4. net10(大額交易人淨部位的 z 分數)。</b>v4 原版假設「大戶越看多越該跟」。資料是倒 U:適度看多(z 0–0.75)隔天平均 +34bp;極端(z > 1.5)反而 −5bp、波動更大。可能是擁擠(該買的都買了)或大戶在避險壓力下,機制還沒證實。v4 原版剛好在最沒 edge、波動最大的時候開最滿,v5 剃刀版在這時減碼。</p>
+   <p><b>5. 限制。</b>net10 只有 2019 年起,樣本外只考了 5 年;10/08、10/15 那兩天 net10 不高,v5 一樣躲不掉;v5 頂到 6.5 上限的天數比較多(28% vs 25%),跳空爆倉那條線沒變。選哪一組是你的決定。</p>
    <p class="sub">來源:CTS-research research_lab/probes/2026-11-06_burn_opt/v41/REPORT_v1.md</p></div></details>`}
 let VP=null;
 async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_options?'+Date.now());O=await r.json()}catch(e){return}
@@ -1882,7 +1882,7 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
  let sec=document.getElementById('tr-capopts');if(!sec){sec=document.createElement('section');sec.id='tr-capopts';sec.className='card pad tr-sec';hub.appendChild(sec)}
  const p=x=>(x*100).toFixed(0)+'%',cards=Object.entries(O.options).map(([k,v])=>{const on=k===O.objective,P=v.params;
   return `<div class="scard${on?' s-live':''}"><span class="nm">${esc(v.label)}${on?' <span class="pill t-ok" style="font-size:11px">使用中</span>':''}</span>
-   <p class="sm">L1 名目 ${P.l1_notional_x}×・v4.1 ×${(P.sleeve_mult||{}).V41??1}・${(P.drop||[]).length?'拿掉 '+P.drop.join('、'):'全部策略'}・${P.invvol_lookback} 日反波動、${P.rebalance_days} 日換</p>
+   <p class="sm">L1 名目 ${P.l1_notional_x}×・期貨 ×${(P.sleeve_mult||{}).V41??1}・${(P.drop||[]).length?'拿掉 '+P.drop.join('、'):'全部策略'}・${P.invvol_lookback} 日反波動、${P.rebalance_days} 日換</p>
    <div class="sc-kpi"><span class="m">本機重算 ${esc(v.local.window[0].slice(0,7))} 起:年化 ${p(v.local.cagr)}・Sharpe ${v.local.sharpe.toFixed(2)}・MDD ${p(v.local.mdd)}</span><span class="bt">研究所 WF:${esc(v.research)}</span></div>
    ${on?'':`<button type="button" class="btn" data-obj="${k}">改用這個</button>`}</div>`}).join('');
  sec.innerHTML=`<div class="stg-h"><h2 class="h2">資金方案目標</h2><span class="sub">總資金 ${O.total?Math.round(O.total/1e4).toLocaleString()+' 萬':'0(測試期)'}・換了會重算各策略資本額,隔天早盤生效</span></div>
@@ -1893,14 +1893,14 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
    ${CAPT?`<div style="white-space:pre-wrap;font-size:12.5px;color:var(--ink2);line-height:1.65">${esc(CAPT.text)}</div>`:''}
    <span class="bt">確認後寫進 config 各策略資本額,隔天早盤生效;每天期貨跑完 TG 兩個帳戶該匯多少(也在「控制」分頁)。TG 也可以打 /capital 1000萬。</span></div>
   <div class="scards">${cards}</div>
-  <h3 class="h2" style="font-size:14px;margin:6px 0 0">v4.1 參數組</h3>
+  <h3 class="h2" style="font-size:14px;margin:6px 0 0">期貨版本</h3>
   ${v41Box(VP)}
-  <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換 v4.1 參數組</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${({original:'原策略',sharpe:'研究剃刀版',rolling5y:'確認版(可做空)'})[v]||v}</button>`).join('')}</div>
+  <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換期貨版本</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${({v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)'})[v]||v}</button>`).join('')}</div>
   <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
  sec.onclick=async e=>{const c=e.target.closest('button[data-cap]');
   if(c){try{const go=c.dataset.cap==='1'&&CAPT,t=+(($('#tr_cap_in')||{}).value||0),j=await opPost('api/capital',{total:go?CAPT.total:t,confirm:!!go});CAPT=go?null:j;if(go)CAPIN=null;renderCapOpts(go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入')}catch(err){renderCapOpts('❌ '+err.message)}return}
   const b=e.target.closest('button[data-obj],button[data-v41]');if(!b)return;
-  try{const j=await opPost('api/objective',{objective:b.dataset.obj||O.objective,v41_preset:b.dataset.v41||O.v41_preset});renderCapOpts(`已改成 ${O.options[j.objective].label}・v4.1 ${({original:'原策略',sharpe:'研究剃刀版',rolling5y:'確認版(可做空)'})[j.v41_preset]||j.v41_preset}`)}catch(err){renderCapOpts('❌ '+err.message)}}}
+  try{const j=await opPost('api/objective',{objective:b.dataset.obj||O.objective,v41_preset:b.dataset.v41||O.v41_preset});renderCapOpts(`已改成 ${O.options[j.objective].label}・期貨 ${({v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)'})[j.v41_preset]||j.v41_preset}`)}catch(err){renderCapOpts('❌ '+err.message)}}}
 // ---- 控制(臨時休市 / 紙上監看開關 / 重開機):serve.py /api/*,只有本機與 tailnet 進得來 ----
 async function opPost(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});
  const j=await r.json().catch(()=>({error:'HTTP '+r.status}));if(!r.ok||j.error)throw new Error(j.error||('HTTP '+r.status));return j}
@@ -1910,7 +1910,7 @@ function capCard(C){const m=x=>x==null?'—':(Math.abs(x)>=1e5?Math.round(x/1e4)
  const c=C&&C.cts||{},y=C&&C.yuanta||{},tot=C&&C.total||0,p=C&&C.plan;
  const pay=c.ok?(c.pay>0?`要付 <b class="num">${c.pay.toLocaleString()}</b> 元`:c.pay<0?`會入帳 <b class="num">${(-c.pay).toLocaleString()}</b> 元`:'0 元'):'查不到(看 app)';
  const mv=y.move==null?(tot?'—':'測試期不算'):Math.abs(y.move)<1?'0 元':`${y.move>0?'匯入':'匯出'} <b class="num">${Math.abs(y.move).toLocaleString()}</b> 元`;
- const rows=p?Object.entries(p.amounts).map(([k,v])=>`<div><span>${esc({RGMC:'RGMC',DISPO:'處置股',V41:'v4.1',TXN:'TXN',L4:'L4'}[k]||k)} <small>${(p.weights[k]*100).toFixed(0)}%${(p.idle||{})[k]!=null?'・未上線,放中信當 L1 備用金':''}</small></span><b class="num">${m(v)}</b></div>`).join('')+`<div><span>L1 當沖名目 <small>1.25×,不佔資金</small></span><b class="num">${m(p.l1_notional)}</b></div>`:'';
+ const rows=p?Object.entries(p.amounts).map(([k,v])=>`<div><span>${esc({RGMC:'RGMC',DISPO:'處置股',V41:'期貨',TXN:'TXN',L4:'L4'}[k]||k)} <small>${(p.weights[k]*100).toFixed(0)}%${(p.idle||{})[k]!=null?'・未上線,放中信當 L1 備用金':''}</small></span><b class="num">${m(v)}</b></div>`).join('')+`<div><span>L1 當沖名目 <small>1.25×,不佔資金</small></span><b class="num">${m(p.l1_notional)}</b></div>`:'';
  return `<section class="card pad"><div class="hd"><h2 class="h2">總資金與今日匯款</h2>${tot?`<span class="pill t-ok">總資金 ${m(tot)}</span>`:'<span class="pill t-disp">測試期(總資金 0)</span>'}</div>
   <div class="proc"><div><span>中信股票<br><small>今天成交的交割款,${esc((c.settle_on||'').slice(5))} 前要在交割戶</small></span><small>${pay}</small></div>
    <div><span>元大期貨<br><small>${y.target!=null?`目標 ${m(y.target)},現在 ${m(y.strategy_equity)}`:`現在權益 ${m(y.strategy_equity)}`}</small></span><small>${mv}</small></div></div>

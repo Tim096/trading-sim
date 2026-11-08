@@ -1578,7 +1578,7 @@ tick();setInterval(tick,PUB?60000:3000);setInterval(()=>{if(curV==='trader')rend
 // ---- research hub tabs(資料 data/hub.json 由 research-trunk 的 python research_lab/hub/publish_hub.py 發佈)----
 const VT=PUB?[['monitor','監看台']]:[['monitor','監看台'],['cycle','盤勢溫度'],['trader','操盤手'],['strategies','策略看板'],['lab','研究所'],['ops','控制']];
 // 研究所:原本的零件庫/研究報告/因子工廠/計畫與籃子/方法論合併成子分頁,加上 Agent 組織與飛輪紀錄(research_lab/agency)
-const LT=[['org','Agent 組織'],['runs','研究飛輪'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['data','資料盤點'],['plan','計畫與籃子'],['method','方法論'],['taste','思考方式']];
+const LT=[['org','Agent 組織'],['runs','研究飛輪'],['parts','零件庫'],['reports','研究報告'],['factory','因子工廠'],['data','資料盤點'],['plan','計畫與籃子'],['method','方法論']];
 let curL=(()=>{try{return localStorage.getItem('ltab')}catch(e){return null}})()||'org',LIVE=null,ORGSEL=null,LOOPSEL=null,INBOX=[];
 if(!LT.some(x=>x[0]===curL))curL='org';
 let curP='user';
@@ -2125,7 +2125,7 @@ function oLoop(A){const J=A.journals||{},nj=Object.values(J).reduce((s,j)=>s+j.n
  const box=(k,t,n,d)=>`<button type="button" class="oloop-b${LOOPSEL===k?' sel':''}" data-loop="${k}"><b>${t}</b><span class="num">${n}</span><span>${d}</span><span class="oloop-go">點開看 →</span></button>`;
  return `<div class="oloop"><div class="col-hd"><b>組織飛輪(通用):每輪結束後,讓下一輪的團隊做得更好更快</b><span>不管研究什麼題目都適用。收尾由看得到全貌的優化組檢討結果、架構、各組流程:結果與研究面目標回到研究飛輪(籃子),組織問題與流程面目標寫回這裡(角色日誌、共用程式、等你核可)。零件、因子、籃子在「研究飛輪」分頁。每一格都能點開、給建議</span></div>
   <div class="oloop-row">${box('retro','收尾檢討',(A.runs||[]).filter(r=>r.report_md).length+' 份優化報告','優化組看全貌:結果、架構、各組流程')}<span class="arrow" aria-hidden="true">→</span>
-   <div class="oloop-fan">${box('journal','工作守則',nj+' 條','各組出勤前先讀')}${box('lib','共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('kpi','流程 KPI',(A.runs||[]).filter(r=>r.kpi).length+' 輪','走勢圖;只當參考')}${box('pending','等你核可',pend.filter(t=>!decided(t.id)).length+' 條','方法論、組織、角色定義、思考方式的改動')}</div></div>
+   <div class="oloop-fan">${box('taste','思考方式',((A.taste_md||'').match(/^### /gm)||[]).length+' 條','你的糾正抽成通則,每組開工先讀')}${box('journal','工作守則',nj+' 條','各組出勤前先讀')}${box('lib','共用程式',(A.toolbox_n||0)+' 個模組','先查再寫,不重寫')}${box('kpi','流程 KPI',(A.runs||[]).filter(r=>r.kpi).length+' 輪','走勢圖;只當參考')}${box('pending','等你核可',pend.filter(t=>!decided(t.id)).length+' 條','方法論、組織、角色定義、思考方式的改動')}</div></div>
   <div id="loopsel">${LOOPSEL?oLoopSel(A,LOOPSEL):''}</div></div>`}
 function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.retro||[];
  const lastRun=((A.runs||[]).find(r=>r.ended)||{}).run_id,isNew=x=>x&&x.indexOf(lastRun||'~')>=0;
@@ -2142,6 +2142,8 @@ function oLoopSel(A,k){const O=A.org,nm=id=>(oRole(O,id)||{name:id}).name,RT=A.r
    runs.map(r=>({run:r.run_id,xs:byRun[r.run_id]||[],r})).map(({run,xs,r})=>`<div style="display:flex;flex-direction:column;gap:6px"><b style="font-size:13px">${esc(r.goal)}</b>
     ${r.report_md?`<details class="orep" open><summary><b>優化報告</b></summary><div class="md">${mdh(r.report_md)}</div>${sugBox('report:'+run,'對這份優化報告有什麼看法?')}</details>`:''}${xs.map(x=>`<div class="oerr"><span class="pill ${x.status==='applied'?'t-ok':'t-disp'}">${x.status==='applied'?'已套用':'待核可'}</span><span>${esc(x.text)}</span><span class="meta">${esc(x.kind)}${x.target?'・'+esc(nm(x.target)):''}${x.evidence?'・依據:'+esc(x.evidence):''}</span></div>`).join('')}</div>`).join('')||'<p class="sub">還沒開過檢討會。</p>',
    ['loop:retro','檢討會與優化報告要多看什麼、少看什麼?'])}
+ if(k==='taste')return wrap('思考方式(品味庫)','你怎麼想、什麼時候轉彎、往哪轉。每輪收尾檢討會讀你這輪的糾正,比對團隊原本怎麼做,能推廣的提案新增或改寫條目,你核可後才寫進來。每組開工先讀。',
+   `<div class="md" style="max-height:560px;overflow:auto">${mdh(A.taste_md||'(還沒發佈)')}</div>`,['loop:taste','哪一條讀錯了、想補什麼?例:第 3 條是我先提的'])
  if(k==='kpi')return wrap('流程 KPI','組織飛輪的量尺:只量流程快不快、穩不穩,量不到研究價值,所以只當參考。',kpiBlock(A),['loop:kpi','想多量什麼、少量什麼?'])
  if(k==='lib')return wrap('共用程式','agent 寫程式前先查這份目錄,能 import 就不重寫;兩支以上 probe 寫過的同類程式,檢討會抽進 research_lab/lib/。',
    `<div class="md" style="max-height:420px;overflow:auto">${mdh(A.toolbox_md||'(還沒有目錄)')}</div>`,['loop:lib','缺什麼共用工具?例:統一的成本模型、資料缺檔檢查'])
@@ -2227,7 +2229,7 @@ async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB
 setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
  if(H.error){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/hub.json</h2><p class="sub">在 research-trunk 執行 python research_lab/hub/publish_hub.py 發佈研究資料。</p></section>';return}
- const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:hData,plan:H=>`<div class="seg" id="ptabs" role="tablist" aria-label="計畫來源"></div><section class="card pad"><div class="md">${mdh(curP==='user'?H.plan_user_md:H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`,taste:H=>`<section class="card pad"><div class="md">${mdh(H.taste_md||'(還沒發佈)')}</div></section>`};
+ const views={strategies:hStrat,org:hOrg,runs:hRuns,parts:hParts,reports:hReports,factory:hFactory,data:hData,plan:H=>`<div class="seg" id="ptabs" role="tablist" aria-label="計畫來源"></div><section class="card pad"><div class="md">${mdh(curP==='user'?H.plan_user_md:H.plan_md)}</div></section>`,method:H=>`<section class="card pad"><div class="md">${mdh(H.method_md)}</div></section>`};
  if(v==='lab'&&(curL==='org'||curL==='runs')){await Promise.all([loadLive(),loadInbox()]);if(v!==curV)return}
  const k=v==='lab'?curL:v;
  box.innerHTML=`<div class="hub">${v==='lab'?`<div class="hd"><div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁"></div><span class="sub">零件 ${H.parts.length}・報告 ${H.reports.length}・資料 ${esc(H.built.slice(5))} 更新</span></div>`:`<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>`}${views[k](H)}</div>`;

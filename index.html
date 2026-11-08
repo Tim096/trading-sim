@@ -1694,8 +1694,11 @@ let TR=null;
 
 // ── 操盤手分頁(data/trader_<日>.json,由 core/trader_api.export_day 寫)──
 // 由上到下:今天一句話 + 數字卡 → 每日檢討 → 盤中巡檢時間軸 → 四場會 → 今天的實單 → 帳本 → 計畫與紀錄
-async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10));
- try{const r=await fetch(`data/trader_${d}.json?`+Date.now());TR=r.ok?await r.json():null}catch(e){TR=null}
+async function renderTrader(){const box=$('#v-hub');let d=(selDay||new Date(Date.now()-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,10)),fb=null;
+ const ld=async x=>{try{const r=await fetch(`data/trader_${x}.json?`+Date.now());return r.ok?await r.json():null}catch(e){return null}};
+ TR=await ld(d);
+ // 沒手動選日期且當天沒開會(週末/休市/還沒開)→ 往前找最近一個有紀錄的日子
+ if(!TR&&!dayPinned){const o=[...$('#day').options].map(x=>x.value).filter(x=>x<d).sort().reverse().slice(0,10);for(const x of o){if(TR=await ld(x)){fb=d;d=x;break}}}
  if(curV!=='trader')return;
  // 每 30 秒重畫:記住使用者打開的 details,重畫後再打開
  const keep=new Set([...box.querySelectorAll('details[data-tk][open]')].map(x=>x.dataset.tk));
@@ -1826,7 +1829,7 @@ async function renderTrader(){const box=$('#v-hub'),d=(selDay||new Date(Date.now
  const hNote=C?'':R?'這份檢討沒有結構化摘要,完整內容在下面「每日檢討」。'
   :isToday?(hm<'16:50'?'收盤後 16:50 寫今天的檢討;寫好後這裡換成檢討結論。':'今天的檢討還沒出來(16:50–19:00 之間會寫)。'):'這天沒有每日檢討。';
  const hero=`<section class="card pad tr-hero ${C?'g-'+(GZ[C.grade]?C.grade:'ok'):'g-live'}">
-  <div class="tr-meta"><b>${esc(TR.day||d)}</b>${C?`<span>每日檢討${R.ended?' '+esc(String(R.ended).slice(11,16)):''}</span>${gd?pill('今天 '+gd[0],gd[1]):''}`:pill('即時狀態','t-disp')}
+  <div class="tr-meta"><b>${esc(TR.day||d)}</b>${fb?pill(fb.slice(5)+' 沒開會,顯示最近一個交易日','t-info'):''}${C?`<span>每日檢討${R.ended?' '+esc(String(R.ended).slice(11,16)):''}</span>${gd?pill('今天 '+gd[0],gd[1]):''}`:pill('即時狀態','t-disp')}
    <span>會議 <b>${nOpen}/4</b></span><span>實單送出 <b>${nSent}</b>${REAL.length>nSent?` <span style="color:var(--bad)">未成功 ${REAL.length-nSent}</span>`:''}</span>${CX.length?`<span>刪單 <b>${CX.length}</b></span>`:''}<span>帳本部位 <b>${nBook}</b> 筆</span>
    <span class="tr-upd">更新於 ${esc(TR.updated)}</span></div>
   <p class="tr-head">${esc(head)}</p>${hNote?`<p class="tr-note">${hNote}</p>`:''}

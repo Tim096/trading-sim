@@ -1848,18 +1848,25 @@ async function renderTrader(){const box=$('#v-hub');let d=(selDay||new Date(Date
 // 操盤手分頁底部:資金方案目標(sharpe / cagr / 11-06 原參數)與 v4.1 參數組;寫 config(serve.py /api/objective)
 let CAPT=null,CAPIN=null;   // 操盤手分頁的總資金預覽 / 正在輸入的數字(30 秒重畫不洗掉)
 // v4.1 兩個參數組的現在槓桿(integration.json v41_presets,build_integration 每天重算)+ 差異 + 第一性原理說明
+// 確認版(rolling5y,2026-11-08):每年 1 月用前 5 個完整年度重選參數;選參狀態 + 提醒
+function v41Sel(S){if(!S)return '';const y=S.year,nx=(S.for_year||y)+1,pv=S.preview&&S.preview.pick;
+ const warn=S.stale?`<span class="pill t-risk" style="font-size:11px">⚠ ${S.for_year} 年還沒重選,沿用 ${y} 年</span> `:(pv&&pv!==S.pick?`<span class="pill t-disp" style="font-size:11px">最新 5 年窗預覽改選 ${esc(pv)},明年 1 月可能換參數</span> `:'');
+ return `<p class="sub" style="margin:0">${warn}確認版選參:<b style="color:var(--ink)">${y} 年用 ${esc(S.pick)}</b>(用 ${esc(S.window[0])}~${esc(S.window[1])} 的 Sharpe 挑;算於 ${esc(S.computed_at)})・下次重選 ${nx} 年 1 月第一個交易日 15:00 前自動跑，結果推 TG${pv?`・目前預覽 ${esc(pv)}`:''}</p>`}
 function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">v4.1 現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
- const P=V.presets||{},nm={original:'原策略',sharpe:'研究剃刀版'},f=x=>x==null?'—':(+x).toFixed(2)+'x';
- const row=(l,k,n)=>`<tr><td>${l}</td>${['original','sharpe'].map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
- return `<div class="tbl"><table><thead><tr><th>現在槓桿(${esc(V.as_of)})</th>${['original','sharpe'].map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
+ const P=V.presets||{},nm={original:'原策略',sharpe:'研究剃刀版',rolling5y:'確認版(可做空)'},f=x=>x==null?'—':(+x).toFixed(2)+'x',PS=['original','sharpe','rolling5y'].filter(p=>P[p]&&!P[p].error);
+ const row=(l,k,n)=>`<tr><td>${l}</td>${PS.map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
+ return `<div class="tbl"><table><thead><tr><th>現在槓桿(${esc(V.as_of)})</th>${PS.map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
   ${row('今天持有','held','理論帳本今天的槓桿')}${row('下一期目標','next','今天收盤訊號算出、15:00 要調到的槓桿(上限 6.5)')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
   <p class="sub" style="margin:0">訊號:逆價差 z(zb)${V.zb}・大額交易人淨部位 z(zn)${V.zn}・距結算 ${V.dte} 個交易日・逆價差資料 ${esc(V.basis_as_of)}、net10 ${esc(V.net10_as_of)}</p>
-  <div class="tbl"><table><thead><tr><th>差在哪</th><th>原策略</th><th>研究剃刀版</th></tr></thead><tbody>
-   <tr><td>net10 太高時</td><td>越高越加碼,z ≥ 2 最滿</td><td>z > 0.5 起反過來減碼(折返 λ=2)</td></tr>
-   <tr><td>net10 乘數範圍</td><td>0.4–2.0,冪次 0.4</td><td>0.2–2.0,冪次 0.7</td></tr>
-   <tr><td>逆價差乘數下限</td><td>0.25</td><td>0(逆價差不深時可以不做)</td></tr>
-   <tr><td>基礎倍數 k</td><td>4.0</td><td>6.93(讓平均槓桿一樣約 3.5x)</td></tr>
-   <tr><td>不變</td><td colspan="2">200 日趨勢閘門、上限 6.5、結算週減碼</td></tr>
+  ${v41Sel((P.rolling5y||{}).selection)}
+  <div class="tbl"><table><thead><tr><th>差在哪</th><th>原策略</th><th>研究剃刀版</th><th>確認版(可做空)</th></tr></thead><tbody>
+   <tr><td>net10 太高時</td><td>越高越加碼,z ≥ 2 最滿</td><td>z > 0.5 起反過來減碼(折返 λ=2)</td><td>同剃刀版;太高時可翻成空單</td></tr>
+   <tr><td>net10 乘數範圍</td><td>0.4–2.0,冪次 0.4</td><td>0.2–2.0,冪次 0.7</td><td>−0.4–2.0(負 = 空單),冪次 0.7</td></tr>
+   <tr><td>逆價差乘數下限</td><td>0.25</td><td>0(逆價差不深時可以不做)</td><td>0</td></tr>
+   <tr><td>基礎倍數 k</td><td>4.0</td><td>6.93(讓平均槓桿一樣約 3.5x)</td><td>6.93</td></tr>
+   <tr><td>空單</td><td colspan="2">不做空</td><td>只在溫度計亮燈首日起 40 個交易日內;窗外改空手。上限 −6.5</td></tr>
+   <tr><td>參數怎麼定</td><td colspan="2">固定</td><td>每年 1 月用前 5 個完整年度從 29 組候選重選</td></tr>
+   <tr><td>不變</td><td colspan="3">200 日趨勢閘門、上限 6.5、結算週減碼</td></tr>
    <tr><td>成績(2022 起樣本外 WF,滑價 4.5 點)</td><td>年化 128%・Sharpe 1.37・MDD −74%</td><td>年化 217%・Sharpe 1.73・MDD −61%</td></tr></tbody></table></div>
   <details data-tk="v41-why"><summary>為什麼這樣改(第一性原理)</summary><div class="md" style="font-size:13px;line-height:1.75">
    <p><b>1. 賺什麼、怎麼活下來。</b>賺台指期長期往上漂的錢(股市長期上漲,加上逆價差換月收斂;後者約 85% 來自除息季的股利),用槓桿放大。跌破 200 日均線就空手,當崩盤保險;上限 6.5 倍是因為台指單日最多跌 10%、史上最壞連兩天 −14.7%,6.5 倍不會爆倉。</p>
@@ -1888,12 +1895,12 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
   <div class="scards">${cards}</div>
   <h3 class="h2" style="font-size:14px;margin:6px 0 0">v4.1 參數組</h3>
   ${v41Box(VP)}
-  <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換 v4.1 參數組</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${v==='original'?'原策略':'研究剃刀版'}</button>`).join('')}</div>
+  <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換 v4.1 參數組</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${({original:'原策略',sharpe:'研究剃刀版',rolling5y:'確認版(可做空)'})[v]||v}</button>`).join('')}</div>
   <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
  sec.onclick=async e=>{const c=e.target.closest('button[data-cap]');
   if(c){try{const go=c.dataset.cap==='1'&&CAPT,t=+(($('#tr_cap_in')||{}).value||0),j=await opPost('api/capital',{total:go?CAPT.total:t,confirm:!!go});CAPT=go?null:j;if(go)CAPIN=null;renderCapOpts(go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入')}catch(err){renderCapOpts('❌ '+err.message)}return}
   const b=e.target.closest('button[data-obj],button[data-v41]');if(!b)return;
-  try{const j=await opPost('api/objective',{objective:b.dataset.obj||O.objective,v41_preset:b.dataset.v41||O.v41_preset});renderCapOpts(`已改成 ${O.options[j.objective].label}・v4.1 ${j.v41_preset==='original'?'原策略':'研究剃刀版'}`)}catch(err){renderCapOpts('❌ '+err.message)}}}
+  try{const j=await opPost('api/objective',{objective:b.dataset.obj||O.objective,v41_preset:b.dataset.v41||O.v41_preset});renderCapOpts(`已改成 ${O.options[j.objective].label}・v4.1 ${({original:'原策略',sharpe:'研究剃刀版',rolling5y:'確認版(可做空)'})[j.v41_preset]||j.v41_preset}`)}catch(err){renderCapOpts('❌ '+err.message)}}}
 // ---- 控制(臨時休市 / 紙上監看開關 / 重開機):serve.py /api/*,只有本機與 tailnet 進得來 ----
 async function opPost(path,body){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});
  const j=await r.json().catch(()=>({error:'HTTP '+r.status}));if(!r.ok||j.error)throw new Error(j.error||('HTTP '+r.status));return j}

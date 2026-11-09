@@ -683,7 +683,7 @@ tr.tr-cx>td{color:var(--mute)}
 <!-- 各策略明細:頁面載入後搬進上面策略總表的展開列 -->
 <div id="details_home">
 <section id="l1" aria-label="L1 跳空放空明細" style="display:flex;flex-direction:column;gap:12px">
-  <div class="between"><h2 class="h2"><span class="tag k-L1">L1</span> 跳空放空明細</h2><span class="sub">10:00 後碰漲停 → 市價回補;否則收盤回補・成本 0.236%</span></div>
+  <div class="between"><h2 class="h2"><span class="tag k-L1">L1</span> 跳空放空明細</h2><span class="sub">盤前版:停利 3%・碰漲停 −3 檔全補・12:00 / 12:30 / 13:00 / 13:20 分段補・剩下收盤補・成本 0.236%</span></div>
   <div class="tbl scroll"><table id="l1t"><thead><tr><th>標的</th><th class="r">股數(回測)</th><th class="r">成本(放空價)</th><th class="r">現價</th><th class="r">報酬</th><th class="r">目前權重</th><th class="r">換股時目標</th><th class="r">依分配金額</th><th>進場日</th><th>預計出場 / 條件</th><th class="r">跳空</th><th class="r">漲停價</th><th>離漲停</th><th>狀態</th><th class="r">回補</th><th class="r">損益</th></tr></thead><tbody class="num"></tbody></table></div>
   <div class="note" id="l1note"></div>
 </section>
@@ -796,7 +796,7 @@ tr.tr-cx>td{color:var(--mute)}
   </div>
 </section>
 
-<p class="note" style="margin-top:16px">規則來源 REPORT_v3.md。回測(2022–2026/05,最保守):合體 Sharpe 3.53、年化 67%、MDD −11%。單日、單週結果雜訊很大,要看長期累積。</p>
+<p class="note" style="margin-top:16px">規則:RGMC / 處置股 / L4 剃刀版、L1 盤前版、期貨 v6 確認版(2026-11-09 起,細節在「策略看板」)。研究融合 WF(OOS 2023-01~2026-11,1,000 萬整張、盤前 L1 回補 60%):259% / Sharpe 5.03 / MDD −26%。單日、單週結果雜訊很大,要看長期累積。</p>
 </div>
 <div id="v-hub" hidden></div>
 </div>
@@ -1138,7 +1138,7 @@ async function render(){
  const l1L=std8Lots(l1R,IGAMT.L1||0),l1M=new Map(l1R.map(r=>[r.sid,r]));
  const l1P=p=>(l1L[p.sid]||0)*LOT*p.open*(p.ret||0);   // 損益 = 依分配金額的張數 × LOT × 開盤價 × ret(ret 已扣成本)
  $('#l1t tbody').innerHTML=l1.length?l1.map(p=>{const dist=p.limit/p.last-1,f=Math.max(0,Math.min(1,1-dist/0.1));
-  return `<tr>${std8Cells(l1M.get(p.sid),l1L,isToday?srcp(p.sid):'')}${ex2Cells(xw(selDay,'09:00','開盤放空'),p.cover!=null?xw(selDay,(p.cover_t||'').slice(0,5),'已回補'):xw(selDay,'13:25','收盤競價回補(漲停價掛單);10:00 後碰漲停→漲停價回補'))}<td class="r up">${pct(p.og,1)}</td><td class="r">${p.limit}</td>
+  return `<tr>${std8Cells(l1M.get(p.sid),l1L,isToday?srcp(p.sid):'')}${ex2Cells(xw(selDay,'09:00','開盤放空'),p.cover!=null?xw(selDay,(p.cover_t||'').slice(0,5),'已回補'):xw(selDay,'13:25','收盤競價回補(漲停價掛單);停利 3% / 碰漲停 −3 檔全補 / 12:00 起分段補'))}<td class="r up">${pct(p.og,1)}</td><td class="r">${p.limit}</td>
   <td>${p.cover!=null?'—':pct(dist,1)+`<span class="meter"><i style="width:${(f*100).toFixed(0)}%;background:var(${f>.8?'--up':'--warn'})"></i></span>`}</td>
   <td>${p.cover==null?'<span class="pill t-info">持有空單</span>':`<span class="pill ${/漲停/.test(p.status)?'t-lu':'t-ok'}">${esc(p.status)}</span>`}${p.touch_before10?' <span class="warn" title="10:00 前碰過漲停">●</span>':''}</td>
   <td class="r">${p.cover!=null?p.cover+' <span class="mute">'+(p.cover_t||'')+'</span>':'—'}</td><td class="r ${cls(l1P(p))}">${sm(l1P(p))}</td></tr>`}).join(''):`<tr><td colspan="16" class="mute">${isToday&&!state.market_open?'等待 09:00 開盤…':'這天沒有符合條件的股票'}</td></tr>`;
@@ -1162,10 +1162,10 @@ async function render(){
  const S=[['08:25','監看啟動','監看程式啟動,載入處置 / 暫停當沖名單;之後整天算理論部位與 L1 名單',['系統'],['08:30','08:35']],
   ['08:20','資料更新','auto_daily 在早盤會議前 10 分鐘更新股價、處置股;每場會產生資訊包時再檢查一次,缺檔或過期就先重抓再交給操盤手',['系統'],['08:25','08:50']],
   ['08:30','★ 早盤會議','對帳(持倉、掛單、每筆單實況)→ 操盤手寫上午的程式 → 審查 → TG 核准鈕。最好 09:00 前按',['RGMC','DISPO','L1','L4'],['09:00','09:15'],'am',T0],
-  ['09:00','L1 名單','監看程式依 09:00 開盤跳空 ≥ 6.5% 產生 L1 名單',['L1'],['09:05','09:30'],'08:59'],
+  ['09:00','L1 名單','08:59 盤前門檻單:試撮跳空 8%–9.5% 現沖先賣,限價 = 前收 × 1.08(開盤成交 = 跳空 ≥ 8%);監看程式用開盤跳空 8%–9.5% 算理論空單',['L1'],['09:05','09:30'],'08:59'],
   ['09:01','早盤程式','核准後啟動,一路跑到 13:25;它做的每個動作在下面各一張卡',['L4','L1','RGMC','DISPO'],['13:30','13:40'],'orders_am',T0],
-  ['09:01','L4 昨天部位賣','開盤 ×0.97 賣出(不低於跌停)',['L4'],0,'o1',T0,OR(['am'],o=>o.strategy==='l4'&&o.kind==='sell','09:05')],
-  ['09:01','L1 放空','09:01–09:30 開盤跳空 ≥ 6.5% 的股票現沖先賣(整張、×0.98)',['L1'],0,'o2',T0,OR(['am'],o=>o.kind==='short','09:30')],
+  ['09:01','L4 昨天部位賣','開盤 ×0.97 賣出(不低於跌停);賣完的同一檔接第二腿:開盤 ≥ 昨收就現沖先賣 0.5 倍,+7% 停損,收盤回補',['L4'],0,'o1',T0,OR(['am'],o=>o.strategy==='l4'&&o.kind==='sell','09:05')],
+  ['09:01','L1 放空','盤前門檻單開盤成交 / 退路(沒有試撮價或券商拒收盤前單):09:01–09:30 開盤跳空 ≥ 8% 現沖先賣(整張、×0.98)',['L1'],0,'o2',T0,OR(['am'],o=>o.kind==='short','09:30')],
   ['09:05','RGMC 賣','換倉 / 清倉要賣的,×0.99',['RGMC'],0,'o3',T0,OR(['am'],o=>o.strategy==='rgmc'&&o.kind==='sell','09:10')],
   ['09:05','處置股賣','早盤要出場的處置股',['DISPO'],0,'o4',T0,OR(['am'],o=>o.strategy==='disposition_combined'&&o.kind==='sell','09:10')],
   ['09:15','L4 名單','依今天開盤跳空打分,產生今天收盤要買的名單',['L4'],['09:40','09:50'],'l4picks',T0],
@@ -1281,15 +1281,15 @@ function details(){if(!IG)return;detailStack3();detailU15();detailLA();const tod
  const l4d=state?state.updated.slice(0,10):today;
  $('#d_l4_t thead').innerHTML=th([...STD8,...EX2,['預測隔夜','r'],['20 日均額','r'],['衝突'],['狀態']]);
  const rgs=new Set(IG.rgmc.holdings),l1s=new Set((((state&&state.l1)||{}).positions||[]).map(p=>p.sid));
- const l4R=picks.map(x=>{const e=ent.get(x.sid);return {sid:x.sid,name:x.name,shares:null,cost:e?e.entry:null,px:x.last??null,ret:e&&x.last?x.last/e.entry-1:null,w:e?1/picks.length:0,tw:1/picks.length,apx:e?e.entry:x.last,adv:x.adv20||0}}),l4L=std8Lots(l4R,p4);
+ const l4K=Math.min(5,picks.length),l4Z=l4K*(l4K+1)/2+(5-l4K)*l4K,l4R=picks.map((x,i)=>{const e=ent.get(x.sid),tw=i<5?(5-i)/l4Z:0;return {sid:x.sid,name:x.name,shares:null,cost:e?e.entry:null,px:x.last??null,ret:e&&x.last?x.last/e.entry-1:null,w:e?(e.w??tw):0,tw,apx:e?e.entry:x.last,adv:x.adv20||0}}),l4L=std8Lots(l4R,p4);
  $('#d_l4_t tbody').innerHTML=picks.map((x,i)=>{const cf=[rgs.has(x.sid)?'RGMC 持有':'',l1s.has(x.sid)?'今天 L1':'',dispo.has(x.sid)?'處置股':''].filter(Boolean);const e=ent.get(x.sid);
   return `<tr class="${cf.length?'bad-row':'ok-row'}">${std8Cells(l4R[i],l4L)}${ex2Cells(xw(l4d,'13:25',e?'收盤競價買進':'待收盤競價買進'),xw(tdNext(l4d),'09:00','開盤競價全部賣出'))}<td class="r up">+${(x.pred_bp/100).toFixed(2)}%</td><td class="r">${money(x.adv20)}</td><td>${cf.length?`<span class="pill t-risk" style="font-size:11px">${cf.join('・')}</span>`:'<span class="pill t-ok" style="font-size:11px">無</span>'}</td><td>${e?`已買 @ ${e.entry}`:'待 13:25'}</td></tr>`}).join('')||'<tr><td colspan="14" class="sub">尚無選股</td></tr>';
  // 今早 09:00 開盤賣出的昨天部位(monitor.py closed_overnight)
- const co=(state&&state.closed_overnight)||[],xo=co.filter(c=>c.kind==='L4'),xh=co.find(c=>c.kind==='L4H'),xa=xo.length?xo.reduce((a,c)=>a+c.ret,0)/xo.length:null;
- $('#d_l4_x_h').innerHTML=xo.length?`<b>今早出場:</b>${xo[0].date} 收盤買進的 ${xo.length} 檔,09:00 開盤賣出・平均報酬(扣成本)<span class="${cls(xa)}">${pct(xa)}</span>`+(xh?`・避險腿 <span class="${cls(xh.ret)}">${pct(xh.ret)}</span>・含避險 <span class="${cls(xa+xh.ret)}">${pct(xa+xh.ret)}</span>`:''):'<b>今早出場:</b>無(昨天沒有 L4 部位,或還沒開盤)';
+ const co=(state&&state.closed_overnight)||[],xo=co.filter(c=>c.kind==='L4'),xh=co.find(c=>c.kind==='L4H'),xa=xo.length?xo.reduce((a,c)=>a+(c.w??1/xo.length)*(c.ret+(((state.l4||{}).leg2||{})[c.sid]?0.5*(1+state.l4.leg2[c.sid].gap)*(state.l4.leg2[c.sid].ret||0):0)),0)/Math.max(1e-9,xo.reduce((a,c)=>a+(c.w??1/xo.length),0)):null;
+ $('#d_l4_x_h').innerHTML=xo.length?`<b>今早出場:</b>${xo[0].date} 收盤買進的 ${xo.length} 檔,09:00 開盤賣出・排名加權報酬(扣成本,含第二腿)<span class="${cls(xa)}">${pct(xa)}</span>`+(xh?`・避險腿 <span class="${cls(xh.ret)}">${pct(xh.ret)}</span>・含避險 <span class="${cls(xa+xh.ret)}">${pct(xa+xh.ret)}</span>`:''):'<b>今早出場:</b>無(昨天沒有 L4 部位,或還沒開盤)';
  $('#d_l4_x thead').innerHTML=th([['標的'],['買進日'],['買進價','r'],['賣出價','r'],['賣出時間'],['報酬(扣成本)','r'],['損益(每檔 '+money(perL4())+')','r']]);
  $('#d_l4_x tbody').innerHTML=xo.map(c=>`<tr><td><span class="code">${c.sid}</span> ${esc(nm(c.sid))}${dtag(c.sid)}</td><td>${c.date}</td><td class="r">${c.entry}</td><td class="r">${c.exit}</td><td>${c.exit_t}</td><td class="r ${cls(c.ret)}">${pct(c.ret)}</td><td class="r ${cls(c.ret)}">${c.ret<0?'−':'+'}${money(Math.abs(c.ret*perL4()))}</td></tr>`).join('')||'<tr><td colspan="7" class="sub">今早沒有出場</td></tr>';
- $('#d_l4_note').textContent='L4 沒有回測帳本,股數(回測)不適用;每檔目標 = L4 分配 ÷ 檔數,依分配金額用整張分配器(每檔 ≤ 5% 20 日均額)。預測隔夜 = 模型預測收盤到明天開盤的超額報酬。只用開盤前就知道的資料的版本;不避險(帶大盤隔夜漲跌),回測 Sharpe 2.81、MDD −29%。';
+ $('#d_l4_note').textContent='L4 剃刀版(2026-11-09 上線,core/l4_runner.py):預算 = L4 分配 × 短線溫度倍數(0.25–1,只縮不放);前 5 名配額 5:4:3:2:1,整張、每檔 ≤ 5% 20 日均額、買不到一張遞補。隔天開盤賣出後,同一檔開盤 ≥ 昨收就現沖先賣 0.5 倍(第二腿,不佔資金),+7% 停損,收盤回補。預測隔夜 = 模型預測收盤到明天開盤的超額報酬。不避險;研究 WF 2022-01~2026-11 整張 1,000 萬 107.5% / Sharpe 3.64 / MDD −12%(競價衝擊未實測)。';
  // RGMC
  const g=IG.rgmc,amt=IGAMT.RGMC||0,dtr=g.days_to_rebal;
  const rebalToday=igToday().rebalToday;
@@ -1303,8 +1303,8 @@ function details(){if(!IG)return;detailStack3();detailU15();detailLA();const tod
   ed:r.new?xw(ex0,'13:10','待買進'):r.entry_date,xd:rb&&!(r.target_w>0)?xw(ex0,'09:05','換股賣出(跌出新目標)'):keepX})),rgL=std8Lots(rgR,amt);
  $('#d_rgmc_t tbody').innerHTML=rgR.map(r=>`<tr class="${r.new?'bad-row':''}">${std8Cells(r,rgL,r.new?' <span class="pill t-disp" style="font-size:11px">新買進</span>':'')}${ex2Cells(r.ed,r.xd)}</tr>`).join('');
  $('#d_rgmc_note').textContent='持股來自 RGMC 回測引擎跑到最新資料日的理論部位(不讀帳戶)。股數(回測)是回測帳本的規模;依分配金額 = 分配金額 × 換股時目標,用整張分配器取整(每檔 ≤ 5% 20 日均額,買不到一張就跳過,附一張的金額),以現價估算。「新買進」= 引擎已排定、下個交易日買進的標的,股數(回測)= 回測帳本目標金額 ÷ 收盤,成本 = 收盤估算進場價。';
- {const hm=nowHM(),f=d=>d.slice(5).replace('-','/');BX.RGMC={pos:!g.regime_on?'大盤開關關閉・全部現金':`${g.rows.filter(r=>!r.new).length} 檔持有中`,
-  nt:rebalToday?(hm<'09:05'?'09:05':'13:10'):null,nx:!g.regime_on?'<span class="mute">—</span>':rebalToday?(hm<'09:05'?nxt('09:05','換股賣出'):hm<'13:10'?nxt('13:10','換股買進'):'今天換股日'):rb?nxt(f(ex0),'換股(09:05 賣・13:10 買)'):nxt(f(nx),'下次換股')}}
+ {const hm=nowHM(),f=d=>d.slice(5).replace('-','/');const tg=g.thermo_gate===0;BX.RGMC={pos:!g.regime_on?'大盤開關關閉・全部現金':tg?'溫度閘關(長熱短冷)・全部現金':`${g.rows.filter(r=>!r.new).length} 檔持有中`,
+  nt:rebalToday?(hm<'09:05'?'09:05':'13:10'):null,nx:!g.regime_on?'<span class="mute">—</span>':tg?'等溫度閘打開(閘開後下一個換股日進場)':rebalToday?(hm<'09:05'?nxt('09:05','換股賣出'):hm<'13:10'?nxt('13:10','換股買進'):'今天換股日'):rb?nxt(f(ex0),'換股(09:05 賣・13:10 買)'):nxt(f(nx),'下次換股')}}
  // DISPO
  const d=IG.dispo,n=d.notes||{},pa=IGAMT.DISPO||0,k_=pa/(d.cap_base||1),held=d.positions||{},rows=d.rows||[];
  const tsid=new Set(rows.map(r=>r.stock_id));
@@ -1469,7 +1469,7 @@ function drawFlow(){const F=FLOW;if(!F)return;
  const runs=SV.filter(([,f])=>f.s==='running'||f.s==='waiting'),nx=SV.find(([,f])=>f.s==='pending'),fails=SV.filter(([,f])=>f.s==='failed'),dones=SV.filter(([,f])=>f.s==='done'&&f.t).sort((a,b)=>a[1].t.localeCompare(b[1].t));
  const rk=x=>x[3][0]==='TXN'?['paper','監看']:x[3].length===1&&x[3][0]==='系統'?['sys','系統']:['','實單'],toC=mnt('13:30')-m;
  const items=runs.map(([x,f])=>{const [c,l]=rk(x),r=(x[2].match(/跑到 (\d\d:\d\d)/)||[])[1];return `<button type="button" class="run" data-open-step="${x[0]}"><span class="rk ${c}">${l}</span><div><b>${esc(x[1])}</b><span class="m">${x[0]}${r?' → '+r:''}</span><div class="d">${esc(f.note||x[2])}</div></div></button>`});
- if(live&&B.l1hold)items.push(`<button type="button" class="run" data-open-row="L1"><span class="rk paper">監看</span><div><b>L1 空單 ${B.l1hold} 檔</b><span class="m">${B.minDist==null?'':'離漲停最近 '+pct(B.minDist,1)}</span><div class="d">10:00 後碰漲停就回補,否則 13:25 收盤回補</div></div></button>`);
+ if(live&&B.l1hold)items.push(`<button type="button" class="run" data-open-row="L1"><span class="rk paper">監看</span><div><b>L1 空單 ${B.l1hold} 檔</b><span class="m">${B.minDist==null?'':'離漲停最近 '+pct(B.minDist,1)}</span><div class="d">停利 3%、碰漲停 −3 檔全補、12:00 起分段補,剩下 13:25 收盤補</div></div></button>`);
  const f1=`<div class="fc ${items.length?'now':'idle'}"><div class="k"><span class="dot" style="background:var(${items.length?'--now':'--mute2'})"></span>現在・進行中 ${items.length} 件${live&&m>=540&&toC>0?`<span class="cd" style="color:var(--now)">距收盤 ${toC} 分</span>`:''}</div>${items.length?`<div class="runs">${items.join('')}</div>`:`<div class="d">${F.off?'休市':live?'目前沒有進行中的工作':'回看 '+F.day+',不是今天'}</div>`}</div>`;
  const f2=nx?`<button type="button" class="fc you" data-open-step="${nx[0][0]}"><div class="k"><span class="dot" style="background:var(--acc)"></span>下一步${live?`<span class="cd">${dur(mnt(nx[0][0])-m)}</span>`:''}</div><div class="v">${nx[0][0]} ${esc(nx[0][1])}</div><div class="d">${esc(nx[0][2])}</div></button>`
   :`<div class="fc idle"><div class="k"><span class="dot" style="background:var(--mute2)"></span>下一步</div><div class="v">${F.FL?(live?'今天':'這天')+'流程已全部結束':'沒有流程紀錄'}</div></div>`;
@@ -1484,9 +1484,9 @@ function toggleFlow(){const f=$('#flowbox');f.hidden=!f.hidden;drawFlow();if(!f.
 // ---- 策略總表:每列一個策略,展開列放原本的明細區塊 ----
 // [key, 名稱, 說明, 顏色, 報酬欄位, 明細區塊 id(null = 由程式產生)]
 const BROWS=[['grp','合起來'],['ALL','合體','','--c-all','combo',null],['BM','0050 基準','同期比較','--c-bm','b0050',''],
- ['grp','每日訊號'],['RGMC','RGMC','動能選股・每 7 交易日換股','--c-rg','rgmc','d_rgmc'],['DISPO','處置股','出關前倒數進場','--c-dp','dispo','d_dispo'],
+ ['grp','每日訊號'],['RGMC','RGMC','動能選股 8 檔・每 7 交易日換股・溫度閘','--c-rg','rgmc','d_rgmc'],['DISPO','處置股','出關前 pe-6~pe-2 分批進場・每批 0.20','--c-dp','dispo','d_dispo'],
  ['V41','期貨','台指期槓桿部位(保證金;v6 可做空)','--c-v4','v41','d_v41'],['TXN','TXN','台指期 13:30 買 → 09:00 賣','--c-txn','txn',null],
- ['L1','L1','跳空 ≥ 6.5% 開盤放空・當沖','--c-l1','l1','l1'],['L4','L4','籌碼前 5 檔・收盤買開盤賣・不避險','--c-l4','l4','d_l4'],
+ ['L1','L1','盤前門檻單・跳空 8–9.5% 放空・當沖','--c-l1','l1','l1'],['L4','L4','籌碼排名加權 5 檔・隔夜 + 第二腿・不避險','--c-l4','l4','d_l4'],
  ['grp','季度 / 手動(不在資金分配方案內)'],['U15','ultra15','季調多因子 15 檔・累積 = 本季','--c-u15','','d_u15'],['LA','long_alloc','雙池配置・永遠手動','--c-la','','d_la']];
 function boardOpen(){try{return new Set(JSON.parse(localStorage.getItem('board_open')||'[]'))}catch(e){return new Set()}}
 function buildBoard(){const tb=$('#board'),open=boardOpen();
@@ -1521,7 +1521,7 @@ function drawBoard(){const B=BD;if(!B)return;const sc=IG&&SCH()[igScheme],W=(sc&
   TXN:{td:B.hr.txn,cm:B.cum.txn,sp:'txn',pos:txIn?'持有隔夜多單':txOut?`今早已平倉 <span class="${cls(txOut.ret)}">${pct(txOut.ret)}</span>`:'空手',nt:txIn?null:'13:30',
    nx:txIn?nxt('09:00','明天開盤平倉'):F?nxt('13:30',`買 ${F.txn} 口${F.hedge?`(避險 −${F.hedge})`:''}`):'—'},
   L1:{td:B.h.l1,cm:B.cum.l1,sp:'l1',pos:B.l1hold?`理論空單 ${B.l1hold} 檔${B.minDist!=null?'・離漲停 '+pct(B.minDist,1):''}`:B.l1.length?`${B.l1.length} 檔已全數回補`:B.isToday&&B.hm<'09:00'?'等待開盤':'今日無訊號',
-   nt:B.l1hold?'13:25':B.isToday&&B.hm<'09:00'?'09:00':null,nx:B.l1hold?nxt('13:25','收盤回補(10:00 後碰漲停先補)'):B.isToday&&B.hm<'09:00'?nxt('09:00','開盤放空跳空 ≥ 6.5%'):'<span class="mute">—</span>'},
+   nt:B.l1hold?'13:25':B.isToday&&B.hm<'09:00'?'08:59':null,nx:B.l1hold?nxt('13:25','收盤回補(停利 3%・碰漲停 −3 檔全補・12:00 起分段補)'):B.isToday&&B.hm<'09:00'?nxt('08:59','盤前門檻單(跳空 8–9.5%)'):'<span class="mute">—</span>'},
   L4:{td:B.hr.l4,cm:B.cum.l4,sp:'l4',pos:l4n?`持有 ${l4n} 檔隔夜`:l4x.length?`今早出場 ${l4x.length} 檔`:'空手',nt:l4n?null:B.picks.length?'13:25':'09:15',
    nx:l4n?nxt('09:00','明天開盤賣出'):B.picks.length?nxt('13:25',`收盤競價買 ${B.picks.length} 檔`):nxt('09:15','產生今天名單')},
   U15:{td:null,cm:u?u.qtd:null,pos:u&&u.rows?`${u.rows.length} 檔・本季 ${String(u.entry_date).slice(5).replace('-','/')} 起`:'—',nx:'季初開盤換股',al:'不分配'},

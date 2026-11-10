@@ -2131,10 +2131,14 @@ function oChart(A){const O=A.org,teams=O.teams,grp=[...new Set(teams.map(t=>t.gr
  <div style="display:flex;flex-direction:column;gap:6px"><span class="sub">研究線(每條一位 PM;包含但不限於,滑過看細節):</span><div class="lanes">${lanes}</div></div>
  <div class="cols">${grp.map(g=>`<div class="col"><div class="col-hd"><b>${esc(g)}</b><span>${esc(GROUPS[g]||'')}</span></div>${teams.filter(t=>t.group===g).map(t=>oNode(A,t)).join('')}</div>`).join('')}</div>
  ${oLoop(A)}`}
-const sugWhen=t=>String(t).startsWith('live:')?'這一輪下一次派工前收件':'下一輪開工時收件';
+// 進行中的 run 會把 live:/role: 的介入當輪送給下一個開工的角色;送達回條在 agency_live.json active[].notes[].delivered
+const sugNow=t=>{t=String(t);return t.startsWith('live:')||(t.startsWith('role:')&&((LIVE&&LIVE.active)||[]).some(r=>r.status==='running'))};
+const sugWhen=t=>sugNow(t)?'這一輪下一個角色開工或交卷時讀到(通常 1–3 分鐘,實驗階段可能 10–30 分鐘)':'下一輪開工時收件';
+function sugRcpt(x){if(!sugNow(x.target))return '';const n=((LIVE&&LIVE.active)||[]).flatMap(r=>r.notes||[]).find(n=>n.target===x.target&&(n.ts===x.ts||n.text===x.text)),dl=(n&&n.delivered)||[];
+ return `<span class="pill ${dl.length?'t-ok':'t-disp'}">${dl.length?'已讀到':'還沒有角色讀到'}</span>${dl.length?`<span class="meta">${dl.map(d=>esc((oRole(HUB.agency.org,d.role)||{name:d.role}).name)+' '+esc(d.task)+' '+esc(String(d.ts||'').slice(11,16))).join('、')}</span>`:''}`}
 function sugBox(target,ph){const mine=INBOX.filter(x=>x.kind==='suggest'&&x.target===target);
- return `<div class="osug" data-target="${esc(target)}"><textarea rows="2" placeholder="${esc(ph||'有什麼建議?例:這一組下次要先…')}"></textarea><div class="osug-ft"><button type="button" class="btn pri" data-sug>送出建議</button><span class="sub osug-msg">${mine.length?`你已送出 ${mine.length} 條,${sugWhen(target)}`:`送出後${sugWhen(target)}`+(String(target).startsWith('live:')?'':',變成待辦')}</span></div>
- ${mine.slice(-3).reverse().map(x=>`<div class="oerr"><span class="pill t-info">已送出</span><span>${esc(x.text)}</span><span class="meta">${esc(x.ts)}</span></div>`).join('')}</div>`}
+ return `<div class="osug" data-target="${esc(target)}"><textarea rows="2" placeholder="${esc(ph||'有什麼建議?例:這一組下次要先…')}"></textarea><div class="osug-ft"><button type="button" class="btn pri" data-sug>送出建議</button><span class="sub osug-msg">${mine.length?`你已送出 ${mine.length} 條,${sugWhen(target)}`:`送出後${sugWhen(target)}`+(sugNow(target)?'':',變成待辦')}</span></div>
+ ${mine.slice(-3).reverse().map(x=>`<div class="oerr"><span class="pill t-info">已送出</span><span>${esc(x.text)}</span><span class="meta">${esc(x.ts)}</span>${sugRcpt(x)}</div>`).join('')}</div>`}
 function decided(id){const d=INBOX.filter(x=>(x.kind==='approve'||x.kind==='reject')&&x.ref===id).pop();return d?d.kind:null}
 function pendBtns(t){const d=decided(t.id);
  return d?`<span class="pill ${d==='approve'?'t-ok':''}">${d==='approve'?'你已核可,下一輪開工時套用':'你已決定不要'}</span>`:`<span class="obtns"><button type="button" class="btn pri" data-note="approve" data-ref="${esc(t.id)}">核可</button><button type="button" class="btn" data-note="reject" data-ref="${esc(t.id)}">不要</button></span>`}

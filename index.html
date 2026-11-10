@@ -507,6 +507,7 @@ tr.tr-cx>td{color:var(--mute)}
 .kspark .hd{display:flex;justify-content:space-between;gap:6px}.kspark b{font-size:18px;color:var(--ink)}.kspark svg{width:100%;height:56px;overflow:visible}
 .kd{font-size:11.5px;margin-left:6px;font-weight:600}.kd.ok{color:var(--ok)}.kd.bad{color:var(--bad)}
 .orep{border:1px solid color-mix(in srgb,var(--acc) 35%,var(--line));border-radius:10px;padding:6px 10px;background:var(--panel)}
+.oart>summary{cursor:pointer;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}.oart .md{max-height:560px;overflow:auto;margin-top:6px}
 .oloop-b{font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}.oloop-b:hover{border-color:color-mix(in srgb,var(--acc) 60%,var(--line))}
 .oloop-b.sel{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 7%,var(--panel2))}.oloop-b:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 .oloop-go{margin-top:4px;color:var(--acc);font-size:11.5px}
@@ -2109,6 +2110,20 @@ function oBanner(){const act=(LIVE&&LIVE.active)||[];
   ${steps(r.stages,r.involvement)}
   <span class="meta">${esc(r.involvement)}・${esc(r.mode==='burn'?'燒 token':r.mode==='lead'?'你主導':'研究題目')}・規模 ${esc(r.scale)}・${esc(r.run_id)}</span>
   ${w?`<p class="lede" style="color:var(--ink)">團隊停在關卡 ${esc(r.gate)},在 Claude 對話裡回覆裁決後會繼續。</p>`:''}</div>`}).join('')}
+// 各組交卷(即時):agency_live.json 每個任務的 artifact;全文走 serve.py /api/agency_artifact,展開才抓。介入框 target=live:<角色>:<任務>
+const ARTC={},AOPEN=new Set();
+function liveArts(){const out=[];((LIVE&&LIVE.active)||[]).forEach(r=>Object.entries(r.roles||{}).forEach(([id,x])=>Object.entries(x.tasks||{}).forEach(([t,v])=>{if(v.artifact)out.push({...v,role:id,task:t,goal:r.goal})})));
+ return out.sort((a,b)=>a.ts<b.ts?1:-1)}
+function oLive(){const xs=liveArts(),O=HUB.agency.org,nm=id=>(oRole(O,id)||{name:id}).name,now=LIVE?new Date(LIVE.updated.replace(' ','T')):0,multi=((LIVE&&LIVE.active)||[]).length>1;
+ if(!xs.length)return '<p class="sub" style="margin:0">進行中的研究還沒有交卷。各組一交卷就會出現在這裡。</p>';
+ const one=a=>{const k=a.artifact+'|'+a.ts,fresh=now-new Date(a.ts.replace(' ','T'))<18e4;
+  return `<details class="orep oart" data-art="${encodeURIComponent(a.artifact)}" data-k="${encodeURIComponent(k)}"${AOPEN.has(a.artifact)?' open':''}><summary><b>${esc(nm(a.role))}</b><span>${esc(a.task)}</span>${ast(a.state)}${fresh?'<span class="newb">新</span>':''}<span class="sub">${esc(a.ts.slice(11,16))} 交卷${multi?'・'+esc(a.goal):''}</span></summary>
+  <div class="md">${ARTC[k]!=null?mdh(ARTC[k]):'<span class="sub">讀取中…</span>'}</div>${sugBox('live:'+a.role+':'+a.task,'這份哪裡不對?例:成本口徑錯了、這個假設不成立')}</details>`};
+ return `<span class="sub">${xs.length} 份・新的在上面・點開看全文,看到不對就在下面寫</span>`+xs.slice(0,12).map(one).join('')+(xs.length>12?`<details class="oartm"${AOPEN.has('__more')?' open':''}><summary><span class="sub">更早的 ${xs.length-12} 份</span></summary><div style="display:flex;flex-direction:column;gap:8px;padding-top:8px">${xs.slice(12).map(one).join('')}</div></details>`:'')}
+async function fillArts(){for(const d of document.querySelectorAll('#olive details.oart[open]')){const k=decodeURIComponent(d.dataset.k);if(ARTC[k]!=null)continue;
+  try{const j=await (await fetch('api/agency_artifact?p='+d.dataset.art)).json();ARTC[k]=j.error?'讀不到:'+j.error:j.md}catch(e){ARTC[k]='讀不到:'+e.message}
+  const b=d.querySelector('.md');if(b&&decodeURIComponent(d.dataset.k)===k)b.innerHTML=mdh(ARTC[k])}}
+function drawLive(){const b=$('#olive');if(!b||[...b.querySelectorAll('textarea')].some(t=>t.value||t===document.activeElement))return;setH(b,oLive());fillArts()}
 function oChart(A){const O=A.org,teams=O.teams,grp=[...new Set(teams.map(t=>t.group))];
  const lanes=O.lanes.map(l=>`<span class="lane ${esc(l.status)}" title="吃:${esc(l.eats)}&#10;問:${esc(l.question)}">${esc(l.name)}${l.status==='proposed'?'(提議)':''}</span>`).join('');
  return `<div class="chain"><div class="onode judge"><div class="on-hd"><span class="on-av">你</span><span class="on-tt"><b>${esc(O.judge.name)}</b><span>${esc(O.judge.who)}</span></span></div><p class="on-mis">${esc(O.judge.mission)}</p></div>
@@ -2116,8 +2131,9 @@ function oChart(A){const O=A.org,teams=O.teams,grp=[...new Set(teams.map(t=>t.gr
  <div style="display:flex;flex-direction:column;gap:6px"><span class="sub">研究線(每條一位 PM;包含但不限於,滑過看細節):</span><div class="lanes">${lanes}</div></div>
  <div class="cols">${grp.map(g=>`<div class="col"><div class="col-hd"><b>${esc(g)}</b><span>${esc(GROUPS[g]||'')}</span></div>${teams.filter(t=>t.group===g).map(t=>oNode(A,t)).join('')}</div>`).join('')}</div>
  ${oLoop(A)}`}
+const sugWhen=t=>String(t).startsWith('live:')?'這一輪下一次派工前收件':'下一輪開工時收件';
 function sugBox(target,ph){const mine=INBOX.filter(x=>x.kind==='suggest'&&x.target===target);
- return `<div class="osug" data-target="${esc(target)}"><textarea rows="2" placeholder="${esc(ph||'有什麼建議?例:這一組下次要先…')}"></textarea><div class="osug-ft"><button type="button" class="btn pri" data-sug>送出建議</button><span class="sub osug-msg">${mine.length?`你已送出 ${mine.length} 條,下一輪開工時收件`:'送出後下一輪開工時收件,變成待辦'}</span></div>
+ return `<div class="osug" data-target="${esc(target)}"><textarea rows="2" placeholder="${esc(ph||'有什麼建議?例:這一組下次要先…')}"></textarea><div class="osug-ft"><button type="button" class="btn pri" data-sug>送出建議</button><span class="sub osug-msg">${mine.length?`你已送出 ${mine.length} 條,${sugWhen(target)}`:`送出後${sugWhen(target)}`+(String(target).startsWith('live:')?'':',變成待辦')}</span></div>
  ${mine.slice(-3).reverse().map(x=>`<div class="oerr"><span class="pill t-info">已送出</span><span>${esc(x.text)}</span><span class="meta">${esc(x.ts)}</span></div>`).join('')}</div>`}
 function decided(id){const d=INBOX.filter(x=>(x.kind==='approve'||x.kind==='reject')&&x.ref===id).pop();return d?d.kind:null}
 function pendBtns(t){const d=decided(t.id);
@@ -2186,6 +2202,7 @@ function oSel(A,id){const O=A.org,r=oRole(O,id);if(!r)return '';
 function hOrg(H){const A=H.agency;if(A)A.toolbox_md=H.toolbox_md||A.toolbox_md;
  if(!A)return '<section class="card pad"><h2 class="h2">研究所還沒有組織資料</h2><p class="lede">在 research-trunk 建立 research_lab/agency/org.yaml 後執行 publish_hub.py。</p></section>';
  return `${oChanges(A)}<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="hd"><h2 class="h2">現在在跑什麼</h2></div><div id="obanner" style="display:flex;flex-direction:column;gap:10px">${oBanner()}</div></section>
+ <section class="card pad" style="display:flex;flex-direction:column;gap:10px"><div class="hd"><h2 class="h2">各組交卷(即時)</h2><span class="sub">每 5 秒更新</span></div><div id="olive" style="display:flex;flex-direction:column;gap:8px">${oLive()}</div></section>
  <section class="card pad" style="display:flex;flex-direction:column;gap:16px"><div class="hd"><h2 class="h2">研究團隊</h2>
   <div class="legend"><span><b class="sdot ok"></b>健康</span><span><b class="sdot warn"></b>有狀況</span><span><b class="sdot bad"></b>問題多</span><span><b class="sdot"></b>尚未出勤</span><span>點角色看細節</span></div></div>
   <p class="lede">你下指令給總指揮,總指揮選題後交給負責那條研究線的 PM;PM 再把工作派給下面四組。每一輪都照同一套研究流程走,結束時把新零件、報告和點子收進庫。</p>
@@ -2225,7 +2242,7 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
   ${r.report_research_md?`<details class="orep" open><summary><b>這輪的結果與下一步</b><span class="sub">優化組收尾檢討・研究結論可信度看紅隊</span></summary><div class="md">${mdh(r.report_research_md)}</div></details>`:''}
   ${r.report_md?`<span class="sub">完整優化報告(含架構與各組流程的問題)在:Agent 組織 → 組織飛輪 → 檢討會</span>`:''}</div>`}).join('')}</section>`}
 async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
- const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();
+ const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();drawLive();
  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#ochart'))return;setH(c,oChart(HUB.agency))}
 setInterval(refreshOrg,5000);
 async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='trader')return renderTrader();if(curV==='ops')return renderOps();const v=curV,H=await loadHub(),box=$('#v-hub');if(v!==curV)return;
@@ -2239,13 +2256,14 @@ async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='tr
  if(k==='parts')drawParts();if(k==='reports'||k==='org')wireReports();if(k==='strategies')fitNotes()}
 const oPick=id=>{ORGSEL=ORGSEL===id?null:id;document.querySelectorAll('#ochart .onode[data-role]').forEach(n=>n.classList.toggle('sel',n.dataset.role===ORGSEL));
  const box=$('#orgsel');if(box){box.innerHTML=ORGSEL?oSel(HUB.agency,ORGSEL):'';if(ORGSEL)box.scrollIntoView({behavior:'smooth',block:'nearest'})}};
+$('#v-hub').addEventListener('toggle',e=>{const d=e.target,mo=d.classList&&d.classList.contains('oartm');if(!mo&&!(d.classList&&d.classList.contains('oart')))return;const p=mo?'__more':decodeURIComponent(d.dataset.art);d.open?AOPEN.add(p):AOPEN.delete(p);if(d.open)fillArts()},true);
 $('#v-hub').addEventListener('keydown',e=>{const n=e.target.closest&&e.target.closest('.onode[data-role]');if(n&&(e.key==='Enter'||e.key===' ')){e.preventDefault();oPick(n.dataset.role)}});
 async function noteSend(body,msgEl){try{const r=await fetch('api/agency_note',{method:'POST',headers:{'Content-Type':'application/json','X-CTS-Op':'1'},body:JSON.stringify(body)});
  const j=await r.json();if(!r.ok||j.error)throw new Error(j.error||r.status);INBOX.push(j);return j}catch(e){if(msgEl){msgEl.textContent='送不出去:'+e.message+'(只能在本機或 Tailscale 開的頁面送)';msgEl.style.color='var(--bad)'}return null}}
 const reloop=()=>{const c=$('#ochart');if(c&&HUB&&HUB.agency)setH(c,oChart(HUB.agency));const o=$('#orgsel');if(o&&ORGSEL)o.innerHTML=oSel(HUB.agency,ORGSEL)};
 $('#v-hub').addEventListener('click',async e=>{const lp=e.target.closest('[data-loop]');if(lp){LOOPSEL=LOOPSEL===lp.dataset.loop?null:lp.dataset.loop;reloop();const ls=$('#loopsel');if(ls&&LOOPSEL)ls.scrollIntoView({behavior:'smooth',block:'nearest'});return}
  const sg=e.target.closest('[data-sug]');if(sg){const w=sg.closest('.osug'),ta=w.querySelector('textarea'),m=w.querySelector('.osug-msg');if(!ta.value.trim()){ta.focus();return}
-  sg.disabled=true;const j=await noteSend({kind:'suggest',target:w.dataset.target,text:ta.value},m);sg.disabled=false;if(j){ta.value='';m.style.color='';reloop();const nb=document.querySelector(`.osug[data-target="${CSS.escape(j.target)}"] .osug-msg`);if(nb)nb.textContent='已送出,下一輪開工時收件'}return}
+  sg.disabled=true;const j=await noteSend({kind:'suggest',target:w.dataset.target,text:ta.value},m);sg.disabled=false;if(j){ta.value='';m.style.color='';reloop();const nb=document.querySelector(`.osug[data-target="${CSS.escape(j.target)}"] .osug-msg`);if(nb)nb.textContent='已送出,'+sugWhen(j.target)}return}
  const nt=e.target.closest('[data-note]');if(nt){nt.disabled=true;const j=await noteSend({kind:nt.dataset.note,ref:nt.dataset.ref,text:''},nt.parentElement);if(j)reloop();else nt.disabled=false;return}
  const n=e.target.closest('.onode[data-role]');if(n){oPick(n.dataset.role);return}
  if(e.target.closest('[data-osel]')){oPick(ORGSEL);return}

@@ -1588,6 +1588,8 @@ const SPL={new:['t-info','🆕 新發現'],testing:['t-disp','🔬 驗證中'],c
 const STG=[['done','研究完成版本','t-ok'],['wip','研究中','t-disp']];
 const PF={q:'',status:'all',neg:false};
 let HUB=null,curV='monitor';
+// 刪除線只認 ~~字~~:單個 ~ 是「2~3 天」的範圍符號
+if(window.marked)marked.use({tokenizer:{del(src){const m=/^~~(?=\S)([\s\S]*?\S)~~/.exec(src);if(m)return{type:'del',raw:m[0],text:m[1],tokens:this.lexer.inlineTokens(m[1])};}}});
 const mdh=s=>window.marked?marked.parse(s||''):'<pre>'+esc(s)+'</pre>';
 let HUB_T=0;async function loadHub(){if(HUB&&!HUB.error&&Date.now()-HUB_T<60000)return HUB;try{HUB=await (await fetch('data/hub.json?'+Date.now())).json();HUB_T=Date.now()}catch(e){HUB={error:true}}return HUB}
 function setV(v){if(LT.some(x=>x[0]===v)){curL=v;v='lab'}if(!VT.some(x=>x[0]===v))v='monitor';curV=v;try{localStorage.setItem('vtab',v)}catch(e){}

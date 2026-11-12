@@ -1900,7 +1900,7 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
   <h3 class="h2" style="font-size:14px;margin:6px 0 0">期貨版本</h3>
   ${v41Box(VP)}
   <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換期貨版本</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${({v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)',v7:'v7 合成版'})[v]||v}</button>`).join('')}</div>
-  <p class="sub" style="margin:0">v7 合成版 = v5 與 v6 的目標槓桿取平均,平均低於 4 倍就空手,否則乘 0.68(最大 4.4 倍)。回測 2022 起約六成日子空手、年化 181% / Sharpe 2.31 / 最大回撤 −30%。k 倍數設定不套用在 v7。<b>v7 內建夜盤停損</b>:美股開盤後 2 小時(台北 冬令 00:30 / 夏令 23:30)當晚已賠 2% 權益砍半、5% 全砍,隔天 08:46 比砍價更差才補回;其他版本只記錄不下單。</p>
+  <p class="sub" style="margin:0">v7 合成版 = v5 與 v6 的目標槓桿取平均,平均低於 4 倍就空手,否則乘 6/6.5(最大 6 倍)。回測 2022 起約六成日子空手、年化 258% / Sharpe 2.28 / 最大回撤 −39%。k 倍數設定不套用在 v7。<b>v7 內建夜盤停損</b>:美股開盤後 2 小時(台北 冬令 00:30 / 夏令 23:30)當晚已賠 2% 權益砍半、5% 全砍,隔天 08:46 比砍價更差才補回;其他版本只記錄不下單。</p>
   <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
  sec.onclick=async e=>{const c=e.target.closest('button[data-cap]');
   if(c){try{const go=c.dataset.cap==='1'&&CAPT,t=+(($('#tr_cap_in')||{}).value||0),j=await opPost('api/capital',{total:go?CAPT.total:t,confirm:!!go});CAPT=go?null:j;if(go)CAPIN=null;renderCapOpts(go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入')}catch(err){renderCapOpts('❌ '+err.message)}return}

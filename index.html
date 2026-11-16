@@ -378,7 +378,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
  .th-hd{display:none}.th-cards{display:block;margin:0}.th-lamp,.th-cold{margin-top:8px}
  .th-lamp.off,.th-cold.off{min-height:0;height:auto;padding:8px 12px}.th-lamp.off .th-mwrap,.th-lamp.off .th-worry,.th-lamp.off .th-lmeta,.th-cold.off .th-ctxt{display:none}
  #th_rg{margin-top:16px}#th_cv{margin:0 -14px;width:calc(100% + 28px)}}
-@media (max-width:760px){#v-monitor>.day,#v-monitor .panel,#v-monitor>.mhero,#v-hub>.card{border-radius:0;border-left:0;border-right:0;margin-left:-14px;margin-right:-14px}}
+@media (max-width:760px){#v-monitor>.day,#v-monitor .panel,#v-monitor>.mhero,#v-hub>.card,#v-hub .hub>.card,#v-hub .hub>div>.card{border-radius:0;border-left:0;border-right:0;margin-left:-14px;margin-right:-14px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 #today,#perf,#strategies,#positions,#engine,.board tr{scroll-margin-top:76px}
 /* ---- research hub tabs ---- */
@@ -395,7 +395,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .hub .md a{color:var(--acc)}
 .part{display:grid;grid-template-columns:4em 1fr;gap:4px 12px;padding:11px 0;border-bottom:1px solid var(--line2)}
 .part:last-child{border-bottom:0}
-.part.neg{box-shadow:inset 3px 0 0 var(--bad);padding-left:10px}
+.part.neg{background:color-mix(in srgb,var(--bad) 7%,transparent)}
 .part .pid{font-family:'IBM Plex Sans','Noto Sans TC',monospace;color:var(--mute);font-size:13px;padding-top:2px}
 .part .b{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:13px;color:var(--ink3);line-height:1.6}
 .part .t{color:var(--ink);font-size:14px}
@@ -418,7 +418,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .stg-nav{display:flex;flex-wrap:wrap;gap:6px}.stg-nav a{font-size:12px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--panel)}
 .stg-nav a:hover{border-color:var(--mute2)}.stg-nav a b{font-family:'IBM Plex Sans','Noto Sans TC',monospace;margin-left:4px;color:var(--ink)}
 .stg{scroll-margin-top:76px}
-.scard{gap:10px}.scard.s-live,.scard.s-done{box-shadow:inset 0 3px 0 var(--ok)}.scard.s-paper{box-shadow:inset 0 3px 0 var(--acc)}
+.scard{gap:10px}.scard.s-live,.scard.s-done{box-shadow:inset 0 2px 0 var(--ok)}.scard.s-paper{box-shadow:inset 0 2px 0 var(--acc)}
 .scard .nm{font-size:15px;font-weight:600;color:var(--ink);line-height:1.4}
 .scard .sm{font-size:13px;color:var(--ink2);line-height:1.65;margin:0}
 .sc-kpi{display:flex;flex-direction:column;gap:6px;padding:9px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)}
@@ -431,8 +431,8 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .sc-more{font:inherit;font-size:12px;color:var(--acc);background:none;border:0;padding:2px 0 0;cursor:pointer}
 .scard .path{margin-top:auto;padding-top:8px;border-top:1px dashed var(--line)}
 /* 操盤手分頁 */
-.tr-hero{display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 3px 0 var(--line)}
-.tr-hero.g-good{box-shadow:inset 0 3px 0 var(--ok)}.tr-hero.g-ok{box-shadow:inset 0 3px 0 var(--acc)}.tr-hero.g-bad{box-shadow:inset 0 3px 0 var(--bad)}.tr-hero.g-live{box-shadow:inset 0 3px 0 var(--now)}
+.tr-hero{display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 2px 0 var(--line)}
+.tr-hero.g-good{box-shadow:inset 0 2px 0 var(--ok)}.tr-hero.g-ok{box-shadow:inset 0 2px 0 var(--acc)}.tr-hero.g-bad{box-shadow:inset 0 2px 0 var(--bad)}.tr-hero.g-live{box-shadow:inset 0 2px 0 var(--now)}
 .tr-meta{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:12px;color:var(--mute)}
 .tr-meta b{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-weight:500;color:var(--ink2)}
 .tr-meta .tr-upd{margin-left:auto}
@@ -447,7 +447,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .tr-sec .stg-h .tr-leg{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px}
 .tk-fix{--k:var(--acc)}.tk-anomaly{--k:var(--warn)}.tk-exec{--k:var(--c-l4)}.tk-lead{--k:var(--c-l1)}
 .tr-tag{background:color-mix(in srgb,var(--k) 16%,transparent);color:var(--k)}
-.scard.tr-k{box-shadow:inset 0 3px 0 var(--k)}
+.scard.tr-k{box-shadow:inset 0 2px 0 var(--k)}
 .tr-pts{margin:0;padding-left:1.1em;font-size:13px;color:var(--ink3);line-height:1.7}
 .tr-pts li::marker{color:var(--mute2)}
 .tr-cap{margin:0;font-size:12px;color:var(--mute);line-height:1.6}
@@ -483,7 +483,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .tr-qs .num{color:var(--mute);margin-right:6px}
 tr.tr-cx>td{color:var(--mute)}
 .mtg{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-.mtg .card{display:flex;flex-direction:column;gap:8px;border-top:3px solid var(--line)}
+.mtg .card{display:flex;flex-direction:column;gap:8px;border-top:2px solid var(--line)}
 .mtg .card.ok{border-top-color:var(--ok)}.mtg .card.warn{border-top-color:var(--warn)}.mtg .card.bad{border-top-color:var(--bad)}.mtg .card.info{border-top-color:var(--acc)}
 .mtg .card.idle{background:transparent;border-style:dashed;border-top-width:1px}
 .mtg .card.idle .h2{color:var(--mute)}

@@ -38,6 +38,7 @@ button{font:inherit;color:inherit}
 .row{display:flex;flex-wrap:wrap;gap:16px;align-items:stretch}
 .between{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
 .hvtip{position:fixed;z-index:60;pointer-events:none;display:none;background:var(--panel2);border:1px solid var(--btn);border-radius:8px;padding:6px 10px;font-size:12px;line-height:1.5;color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.28);white-space:nowrap}
+.vc-t{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:3px}.vc-t .sub{font-weight:400;text-align:right}
 .hvtip i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}.hvtip .r{display:flex;justify-content:space-between;gap:14px}
 .hvline{position:fixed;z-index:59;pointer-events:none;display:none;width:1px;background:var(--mute);opacity:.7}
 [data-hv]{cursor:crosshair}
@@ -1856,22 +1857,95 @@ let CAPT=null,CAPIN=null;   // 操盤手分頁的總資金預覽 / 正在輸入�
 function v41Sel(S){if(!S)return '';const y=S.year,nx=(S.for_year||y)+1,pv=S.preview&&S.preview.pick;
  const warn=S.stale?`<span class="pill t-risk" style="font-size:11px">⚠ ${S.for_year} 年還沒重選,沿用 ${y} 年</span> `:(pv&&pv!==S.pick?`<span class="pill t-disp" style="font-size:11px">最新 5 年窗預覽改選 ${esc(pv)},明年 1 月可能換參數</span> `:'');
  return `<p class="sub" style="margin:0">${warn}v6 選參:<b style="color:var(--ink)">${y} 年用 ${esc(S.pick)}</b>(用 ${esc(S.window[0])}~${esc(S.window[1])} 的 Sharpe 挑;算於 ${esc(S.computed_at)})・下次重選 ${nx} 年 1 月第一個交易日 15:00 前自動跑，結果推 TG${pv?`・目前預覽 ${esc(pv)}`:''}</p>`}
-const v41Img=(f,alt,w,h)=>{const u='data/'+f+'?'+Math.floor(Date.now()/6e5);return `<a href="${u}" target="_blank" rel="noopener" style="display:block"><img src="${u}" alt="${alt}" width="${w}" height="${h}" style="display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff"></a>`};
-function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">期貨現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
- const P=V.presets||{},nm={v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)',v7:'v7 合成版'},f=x=>x==null?'—':(+x).toFixed(2)+'x',PS=['v4','v5','v6','v7'].filter(p=>P[p]&&!P[p].error);
- const row=(l,k,n)=>`<tr><td>${l}</td>${PS.map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
- return `<div class="tbl"><table><thead><tr><th>槓桿(訊號日 ${esc(V.as_of)})</th>${PS.map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
-  ${row('今天 15:00 目標','next','今天收盤後的訊號、15:00 下單的槓桿(上限 ±6.5;負 = 空單)')}${row('昨天 15:00 目標','held','前一交易日 15:00 下的部位，持有到今天 15:00')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
-  <p class="sub" style="margin:0">訊號:逆價差 z(zb)${V.zb}・大額交易人淨部位 z(zn)${V.zn}・距結算 ${V.dte} 個交易日・逆價差資料 ${esc(V.basis_as_of)}、net10 ${esc(V.net10_as_of)}</p>
-  ${v41Sel((P.v6||{}).selection)}
-  <h3 class="h2" style="font-size:14px;margin:6px 0 0">差在哪(每個參數 → 綜合)</h3>
-  <p class="sub" style="margin:0">三張圖每天 15:00 期貨換完部位後重畫(dashboard/build_v41_charts.py,和實單同一套程式,圖上的綜合槓桿會和回測引擎對帳)。點圖看原尺寸。</p>
-  ${v41Img('v41_rules.png','期貨 v4 到 v7 的規則、今天的算式與參數總表',1878,1818)}
-  ${v41Img('v41_daily.png','net10、逆價差、閘門、各版本乘數與目標槓桿的每日走勢',2087,2777)}
-  <h3 class="h2" style="font-size:14px;margin:6px 0 0">為什麼這樣改(第一性原理)</h3>
-  ${v41Img('v41_why.png','訊號分組的隔天報酬、各版本把槓桿放在哪、2022 起權益曲線',1945,1790)}
-  <details data-tk="v41-tbl"><summary>文字對照表</summary>
-  <div class="tbl"><table><thead><tr><th>差在哪</th><th>v4 原版</th><th>v5 剃刀版</th><th>v6 確認版(可做空)</th></tr></thead><tbody>
+// ---- 期貨版本「差在哪」互動圖:data/v41_charts.json(build_v41_charts.py,每天 15:00 期貨換完部位後重算)----
+// 每一塊都是可摺疊的 details(開合狀態記在 VCS.open,30 秒重畫不會洗掉);圖用 svg + data-hv,滑過顯示當天每個數值
+let VC=null;const VCS={n:120,hide:new Set(),open:new Set(['today'])};
+const VCC={v4:'var(--mute)',v5:'#E08A00',v6:'#9B5DE5',v7:'var(--acc)'},VCN={v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版',v7:'v7 合成版'},VUP='#E0602B',VDN='#9B5DE5';
+const vcF=(v,d=2)=>v==null?'—':(+v).toFixed(d).replace('-','−');
+const vcTicks=(lo,hi)=>{const r=hi-lo,e=Math.pow(10,Math.floor(Math.log10(r/3))),s=[1,2,5,10].map(m=>m*e).find(x=>r/x<=4)||e*10,t=[];for(let v=Math.ceil(lo/s-1e-9)*s;v<=hi+1e-9;v+=s)t.push(+v.toFixed(10));return t};
+// 一格圖 o={key,h,n,title,note,ser:[{y,c,dash,w}],bars:{y},lo,hi,zero,bands:[{on,c,o}],vline,ticks,tf,xl}
+function vcPanel(o){const W=1000,H=100,n=o.n;let lo=o.lo,hi=o.hi;
+ if(lo==null){const a=[...(o.ser||[]).flatMap(s=>s.y),...(o.bars?o.bars.y:[])].filter(v=>v!=null);lo=Math.min(...a);hi=Math.max(...a);if(o.zero){lo=Math.min(lo,0);hi=Math.max(hi,0)}const p=(hi-lo||1)*.1;lo-=p;hi+=p}
+ const X=i=>n>1?i/(n-1)*W:W/2,Y=v=>(hi-v)/(hi-lo)*H,bw=W/Math.max(n-1,1);
+ const path=y=>{let d='',pen=0;y.forEach((v,i)=>{if(v==null){pen=0;return}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1);pen=1});return d};
+ const runs=on=>{const r=[];let s=-1;for(let i=0;i<=n;i++){if(i<n&&on[i]){if(s<0)s=i}else if(s>=0){r.push([s,i-1]);s=-1}}return r};
+ const bands=(o.bands||[]).map(b=>runs(b.on).map(([a,z])=>`<rect x="${Math.max(0,X(a)-bw/2).toFixed(1)}" width="${(Math.min(W,X(z)+bw/2)-Math.max(0,X(a)-bw/2)).toFixed(1)}" y="0" height="${H}" fill="${b.c}" opacity="${b.o||.12}"/>`).join('')).join('');
+ const bar=pos=>{let d='';o.bars.y.forEach((v,i)=>{if(!v||(v>0)!==pos)return;const x0=Math.max(0,X(i)-bw/2),x1=Math.min(W,X(i)+bw/2);d+=`M${x0.toFixed(1)} ${Y(0).toFixed(1)}V${Y(v).toFixed(1)}H${x1.toFixed(1)}V${Y(0).toFixed(1)}Z`});return d};
+ const tk=(o.ticks||vcTicks(lo,hi)).filter(v=>v>=lo&&v<=hi),tf=o.tf||(v=>String(+v.toFixed(4)).replace('-','−'));
+ return `<div><div class="vc-t"><span>${o.title||''}</span><span class="sub num">${o.note||''}</span></div>
+  <div style="position:relative;height:${o.h}px;margin-left:44px">${tk.map(v=>`<span class="num" style="position:absolute;right:100%;margin-right:6px;top:${Y(v)}%;transform:translateY(-50%);font-size:10.5px;color:var(--mute);white-space:nowrap">${tf(v)}</span>`).join('')}
+   <svg data-hv="${o.key}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;display:block;background:var(--card2);border-radius:6px">${bands}
+    ${tk.map(v=>`<path d="M0 ${Y(v).toFixed(1)}H${W}" stroke="${v===0?'var(--mute2)':'var(--line)'}" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')}
+    ${o.bars?`<path d="${bar(true)}" fill="${VUP}"/><path d="${bar(false)}" fill="${VDN}"/>`:''}
+    ${(o.ser||[]).map(s=>`<path d="${path(s.y)}" fill="none" stroke="${s.c}" stroke-width="${s.w||1.6}" ${s.dash?`stroke-dasharray="${s.dash}"`:''} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`).join('')}
+    ${o.vline!=null?`<path d="M${(o.vline*W).toFixed(1)} 0V${H}" stroke="var(--up)" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`:''}</svg></div>
+  ${o.xl?`<div class="num" style="display:flex;justify-content:space-between;margin-left:44px;font-size:10.5px;color:var(--mute)">${o.xl.map(x=>`<span>${x}</span>`).join('')}</div>`:''}</div>`}
+// 分組長條 o={title,labels,groups:[{name,c,y}],h,unit,d,sub}
+function vcBars(o){const a=o.groups.flatMap(g=>g.y).filter(v=>v!=null),hi=Math.max(0,...a)*1.25||1,lo=Math.min(0,...a)*1.25,Y=v=>(hi-v)/(hi-lo)*100,G=o.groups.length,nL=o.labels.length,d=o.d??0;
+ const bars=o.labels.map((lab,i)=>o.groups.map((g,k)=>{const v=g.y[i];if(v==null)return '';const w=76/nL/G,l=i*100/nL+12/nL+k*w,t=Math.min(Y(v),Y(0)),h=Math.abs(Y(v)-Y(0));
+  return `<div title="${lab}・${g.name?g.name+' ':''}${vcF(v,Math.max(d,1))}${o.unit||''}" style="position:absolute;left:${l}%;width:${w*.9}%;top:${t}%;height:${Math.max(h,.6)}%;background:${g.c||(v>=0?VUP:VDN)};border-radius:2px"></div>`
+   +(G===1?`<span class="num" style="position:absolute;left:${i*100/nL}%;width:${100/nL}%;text-align:center;font-size:11.5px;font-weight:700;color:var(--ink);${v>=0?`bottom:${100-t}%`:`top:${t+h}%`}">${v>0?'+':''}${vcF(v,d)}${o.unit||''}</span>`:'')}).join('')).join('');
+ return `<div><div class="vc-t"><span>${o.title}</span><span class="sub">${o.note||''}</span></div>
+  <div style="position:relative;height:${o.h||150}px;background:var(--card2);border-radius:6px"><div style="position:absolute;left:0;right:0;top:${Y(0)}%;border-top:1px solid var(--mute2)"></div>${bars}</div>
+  <div style="display:flex">${o.labels.map((l,i)=>`<span style="flex:1;text-align:center;font-size:11px;color:var(--mute);line-height:1.35">${l}${o.sub?`<br><span style="color:var(--mute2)">${o.sub[i]}</span>`:''}</span>`).join('')}</div></div>`}
+const vcLeg=(vs,extra)=>`<div class="sub" style="display:flex;flex-wrap:wrap;gap:4px 14px;margin:0">${vs.map(v=>`<span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${VCC[v]};margin-right:5px"></i>${VCN[v]}${extra?extra(v):''}</span>`).join('')}</div>`;
+const vcTbl=(head,rows,hl)=>`<div class="tbl"><table><thead><tr>${head.map((h,i)=>`<th${i&&VCC[h]?` style="color:${VCC[h]}"`:''}>${VCN[h]||h}</th>`).join('')}</tr></thead><tbody>${rows.map((r,j)=>`<tr${j===hl?' style="background:var(--hover);font-weight:700"':''}>${r.map((c,i)=>`<td${i&&i<=VC.names.length?' class="num"':' style="white-space:normal"'}>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+// 規則:z → 乘數的曲線(紅虛線 = 今天的 z),最後照今天的逆價差綜合成目標槓桿
+function vcRules(){const C=VC.curve,z=C.z,n=z.length,B=VC.base,L=VC.days.length-1,zn=B.zn[L],zb=B.zb[L],fx=v=>Math.min(1,Math.max(0,(v+3)/6)),xl=['z −3','0','+3'];
+ const hv=(key,lab,M,u)=>{HV[key]={x:z.map((_,i)=>i/(n-1)),tip:i=>`<div class="sub">${lab} z = ${vcF(z[i])}</div>`+Object.keys(M).map(v=>`<div class="r"><span><i style="background:${VCC[v]}"></i>${v}</span><b class="num">${vcF(M[v][i])}${u}</b></div>`).join('')}};
+ hv('v41n','net10',C.n,'');hv('v41b','逆價差',C.b,'');hv('v41l','net10',C.lev,'x');
+ const ser=M=>Object.keys(M).map(v=>({y:M[v],c:VCC[v],w:v==='v7'?2.4:2,dash:v==='v6'?'6 4':null})),cell=h=>`<div style="flex:1 1 280px;min-width:0">${h}</div>`;
+ return vcLeg(VC.names)+`<div style="display:flex;flex-wrap:wrap;gap:12px">`
+  +cell(vcPanel({key:'v41n',h:170,n,title:'① net10 z → 乘數',note:`今天 z ${vcF(zn)}`,ser:ser(C.n),zero:1,vline:fx(zn),xl}))
+  +cell(vcPanel({key:'v41b',h:170,n,title:'② 逆價差 z → 乘數',note:`今天 z ${vcF(zb)}・距結算 ${B.dte[L]} 日`,ser:ser(C.b),zero:1,vline:fx(zb),xl}))
+  +cell(vcPanel({key:'v41l',h:170,n,title:'③ 綜合:net10 z → 目標槓桿',note:'照今天的逆價差與閘門',ser:ser(C.lev),lo:-7,hi:7,ticks:[-6.5,-4,0,4,6.5],vline:fx(zn),xl}))+`</div>
+  <p class="sub" style="margin:0">① v4 越高越加碼;v5 過 0.5 反過來減;v6 可以減到負(空單)。② 逆價差越深(z 高)越加碼,v5 / v6 下限 0;結算前 3 日乘數向 1 收一半。③ v7 = v5、v6 平均,低於 4 倍空手,再 ×6/6.5${B.win[L]?'':';今天准空窗關,v6 負的部分改空手'}。紅虛線 = 今天。</p>`}
+// 走勢:訊號 → 各版本乘數 → 閘門 → 綜合目標槓桿;淡紫底 = 准空窗開,橘底 = 結算前 3 日
+function vcDaily(){const n0=VC.days.length,k=Math.min(VCS.n,n0),s=n0-k,sl=a=>a.slice(s),B=VC.base,D=sl(VC.days),vs=VC.names.filter(v=>!VCS.hide.has(v)),sg=vs.filter(v=>VC.ver[v].n);
+ const win={on:sl(B.win),c:VDN,o:.11},nm=sl(B.nmu),sd=sl(B.nsd),ln=z=>nm.map((m,i)=>m==null?null:m+z*sd[i]),last=a=>a[a.length-1];
+ HV.v41d={x:D.map((_,i)=>k>1?i/(k-1):.5),tip:i=>{const j=s+i;return `<div class="sub">${D[i]}・距結算 ${B.dte[j]} 日${B.win[j]?'・准空窗開':''}</div>
+   <div class="r"><span>net10</span><b class="num">${vcF(B.net10[j],3)}(z ${vcF(B.zn[j])})</b></div><div class="r"><span>逆價差</span><b class="num">${vcF(B.sp[j])}%(z ${vcF(B.zb[j])})</b></div>
+   <div class="r"><span>近 200 日</span><b class="num">${vcF(B.g200[j],0)}%・閘門${B.gate[j]?'開':'關'}</b></div>`
+   +VC.names.map(v=>{const R=VC.ver[v];return `<div class="r"><span><i style="background:${VCC[v]}"></i>${v}${R.n?` <span class="sub num">${vcF(R.b[j])} × ${vcF(R.n[j])}</span>`:''}</span><b class="num">${vcF(R.tgt[j])}x</b></div>`}).join('')
+   +`<div class="r"><span>台指期</span><b class="num">${(B.px[j]||0).toLocaleString()}</b></div>`}};
+ const P=o=>vcPanel({key:'v41d',n:k,bands:[win],...o}),sz=VC.lines.short_z,f0=VC.lines.fold_z0;
+ const ctl=`<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span class="sub">天數</span>${[60,120,280].map(x=>`<button type="button" class="btn${VCS.n===x?' pri':''}" data-vr="${x}" aria-pressed="${VCS.n===x}">${x}</button>`).join('')}
+   <span class="sub" style="margin-left:8px">版本</span>${VC.names.map(v=>`<button type="button" class="btn" data-vv="${v}" aria-pressed="${!VCS.hide.has(v)}" style="${VCS.hide.has(v)?'opacity:.45':`border-color:${VCC[v]}`}"><i style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${VCC[v]};margin-right:5px"></i>${v}</button>`).join('')}
+   <span class="sub">淡紫底 = 准空窗開・橘底 = 結算前 3 日・滑過看當天每個數值</span></div>`;
+ return ctl+P({h:150,title:'net10 = 前十大交易人淨多單 ÷ 全市場未平倉',note:`今天 ${vcF(last(B.net10),3)}(z ${vcF(last(B.zn))})${sz.length?`・v6 做空線 ${sz.map(z=>vcF(last(B.nmu)+z*last(B.nsd),3)).join(' / ')}`:''}`,
+    ser:[{y:ln(0),c:'var(--mute2)',dash:'2 3',w:1},...(f0!=null?[{y:ln(f0),c:'#E08A00',w:1.2}]:[]),...sz.map(z=>({y:ln(z),c:VDN,w:1.5,dash:z<0?'6 4':null})),{y:sl(B.net10),c:'var(--ink)',w:1.6}]})
+  +`<p class="sub" style="margin:0">紫線 = v6 做空線(上實、下虛;超出去乘數變負)・橘線 = 折返起點(z ${vcF(f0,1)},再高就減碼)・點線 = 252 日平均</p>`
+  +P({h:80,title:'net10 乘數',note:sg.map(v=>`${v} ${vcF(last(VC.ver[v].n))}`).join('・'),ser:sg.map(v=>({y:sl(VC.ver[v].n),c:VCC[v],dash:v==='v6'?'5 3':null})),zero:1})
+  +P({h:80,title:'逆價差 z =(近月 − 次月)÷ 近月,對過去 252 日',note:`今天 ${vcF(last(B.zb))}(價差 ${vcF(last(B.sp))}%)`,ser:[{y:sl(B.zb),c:'var(--ink)'}],zero:1,bands:[win,{on:sl(B.dte).map(d=>d<=3),c:'#E08A00',o:.2}]})
+  +P({h:70,title:'逆價差乘數',note:sg.map(v=>`${v} ${vcF(last(VC.ver[v].b))}`).join('・'),ser:sg.map(v=>({y:sl(VC.ver[v].b),c:VCC[v],dash:v==='v6'?'5 3':null})),zero:1})
+  +P({h:60,title:'200 日趨勢閘門:近 200 日累積報酬 %(> 0 才做)',note:`今天 ${vcF(last(B.g200),0)}% → ${last(B.gate)?'開':'關'}`,ser:[{y:sl(B.g200),c:'var(--ok)'}],zero:1})
+  +vs.map(v=>P({h:46,title:`<span style="color:${VCC[v]}">${VCN[v]}</span> 15:00 目標槓桿`,note:`今天 ${vcF(last(VC.ver[v].tgt))}x・近 20 日 ${vcF(VC.ver[v].tgt.slice(-20).reduce((a,b)=>a+b,0)/20)}x`,bars:{y:sl(VC.ver[v].tgt)},lo:-7,hi:7,ticks:[-6.5,0,6.5]})).join('')
+  +P({h:80,title:'台指期近月結算價',note:(last(B.px)||0).toLocaleString(),ser:[{y:sl(B.px),c:'var(--ink)'}],tf:v=>Math.round(v).toLocaleString(),xl:[D[0],D[k>>1],D[k-1]]})}
+// 第一性原理:訊號分組的隔天報酬與波動、各版本把槓桿放在哪、2022 起權益曲線(對數)
+function vcWhy(){const Y=VC.why,E=Y.eq,n=E.dates.length,lg=v=>VC.names.reduce((m,k)=>(m[k]=E[k].map(x=>x>0?Math.log10(x):null),m),{}),L=lg(),cell=h=>`<div style="flex:1 1 320px;min-width:0">${h}</div>`;
+ HV.v41e={x:E.dates.map((_,i)=>i/(n-1)),tip:i=>`<div class="sub">${E.dates[i]}・2022 起 1 元變</div>`+VC.names.map(v=>`<div class="r"><span><i style="background:${VCC[v]}"></i>${v}</span><b class="num">${E[v][i]>=100?Math.round(E[v][i]).toLocaleString():vcF(E[v][i])} 元</b></div>`).join('')};
+ const sub=B=>B.cnt.map((c,i)=>`波動 ${vcF(B.sd[i],0)}bp・${c} 天`);
+ return `<p class="sub" style="margin:0">槓桿的成本是波動的平方:平均槓桿一樣,把槓桿從「沒多賺又波動大」的日子挪到「有多賺」的日子,複利就變好。分組用 ${esc(Y.from.slice(0,4))} 起閘門開的 ${Y.n_days.toLocaleString()} 天,報酬 = 15:00 進、隔天 15:00 出、1 倍槓桿。滑過長條看數字。</p>
+  <div style="display:flex;flex-wrap:wrap;gap:14px">`
+  +cell(vcBars({title:'① net10 z 分組 → 隔天平均報酬',labels:Y.labels,groups:[{y:Y.net10.mean}],unit:'bp',sub:sub(Y.net10)}))
+  +cell(vcBars({title:'② 逆價差 z 分組 → 隔天平均報酬',labels:Y.labels,groups:[{y:Y.basis.mean}],unit:'bp',sub:sub(Y.basis)}))
+  +cell(vcBars({title:'③ 各版本把槓桿放在哪(依 net10 z 分組的平均目標槓桿)',labels:Y.labels,groups:VC.names.map(v=>({name:v,c:VCC[v],y:Y.lev[v]})),unit:'x',d:2})+vcLeg(VC.names))
+  +cell(vcPanel({key:'v41e',h:170,n,title:'④ 2022 起 1 元變幾元(對數軸)',note:`現行參數整段回測、不是樣本外・滑價 ${Y.slip} 點`,ser:VC.names.map(v=>({y:L[v],c:VCC[v],w:1.8})),ticks:[0,1,2,3],tf:v=>'×'+Math.pow(10,v).toLocaleString(),xl:[E.dates[0].slice(0,7),E.dates[n>>1].slice(0,7),E.dates[n-1].slice(0,7)]})
+    +vcLeg(VC.names,v=>{const m=Y.m22[v]||{};return `<span class="num" style="color:var(--mute)">・年化 ${m.cagr==null?'—':Math.round(m.cagr*100)}%・Sharpe ${vcF(m.sharpe)}・MDD ${m.mdd==null?'—':Math.round(m.mdd*100)}%</span>`}))+`</div>
+  <p class="sub" style="margin:0">限制:net10 只有 2019 年起的資料;v6 / v7 的參數看過這段歷史才選,④ 會比真實樣本外好看;v7 另有夜盤停損,圖上沒算;逆價差最左那格天數很少。</p>${V41WHY}`}
+function v41Charts(){if(!VC)return '<p class="sub" style="margin:0">圖表資料還沒算(data/v41_charts.json;每天 15:00 期貨跑完後產生)</p>';
+ const L=VC.days.length-1,B=VC.base,T=VC.today[5]||[],det=(tk,sum,sub,body)=>`<details data-vk="${tk}"${VCS.open.has(tk)?' open':''}><summary>${sum}<span class="sub">${sub}</span></summary><div style="display:flex;flex-direction:column;gap:10px;padding:8px 0 4px">${VCS.open.has(tk)?body():''}</div></details>`;
+ return `<div class="stg-h"><h3 class="h2" style="font-size:14px;margin:0">差在哪(每個參數 → 綜合)</h3><span class="sub">訊號日 ${esc(VC.as_of)}・算於 ${esc(VC.built)}・每天 15:00 換完部位後更新${VC.mismatch.length?` <span class="pill t-risk" style="font-size:11px">⚠ 和回測引擎對不上:${esc(VC.mismatch.join('、'))}</span>`:''}</span></div>`
+  +det('today','今天怎麼乘出來',VC.names.map((v,i)=>`${v} ${esc(T[i+1]||'—')}`).join('・'),()=>vcTbl(['閘門 × 逆價差乘數 × net10 乘數 × k',...VC.names],VC.today,5))
+  +det('daily','每個數值的走勢與綜合槓桿',`net10 ${vcF(B.net10[L],3)}(z ${vcF(B.zn[L])})・逆價差 z ${vcF(B.zb[L])}・閘門${B.gate[L]?'開':'關'}・准空窗${B.win[L]?'開':'關'}`,vcDaily)
+  +det('rules','規則曲線:訊號怎麼變成乘數','net10、逆價差各一張,再綜合成槓桿',vcRules)
+  +det('params','每個參數',`${VC.params.length} 項`,()=>vcTbl(['參數',...VC.names,'這個參數在做什麼'],VC.params))
+  +det('why','為什麼這樣改(第一性原理)','分組報酬、槓桿放哪、權益曲線',vcWhy)
+  +det('tbl','文字對照表','含 2022 起樣本外成績',()=>V41TBL)}
+function v41Paint(){const c=document.getElementById('v41c');if(!c)return;c.innerHTML=v41Charts();
+ c.querySelectorAll('details[data-vk]').forEach(d=>d.ontoggle=()=>{const k=d.dataset.vk;if(!d.isConnected||d.open===VCS.open.has(k))return;d.open?VCS.open.add(k):VCS.open.delete(k);v41Paint()});
+ c.onclick=e=>{const r=e.target.closest('[data-vr]'),v=e.target.closest('[data-vv]');if(r)VCS.n=+r.dataset.vr;else if(v){const k=v.dataset.vv;VCS.hide.has(k)?VCS.hide.delete(k):VCS.hide.add(k)}else return;v41Paint()}}
+const V41TBL=`<div class="tbl"><table><thead><tr><th>差在哪</th><th>v4 原版</th><th>v5 剃刀版</th><th>v6 確認版(可做空)</th></tr></thead><tbody>
    <tr><td>net10 太高時</td><td>越高越加碼,z ≥ 2 最滿</td><td>z > 0.5 起反過來減碼(折返 λ=2)</td><td>同 v5;太高時可翻成空單</td></tr>
    <tr><td>net10 乘數範圍</td><td>0.4–2.0,冪次 0.4</td><td>0.2–2.0,冪次 0.7</td><td>−0.4–2.0(負 = 空單),冪次 0.7</td></tr>
    <tr><td>逆價差乘數下限</td><td>0.25</td><td>0(逆價差不深時可以不做)</td><td>0</td></tr>
@@ -1879,17 +1953,25 @@ function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">期貨
    <tr><td>空單</td><td colspan="2">不做空</td><td>只在溫度計亮燈首日起 40 個交易日內;窗外改空手。上限 −6.5</td></tr>
    <tr><td>參數怎麼定</td><td colspan="2">固定</td><td>每年 1 月用前 5 個完整年度從 29 組候選重選</td></tr>
    <tr><td>不變</td><td colspan="3">200 日趨勢閘門、上限 6.5、結算週減碼</td></tr>
-   <tr><td>成績(2022 起樣本外 WF,滑價 4.5 點)</td><td>年化 128%・Sharpe 1.37・MDD −74%</td><td>年化 217%・Sharpe 1.73・MDD −61%</td></tr></tbody></table></div></details>
-  <details data-tk="v41-why"><summary>第一性原理文字說明</summary><div class="md" style="font-size:13px;line-height:1.75">
+   <tr><td>成績(2022 起樣本外 WF,滑價 4.5 點)</td><td>年化 128%・Sharpe 1.37・MDD −74%</td><td>年化 217%・Sharpe 1.73・MDD −61%</td></tr></tbody></table></div>`;
+const V41WHY=`<div class="md" style="font-size:13px;line-height:1.75">
    <p><b>1. 賺什麼、怎麼活下來。</b>賺台指期長期往上漂的錢(股市長期上漲,加上逆價差換月收斂;後者約 85% 來自除息季的股利),用槓桿放大。跌破 200 日均線就空手,當崩盤保險;上限 6.5 倍是因為台指單日最多跌 10%、史上最壞連兩天 −14.7%,6.5 倍不會爆倉。</p>
    <p><b>2. 槓桿的真實成本是波動的平方。</b>平均槓桿一樣,把槓桿從「沒有 edge 又波動大」的日子挪到「有 edge」的日子,長期複利會明顯變好。v5 剃刀版只做這件事,整體沒有多開。</p>
    <p><b>3. 逆價差。</b>期貨比現貨便宜越多,抱期貨本身就多賺,所以深逆價差時加碼合理;但資料顯示只有很深時才有額外好處,不深時沒有 → v5 剃刀版允許降到 0。</p>
    <p><b>4. net10(大額交易人淨部位的 z 分數)。</b>v4 原版假設「大戶越看多越該跟」。資料是倒 U:適度看多(z 0–0.75)隔天平均 +34bp;極端(z > 1.5)反而 −5bp、波動更大。可能是擁擠(該買的都買了)或大戶在避險壓力下,機制還沒證實。v4 原版剛好在最沒 edge、波動最大的時候開最滿,v5 剃刀版在這時減碼。</p>
-   <p><b>5. 限制。</b>net10 只有 2019 年起,樣本外只考了 5 年;10/08、10/15 那兩天 net10 不高,v5 一樣躲不掉;v5 頂到 6.5 上限的天數比較多(28% vs 25%),跳空爆倉那條線沒變。選哪一組是你的決定。</p>
-   <p class="sub">來源:CTS-research research_lab/probes/2026-11-06_burn_opt/v41/REPORT_v1.md</p></div></details>`}
+   <p><b>5. 限制。</b>net10 只有 2019 年起,樣本外只考了 5 年;10/08、10/15 那兩天 net10 不高,v5 一樣躲不掉;v5 頂到 6.5 上限的天數比較多(28% vs 25%),跳空爆倉那條線沒變。選哪一組是你的決定。</p><p class="sub">來源:CTS-research research_lab/probes/2026-11-06_burn_opt/v41/REPORT_v1.md</p></div>`;
+function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">期貨現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
+ const P=V.presets||{},nm={v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)',v7:'v7 合成版'},f=x=>x==null?'—':(+x).toFixed(2)+'x',PS=['v4','v5','v6','v7'].filter(p=>P[p]&&!P[p].error);
+ const row=(l,k,n)=>`<tr><td>${l}</td>${PS.map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
+ return `<div class="tbl"><table><thead><tr><th>槓桿(訊號日 ${esc(V.as_of)})</th>${PS.map(p=>`<th class="r">${nm[p]}${p===V.active?' <span class="pill t-ok" style="font-size:10px">config 使用中</span>':''}</th>`).join('')}<th></th></tr></thead><tbody>
+  ${row('今天 15:00 目標','next','今天收盤後的訊號、15:00 下單的槓桿(上限 ±6.5;負 = 空單)')}${row('昨天 15:00 目標','held','前一交易日 15:00 下的部位，持有到今天 15:00')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
+  <p class="sub" style="margin:0">訊號:逆價差 z(zb)${V.zb}・大額交易人淨部位 z(zn)${V.zn}・距結算 ${V.dte} 個交易日・逆價差資料 ${esc(V.basis_as_of)}、net10 ${esc(V.net10_as_of)}</p>
+  ${v41Sel((P.v6||{}).selection)}
+  <div id="v41c" style="display:flex;flex-direction:column;gap:8px"></div>`}
 let VP=null;
 async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_options?'+Date.now());O=await r.json()}catch(e){return}
  try{const r=await fetch('integration.json?'+Date.now());VP=r.ok?(await r.json()).v41_presets:VP}catch(e){}
+ try{const r=await fetch('data/v41_charts.json?'+Date.now());VC=r.ok?await r.json():VC}catch(e){}
  if(curV!=='trader'||!O||O.error)return;const hub=document.querySelector('#v-hub .hub');if(!hub)return;
  let sec=document.getElementById('tr-capopts');if(!sec){sec=document.createElement('section');sec.id='tr-capopts';sec.className='card pad tr-sec';hub.appendChild(sec)}
  const p=x=>(x*100).toFixed(0)+'%',cards=Object.entries(O.options).map(([k,v])=>{const on=k===O.objective,P=v.params;
@@ -1910,6 +1992,7 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
   <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換期貨版本</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${({v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)',v7:'v7 合成版'})[v]||v}</button>`).join('')}</div>
   <p class="sub" style="margin:0">v7 合成版 = v5 與 v6 的目標槓桿取平均,平均低於 4 倍就空手,否則乘 6/6.5(最大 6 倍)。回測 2022 起約六成日子空手、年化 258% / Sharpe 2.28 / 最大回撤 −39%。k 倍數設定不套用在 v7。<b>v7 內建夜盤停損</b>:美股開盤後 2 小時(台北 冬令 00:30 / 夏令 23:30)當晚已賠 2% 權益砍半、5% 全砍,隔天 08:46 比砍價更差才補回;其他版本只記錄不下單。</p>
   <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
+ v41Paint();
  sec.onclick=async e=>{const c=e.target.closest('button[data-cap]');
   if(c){try{const go=c.dataset.cap==='1'&&CAPT,t=+(($('#tr_cap_in')||{}).value||0),j=await opPost('api/capital',{total:go?CAPT.total:t,confirm:!!go});CAPT=go?null:j;if(go)CAPIN=null;renderCapOpts(go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入')}catch(err){renderCapOpts('❌ '+err.message)}return}
   const b=e.target.closest('button[data-obj],button[data-v41]');if(!b)return;

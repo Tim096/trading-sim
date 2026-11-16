@@ -379,6 +379,10 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
  .th-lamp.off,.th-cold.off{min-height:0;height:auto;padding:8px 12px}.th-lamp.off .th-mwrap,.th-lamp.off .th-worry,.th-lamp.off .th-lmeta,.th-cold.off .th-ctxt{display:none}
  #th_rg{margin-top:16px}#th_cv{margin:0 -14px;width:calc(100% + 28px)}}
 @media (max-width:760px){#v-monitor>.day,#v-monitor .panel,#v-monitor>.mhero,#v-hub>.card,#v-hub .hub>.card,#v-hub .hub>div>.card{border-radius:0;border-left:0;border-right:0;margin-left:-14px;margin-right:-14px}}
+/* 手機:字級下限 12px、觸控目標 >=40px(主要按鈕 44px) */
+@media (max-width:760px){.th-mtick,.th-lgh,.tag,.lock,.code,svg text,th,.paper,.band span,.span b,.node,.node .n,.rk,.chev,.cnt,.agb>div .t,.ptabs button em,.thm-scale,.ptype,.yr,.tr-slot>span,.hub summary::before,.newb,.drow .ds,.dax{font-size:12px}
+ .seg button{min-height:40px;padding:0 14px;font-size:13px}.ibtn,.health{height:44px;min-width:44px}.btn,.btn.sm{min-height:44px;padding-top:0;padding-bottom:0}
+ .link,.sc-more{position:relative}.link::after,.sc-more::after{content:'';position:absolute;inset:-13px -8px}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 #today,#perf,#strategies,#positions,#engine,.board tr{scroll-margin-top:76px}
 /* ---- research hub tabs ---- */

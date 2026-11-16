@@ -5,29 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>合體策略監看台</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0A0B0D;--panel:#111314;--panel2:#17191B;--line:#26282B;--line2:#1C1E20;--btn:#36383C;
-  --ink:#EFF0F2;--ink2:#D2D4D7;--ink3:#B5B7BA;--mute:#95989D;--mute2:#7A7E82;
-  --up:#F5605B;--dn:#43C07A;--ok:#5DC291;--warn:#E8AA4E;--bad:#F0834E;--acc:#8FC4F1;--now:#EBBD57;
+  --bg:#000000;--panel:#000000;--panel2:#0B0B0B;--line:#2A2A2A;--line2:#1B1B1B;--btn:#3A3A3A;
+  --ink:#E6E6E2;--ink2:#CACAC5;--ink3:#ABABA6;--mute:#8E8E89;--mute2:#7B7B77;
+  --up:#FF4D4D;--dn:#2BD96B;--ok:#2BD96B;--warn:#FFD84D;--bad:#FF8A3D;--acc:#FFB000;--now:#FFB000;
   --c-l1:#B9A5F6;--c-txn:#79B9FB;--c-l4:#49CCBE;--c-all:#DFA95B;--c-rg:#EE95B8;--c-dp:#C5B65A;--c-v4:#7CC98D;--c-s3:#48C7E2;--c-u15:#EF9E70;--c-la:#D99ADD;--c-bm:#95989D;
   --t-disp-bg:#33270F;--t-disp-fg:#F0C060;--t-lu-bg:#3A1A1A;--t-info-bg:#1B2A3A;--t-info-fg:#9CC8F5;--t-risk-bg:#3A1F17;--t-risk-fg:#F4A07A;--t-ok-bg:#15302A;--t-ok-fg:#7FDCB0;
-  --card:var(--panel);--card2:var(--bg);--hover:rgba(255,255,255,.03);--r:10px;color-scheme:dark}
+  --card:var(--panel);--card2:var(--bg);--hover:rgba(255,255,255,.03);--r:0px;color-scheme:dark}
 :root[data-theme="light"]{
-  --bg:#F2F3F5;--panel:#FFFFFF;--panel2:#F7F8F9;--line:#DCDEE1;--line2:#EAEBED;--btn:#CBCED2;
-  --ink:#141619;--ink2:#2E3134;--ink3:#44484D;--mute:#5F6469;--mute2:#6F7479;
-  --up:#CC2827;--dn:#007F43;--ok:#007F4E;--warn:#A76100;--bad:#BF4306;--acc:#2063B0;--now:#AD7300;
+  --bg:#F4F3EE;--panel:#F4F3EE;--panel2:#EBEAE4;--line:#C9C7BD;--line2:#DDDBD2;--btn:#B5B3A8;
+  --ink:#111111;--ink2:#2A2A28;--ink3:#444441;--mute:#5E5E59;--mute2:#6C6C67;
+  --up:#C4201F;--dn:#00713B;--ok:#00713B;--warn:#8A6200;--bad:#B8470A;--acc:#8F5200;--now:#8F5200;
   --c-l1:#765BB6;--c-txn:#1B71BC;--c-l4:#008779;--c-all:#9D5F00;--c-rg:#AA4673;--c-dp:#826F00;--c-v4:#17843F;--c-s3:#0081A1;--c-u15:#AC5107;--c-la:#964E9B;--c-bm:#6F7479;
   --t-disp-bg:#FEF3C7;--t-disp-fg:#92400E;--t-lu-bg:#FEE4E2;--t-info-bg:#E0EDFC;--t-info-fg:#1D4E89;--t-risk-bg:#FEE4D6;--t-risk-fg:#9A3412;--t-ok-bg:#DCFAE6;--t-ok-fg:#05603A;
   --card2:var(--panel2);--hover:rgba(16,24,40,.03);color-scheme:light}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 'IBM Plex Sans','Noto Sans TC',"Microsoft JhengHei",system-ui,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.55 'IBM Plex Mono','Noto Sans TC',"Microsoft JhengHei",system-ui,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 button{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.num{font-family:'IBM Plex Sans','Noto Sans TC',ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
+.num{font-family:'IBM Plex Mono','Noto Sans TC',ui-monospace,Consolas,monospace;font-variant-numeric:tabular-nums}
 .up{color:var(--up)}.dn{color:var(--dn)}.mute{color:var(--mute)}.warn{color:var(--warn)}.r{text-align:right}
 .wrap{max-width:1480px;margin:0 auto;padding:0 28px 72px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);min-width:0}
@@ -121,7 +121,7 @@ select,input{font:inherit;font-size:13px;color:var(--ink);background:var(--panel
 .cfg input{width:104px}
 .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--ink3)}
 .legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px}
-svg text{fill:var(--mute2);font-size:11px;font-family:'IBM Plex Sans','Noto Sans TC',ui-monospace,monospace}
+svg text{fill:var(--mute2);font-size:11px;font-family:'IBM Plex Mono','Noto Sans TC',ui-monospace,monospace}
 .flash{animation:flash 1.2s cubic-bezier(.22,1,.36,1)}
 @keyframes flash{0%{box-shadow:inset 0 0 0 2px var(--acc)}100%{box-shadow:inset 0 0 0 2px transparent}}
 
@@ -187,10 +187,10 @@ th.r,td.r{text-align:right}
 .node.run i{background:var(--now);border-color:var(--now);animation:pulse 1.8s cubic-bezier(.22,1,.36,1) infinite}.node.run{color:var(--now)}
 .node.star i{border-radius:5px;transform:rotate(45deg);width:15px;height:15px;margin:1px 0 2px}
 .node.star:hover i{transform:rotate(45deg) scale(1.2)}
-.node .t{font-family:'IBM Plex Sans','Noto Sans TC',monospace}
+.node .t{font-family:'IBM Plex Mono','Noto Sans TC',monospace}
 .node .n{font-size:11px;color:var(--ink2);white-space:nowrap;position:absolute;top:-28px}
 .nowline{position:absolute;top:24px;height:42px;width:2px;background:var(--now);border-radius:2px;z-index:3;pointer-events:none}
-.nowline span{position:absolute;top:62px;left:50%;transform:translateX(-50%);font:600 11px 'IBM Plex Sans','Noto Sans TC',monospace;color:#1a1204;background:var(--now);padding:1px 7px;border-radius:999px;white-space:nowrap}
+.nowline span{position:absolute;top:62px;left:50%;transform:translateX(-50%);font:600 11px 'IBM Plex Mono','Noto Sans TC',monospace;color:#1a1204;background:var(--now);padding:1px 7px;border-radius:999px;white-space:nowrap}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--now) 60%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
 .drawer{margin-top:4px;border:1px solid color-mix(in srgb,var(--acc) 40%,var(--line));border-radius:8px;background:color-mix(in srgb,var(--acc) 4%,var(--panel2));padding:4px;position:relative;animation:drop .25s cubic-bezier(.22,1,.36,1)}
 .drawer .step{margin:0;border:0;background:transparent;padding-right:56px}
@@ -207,16 +207,16 @@ button.fc:hover{transform:translateY(-1px)}
 .fc.you{border-color:color-mix(in srgb,var(--acc) 45%,var(--line));background:color-mix(in srgb,var(--acc) 6%,var(--panel2))}
 .fc.ok{border-color:color-mix(in srgb,var(--ok) 35%,var(--line));background:color-mix(in srgb,var(--ok) 5%,var(--panel2))}
 .fc.bad{border-color:color-mix(in srgb,var(--bad) 55%,var(--line));background:color-mix(in srgb,var(--bad) 7%,var(--panel2))}
-.cd{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:12px;color:var(--acc);margin-left:auto}
+.cd{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:12px;color:var(--acc);margin-left:auto}
 .runs{display:flex;flex-direction:column;gap:2px;margin-top:2px}
 .run{display:flex;gap:10px;align-items:flex-start;padding:6px;margin:0 -6px;border-radius:8px;background:none;border:0;text-align:left;cursor:pointer}
 .run:hover{background:var(--hover)}
 .rk{font-size:11px;font-weight:600;padding:1px 7px;border-radius:5px;background:var(--t-lu-bg);color:var(--up);flex:none;margin-top:2px}
 .rk.paper{background:var(--t-disp-bg);color:var(--t-disp-fg)}.rk.sys{background:var(--line);color:var(--ink3)}
 .run b{font-size:14px;font-weight:600;color:var(--ink)}
-.run .m{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:12px;color:var(--ink3);margin-left:6px}
+.run .m{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:12px;color:var(--ink3);margin-left:6px}
 .run .d{font-size:13px;color:var(--ink3);margin-top:2px}
-.okbig{font-size:22px;font-weight:600;font-family:'IBM Plex Sans','Noto Sans TC',monospace}
+.okbig{font-size:22px;font-weight:600;font-family:'IBM Plex Mono','Noto Sans TC',monospace}
 .more{margin-top:12px;font-size:12px;color:var(--mute);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .more #rules_now b{font-weight:600}
 .flowhead{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-top:14px;font-size:14px}
@@ -263,7 +263,7 @@ button.fc:hover{transform:translateY(-1px)}
 .sname>div{min-width:0}
 .big{font-size:17px;font-weight:600}
 .pos,.next{font-size:13px;color:var(--ink2)}
-.next .tm{font-family:'IBM Plex Sans','Noto Sans TC',monospace;color:var(--ink);margin-right:6px}
+.next .tm{font-family:'IBM Plex Mono','Noto Sans TC',monospace;color:var(--ink);margin-right:6px}
 .next.soon .tm{color:var(--now)}
 .alloc{font-size:13px;color:var(--ink3)}
 .alloc i{display:block;height:3px;border-radius:2px;background:var(--line);margin-top:6px;width:90px;margin-left:auto;overflow:hidden}
@@ -290,7 +290,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .rm:first-child{border-top:0;padding-top:4px}
 .rm:hover{background:var(--hover)}
 .rm .row{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--ink2)}
-.rm .row span:last-child{font-family:'IBM Plex Sans','Noto Sans TC',monospace;white-space:nowrap}
+.rm .row span:last-child{font-family:'IBM Plex Mono','Noto Sans TC',monospace;white-space:nowrap}
 .mbar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
 .mbar i{display:block;height:100%;border-radius:3px}
 .ag{border-top:1px solid var(--line2)}
@@ -298,19 +298,19 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .agh{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;font-size:13px;width:100%;background:none;border:0;text-align:left}
 .agh:hover b{text-decoration:underline}
 .agh b{font-weight:600;color:var(--ink)}
-.agh .sum{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:12px;white-space:nowrap}
-.agh .t{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:12px;color:var(--mute2);margin-left:auto}
+.agh .sum{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:12px;white-space:nowrap}
+.agh .t{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:12px;color:var(--mute2);margin-left:auto}
 .agh .chev{margin-left:0}
 .ag.open .agh .chev{transform:rotate(180deg)}
 .agb{padding:0 0 10px;border-left:2px solid var(--line);margin-left:6px;animation:drop .2s cubic-bezier(.22,1,.36,1)}
 .agb>div{display:flex;gap:10px;padding:5px 0 5px 12px;font-size:13px;color:var(--ink2)}
-.agb>div .t{margin-left:auto;font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:11px;color:var(--mute2);white-space:nowrap}
+.agb>div .t{margin-left:auto;font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:11px;color:var(--mute2);white-space:nowrap}
 
 /* ---- 分頁面板 ---- */
 .ptabs{display:flex;gap:4px;padding:0 16px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
 .ptabs button{font-size:13px;font-weight:500;color:var(--mute);padding:12px;position:relative;cursor:pointer;display:flex;gap:6px;align-items:center;background:none;border:0;white-space:nowrap}
 .ptabs button:hover{color:var(--ink)}
-.ptabs button em{font-style:normal;font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:11px;color:var(--mute2);background:var(--line2);padding:0 6px;border-radius:999px}
+.ptabs button em{font-style:normal;font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:11px;color:var(--mute2);background:var(--line2);padding:0 6px;border-radius:999px}
 .ptabs button em:empty{display:none}
 .ptabs button[aria-selected="true"]{color:var(--ink)}.ptabs button[aria-selected="true"]::after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:var(--ink);border-radius:2px}
 .pbody{padding:16px 20px 20px;display:flex;flex-direction:column;gap:12px;min-width:0}
@@ -339,7 +339,7 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .thm-track .mk{width:18px;height:18px;background:var(--ink);border:3px solid var(--panel)}.thm-track .gh{width:10px;height:10px;border:2px solid var(--ink);background:var(--panel);opacity:.6}
 .thm-scale{position:relative;height:14px;font-size:11px;color:var(--mute2);margin-top:-8px}.thm-scale span{position:absolute;transform:translateX(-50%)}
 .thm-ro{align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;margin:10px 0 6px;min-height:24px}.thm-ro i{font-style:normal;font-weight:600;font-size:12px;padding:1px 7px;border-radius:6px}
-.thm-heat{display:grid;grid-template-columns:1fr repeat(3,58px);gap:4px;align-items:center}.thm-heat i{font:600 12.5px 'IBM Plex Sans','Noto Sans TC',monospace;text-align:center;padding:5px 0;border-radius:6px}.thm-heat b{text-align:center;font-size:12px;color:var(--mute);font-weight:500}
+.thm-heat{display:grid;grid-template-columns:1fr repeat(3,58px);gap:4px;align-items:center}.thm-heat i{font:600 12.5px 'IBM Plex Mono','Noto Sans TC',monospace;text-align:center;padding:5px 0;border-radius:6px}.thm-heat b{text-align:center;font-size:12px;color:var(--mute);font-weight:500}
 /* 扁平化:面板裡不再放卡片,用細線與留白分區 */
 .fc{background:none!important;border:0;border-top:1px solid var(--line);border-radius:0;padding:14px 2px 6px}.focus{gap:12px 28px}button.fc:hover{transform:none}button.fc:hover .v{text-decoration:underline}
 .kpi,.card.kpi{background:none;border:0;border-top:1px solid var(--line);border-radius:0;padding:10px 2px 4px}.strip{gap:8px 24px}
@@ -393,17 +393,17 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .hub .md table{display:block;overflow-x:auto;border-collapse:collapse;font-size:13px;margin:8px 0}
 .hub .md th,.hub .md td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
 .hub .md th{color:var(--mute);font-weight:500}
-.hub .md code{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:.85em;background:var(--card2);padding:0 4px;border-radius:3px}
+.hub .md code{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:.85em;background:var(--card2);padding:0 4px;border-radius:3px}
 .hub .md pre{overflow-x:auto;background:var(--card2);padding:10px;border-radius:6px}
 .hub .md blockquote{margin:8px 0;padding:2px 12px;border-left:3px solid var(--acc);color:var(--ink3)}
 .hub .md a{color:var(--acc)}
 .part{display:grid;grid-template-columns:4em 1fr;gap:4px 12px;padding:11px 0;border-bottom:1px solid var(--line2)}
 .part:last-child{border-bottom:0}
 .part.neg{background:color-mix(in srgb,var(--bad) 7%,transparent)}
-.part .pid{font-family:'IBM Plex Sans','Noto Sans TC',monospace;color:var(--mute);font-size:13px;padding-top:2px}
+.part .pid{font-family:'IBM Plex Mono','Noto Sans TC',monospace;color:var(--mute);font-size:13px;padding-top:2px}
 .part .b{display:flex;flex-direction:column;gap:3px;min-width:0;font-size:13px;color:var(--ink3);line-height:1.6}
 .part .t{color:var(--ink);font-size:14px}
-.part .m{font-family:'IBM Plex Sans','Noto Sans TC',monospace;color:var(--ink2);font-size:13px}
+.part .m{font-family:'IBM Plex Mono','Noto Sans TC',monospace;color:var(--ink2);font-size:13px}
 .ptree summary{display:flex;justify-content:space-between;gap:12px;cursor:pointer;padding:9px 0}
 .ptree.l0>summary{font-size:16px;color:var(--ink)}
 .ptree.l1>summary{font-size:14px;color:var(--ink2)}
@@ -416,20 +416,20 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .hub input[type=search]{font:inherit;padding:7px 10px;border-radius:7px;border:1px solid var(--btn);background:var(--card2);color:var(--ink);width:100%;max-width:420px}
 .scards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .scard{border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:6px;background:var(--card2);min-width:0}
-.scard .path{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:12px;color:var(--mute);word-break:break-all}
+.scard .path{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:12px;color:var(--mute);word-break:break-all}
 /* 策略看板:階段頭、卡片層次(名稱 → 一句話 → 數字區 → 備註 → 路徑) */
 .stg-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.stg-h .h2{font-size:16px}.stg-h .sub{font-size:13px}
 .stg-nav{display:flex;flex-wrap:wrap;gap:6px}.stg-nav a{font-size:12px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--panel)}
-.stg-nav a:hover{border-color:var(--mute2)}.stg-nav a b{font-family:'IBM Plex Sans','Noto Sans TC',monospace;margin-left:4px;color:var(--ink)}
+.stg-nav a:hover{border-color:var(--mute2)}.stg-nav a b{font-family:'IBM Plex Mono','Noto Sans TC',monospace;margin-left:4px;color:var(--ink)}
 .stg{scroll-margin-top:76px}
 .scard{gap:10px}.scard.s-live,.scard.s-done{box-shadow:inset 0 2px 0 var(--ok)}.scard.s-paper{box-shadow:inset 0 2px 0 var(--acc)}
 .scard .nm{font-size:15px;font-weight:600;color:var(--ink);line-height:1.4}
 .scard .sm{font-size:13px;color:var(--ink2);line-height:1.65;margin:0}
 .sc-kpi{display:flex;flex-direction:column;gap:6px;padding:9px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line2)}
-.sc-kpi .m{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:13px;color:var(--ink);line-height:1.55}
-.sc-kpi .bt{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:13px;color:var(--ink2)}
+.sc-kpi .m{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:13px;color:var(--ink);line-height:1.55}
+.sc-kpi .bt{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:13px;color:var(--ink2)}
 .yrs{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
-.yr{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:11px;border:1px solid var(--line);border-radius:5px;padding:0 5px;color:var(--mute);line-height:18px}.yr b{margin-left:3px;font-weight:600}
+.yr{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:11px;border:1px solid var(--line);border-radius:5px;padding:0 5px;color:var(--mute);line-height:18px}.yr b{margin-left:3px;font-weight:600}
 .sc-note p{margin:0;font-size:12px;color:var(--mute);line-height:1.65;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .sc-note.open p{display:block}
 .sc-more{font:inherit;font-size:12px;color:var(--acc);background:none;border:0;padding:2px 0 0;cursor:pointer}
@@ -438,14 +438,14 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .tr-hero{display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 2px 0 var(--line)}
 .tr-hero.g-good{box-shadow:inset 0 2px 0 var(--ok)}.tr-hero.g-ok{box-shadow:inset 0 2px 0 var(--acc)}.tr-hero.g-bad{box-shadow:inset 0 2px 0 var(--bad)}.tr-hero.g-live{box-shadow:inset 0 2px 0 var(--now)}
 .tr-meta{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center;font-size:12px;color:var(--mute)}
-.tr-meta b{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-weight:500;color:var(--ink2)}
+.tr-meta b{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-weight:500;color:var(--ink2)}
 .tr-meta .tr-upd{margin-left:auto}
 .tr-head{margin:0;font-size:20px;font-weight:600;line-height:1.45;color:var(--ink)}
 .tr-note{margin:0;font-size:13px;color:var(--mute);line-height:1.6}
 .tr-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .tr-kpi{gap:2px}
 .tr-kpi .l{font-size:12px;color:var(--mute)}
-.tr-kpi .v{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:20px;font-weight:600;color:var(--ink);line-height:1.35;font-variant-numeric:tabular-nums}
+.tr-kpi .v{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:20px;font-weight:600;color:var(--ink);line-height:1.35;font-variant-numeric:tabular-nums}
 .tr-kpi .n{font-size:12px;color:var(--ink3);line-height:1.5}
 .tr-sec{display:flex;flex-direction:column;gap:12px}
 .tr-sec .stg-h .tr-leg{margin-left:auto;display:flex;flex-wrap:wrap;gap:4px}
@@ -468,12 +468,12 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .tr-slot.run i{background:var(--now);animation:pulse 1.8s cubic-bezier(.22,1,.36,1) infinite}
 .tr-slot.none i{background:var(--panel);border:1.5px dashed var(--mute2)}
 .tr-slot.wait i{background:var(--panel);border:1.5px solid var(--btn)}
-.tr-slot>span{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:11px;line-height:1;color:var(--mute2);white-space:nowrap}
+.tr-slot>span{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:11px;line-height:1;color:var(--mute2);white-space:nowrap}
 .tr-pl{display:flex;flex-direction:column}
 .tr-pr{display:grid;grid-template-columns:3.4em minmax(0,1fr);gap:4px 10px;padding:10px 0 10px 10px;border-top:1px solid var(--line2)}
 .tr-pr.hit,.tr-pr.fail,.tr-pr.run{box-shadow:inset 2px 0 0 var(--k)}
 .tr-pr.fail{--k:var(--bad)}.tr-pr.run{--k:var(--now)}
-.tr-pr>.t{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:13px;font-weight:600;color:var(--ink);line-height:1.55}
+.tr-pr>.t{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:13px;font-weight:600;color:var(--ink);line-height:1.55}
 .tr-pr>.b{display:flex;flex-direction:column;gap:6px;min-width:0}
 .tr-pr .ps{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;font-size:14px;line-height:1.55;color:var(--ink)}
 .tr-fd{display:flex;gap:8px;align-items:baseline;font-size:13px;line-height:1.6;color:var(--ink2)}
@@ -501,7 +501,7 @@ tr.tr-cx>td{color:var(--mute)}
 /* 資料盤點:每列一條時間軸,四種狀態上色 */
 .dtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .dtile{font:inherit;text-align:left;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--card2);color:var(--ink);display:flex;flex-direction:column;gap:2px}
-.dtile b{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:22px;font-weight:600}.dtile span{font-size:13px;color:var(--ink2)}
+.dtile b{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:22px;font-weight:600}.dtile span{font-size:13px;color:var(--ink2)}
 .dtile[aria-pressed="true"]{border-color:var(--ink2);box-shadow:inset 0 0 0 1px var(--ink2)}
 .dtile .sw{width:22px;height:6px;border-radius:3px;margin-bottom:4px}
 .dchips{display:flex;flex-wrap:wrap;gap:6px}
@@ -510,13 +510,13 @@ tr.tr-cx>td{color:var(--mute)}
 .dfam{display:flex;flex-direction:column}
 .drow{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,1.6fr) minmax(220px,1.4fr);gap:14px;align-items:center;padding:9px 0;border-top:1px solid var(--line2)}
 .drow.axis{border-top:0;padding:0 0 4px}.drow .nm{font-size:14px;font-weight:600;color:var(--ink);line-height:1.4}
-.drow .ds{font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:11px;color:var(--mute);word-break:break-all}
+.drow .ds{font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:11px;color:var(--mute);word-break:break-all}
 .drow .use{font-size:12px;color:var(--ink2);line-height:1.5}
 .dbar{position:relative;height:14px;border-radius:4px;background:var(--panel2);overflow:hidden}
 .dbar i{position:absolute;top:0;bottom:0}.dbar i.s-have{background:var(--ok)}.dbar i.s-can{background:var(--acc)}.dbar i.s-cant{background:var(--bad);opacity:.75}
 .dbar i.s-unk{background:repeating-linear-gradient(45deg,var(--mute2) 0 3px,transparent 3px 6px)}
 .dbar b{position:absolute;top:0;bottom:0;width:1px;background:var(--bg);opacity:.6}
-.dax{position:relative;height:14px;font-family:'IBM Plex Sans','Noto Sans TC',monospace;font-size:11px;color:var(--mute)}.dax span{position:absolute;transform:translateX(-50%)}
+.dax{position:relative;height:14px;font-family:'IBM Plex Mono','Noto Sans TC',monospace;font-size:11px;color:var(--mute)}.dax span{position:absolute;transform:translateX(-50%)}
 .dseg{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink2)}.dseg div{line-height:1.5}.dseg .num{color:var(--ink)}
 .dleg{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--ink2);align-items:center}.dleg i{display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:4px;vertical-align:0}
 @media (max-width:760px){.drow{grid-template-columns:1fr;gap:6px}.drow.axis{display:none}}
@@ -610,7 +610,7 @@ tr.tr-cx>td{color:var(--mute)}
 .runcard{border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:12px;background:var(--panel2)}
 .runcard.waiting{border-color:color-mix(in srgb,var(--now) 55%,var(--line));background:color-mix(in srgb,var(--now) 5%,var(--panel2))}
 .runcard h3{margin:0;font-size:15.5px;line-height:1.4;text-wrap:balance}
-.meta{font-size:12px;color:var(--mute);font-family:'IBM Plex Sans','Noto Sans TC',monospace;word-break:break-all}
+.meta{font-size:12px;color:var(--mute);font-family:'IBM Plex Mono','Noto Sans TC',monospace;word-break:break-all}
 .stat{display:inline-flex;align-items:baseline;gap:5px;padding:4px 10px;border-radius:8px;background:var(--panel);border:1px solid var(--line2);font-size:13px;color:var(--ink2)}
 .stat b{font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}.stat.zero{opacity:.55}.stat.bad b{color:var(--bad)}
 /* ── 控制 ── */
@@ -621,7 +621,7 @@ tr.tr-cx>td{color:var(--mute)}
 .proc{display:flex;flex-direction:column}
 .proc div{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line2);font-size:14px}
 .proc div:last-child{border-bottom:0}
-.proc small{font-size:12px;color:var(--mute);font-family:'IBM Plex Sans','Noto Sans TC',monospace}
+.proc small{font-size:12px;color:var(--mute);font-family:'IBM Plex Mono','Noto Sans TC',monospace}
 .daychips{display:flex;gap:6px;flex-wrap:wrap}
 .daychip{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;border-radius:999px;background:color-mix(in srgb,var(--now) 14%,var(--panel));border:1px solid color-mix(in srgb,var(--now) 40%,var(--line));font-size:13px;font-variant-numeric:tabular-nums}
 .daychip button{border:0;background:none;color:var(--mute);cursor:pointer;font-size:13px;padding:0 4px;border-radius:50%}
@@ -629,6 +629,108 @@ tr.tr-cx>td{color:var(--mute)}
 .ops input[type=date]{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--btn);background:var(--panel2);color:var(--ink)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .danger-zone{border-color:color-mix(in srgb,var(--bad) 30%,var(--line))}
+
+/* ============ 終端風格(B):方角、格線、琥珀色標籤、等寬數字 ============ */
+*,*::before,*::after{border-radius:0!important}
+.card,.panel,.day,.kpi,.card.kpi,.inner,.tbl,.th-card,.th-date,.drawer{background:var(--bg);box-shadow:none}
+h2,h3,.h2,.ph h2,.panel>h3,.eyebrow{font-weight:500}
+.h2,.panel>h3,.ph h2,.zone>.ph h2{font-size:12px;color:var(--acc);letter-spacing:.08em}
+th{font-weight:400;letter-spacing:.04em}
+.tag,.pill,.lock,.side,.paper{font-weight:500;background:none!important;border:1px solid currentColor;padding:0 6px;line-height:16px}
+.btn{font-weight:500}.btn.pri{color:#000}
+.seg{padding:0;gap:0;background:none}.seg button{padding:5px 11px;border-right:1px solid var(--line)}.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--acc);color:#000}
+:root[data-theme="light"] .seg button[aria-pressed="true"]{background:var(--acc);color:#fff;box-shadow:none}
+.tabs button[aria-pressed="true"]{color:var(--acc);font-weight:500}.tabs button[aria-pressed="true"]::after{background:var(--acc)}
+.brand{color:var(--acc);font-weight:500;font-size:14px}.mark{display:none}
+.hvtip{box-shadow:none;border-color:var(--acc)}
+a{color:var(--acc)}
+
+/* ---- 操盤手:四場會改成列、巡檢合併成問題表 ---- */
+.mtg.mt-l{display:block}
+.hub .mt-r{border:0;border-top:1px solid var(--line2);box-shadow:inset 2px 0 0 var(--k,var(--line))}
+.mt-r.ok{--k:var(--ok)}.mt-r.warn{--k:var(--warn)}.mt-r.bad{--k:var(--bad)}.mt-r.info{--k:var(--acc)}
+.hub .mt-r>summary,div.mt-r{display:grid;grid-template-columns:1em 3.4em 5.5em auto minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 10px}
+div.mt-r::before{content:''}div.mt-r b{color:var(--mute);font-weight:400}
+.mt-r b{font-weight:500}.mt-r .pl{display:flex;gap:6px;flex-wrap:wrap}
+.mt-r .l1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+.mt-r[open] .l1{visibility:hidden}
+.mt-b{padding:2px 10px 14px calc(1em + 20px);display:flex;flex-direction:column;gap:8px;max-width:100ch}
+table.iss td{vertical-align:top;padding-top:9px;padding-bottom:9px}
+.iss-t{white-space:normal;min-width:24em;line-height:1.55;color:var(--ink2)}.iss-t b{color:var(--ink);font-weight:500}
+.iss-p{display:inline-grid;grid-auto-flow:column;gap:1px;vertical-align:middle}.iss-p i{width:7px;height:13px;background:var(--line)}.iss-p i.on{background:var(--k)}
+.tr-2{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:16px;align-items:start}
+.hub details.cfgd{border:0}.cfgd>summary{padding:0;gap:18px;align-items:baseline}.cfgd>summary b{font-weight:500}.cfgb{padding-top:14px}
+@media (max-width:760px){.tr-2{grid-template-columns:1fr}
+ .hub .mt-r>summary,div.mt-r{display:flex;flex-wrap:wrap;gap:6px 10px}.mt-r .l1{flex-basis:100%;white-space:normal}.mt-b{padding-left:10px}
+ table.iss th:nth-child(3),table.iss td:nth-child(3),table.iss th:nth-child(4),table.iss td:nth-child(4),table.iss th:nth-child(6),table.iss td:nth-child(6){display:none}
+ .iss-t{min-width:0}.cfgd>summary{gap:6px 14px}}
+
+/* ---- 策略看板:卡片 → 比較表 ---- */
+.sg{border-top:1px solid var(--line)}
+.sg-h,.hub .sg-r>summary{display:grid;grid-template-columns:1em minmax(200px,1.3fr) 4.2em 4.6em 4.6em auto minmax(0,1.6fr);gap:14px;align-items:baseline;padding:9px 6px}
+.sg-h{font-size:12px;color:var(--mute);border-bottom:1px solid var(--line)}.sg-h::before{content:''}
+.hub .sg-r{border:0;border-bottom:1px solid var(--line2)}.hub .sg-r>summary:hover{background:var(--hover)}
+.sg-r .nm{display:flex;flex-direction:column;min-width:0}.sg-r .nm b{font-weight:500;font-size:14px}.sg-r .nm .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sg .r{text-align:right}.sg-r summary>.num{font-size:14px}
+.sg-y{display:grid;grid-auto-flow:column;grid-auto-columns:2.7em;text-align:right}.sg-y i{font-style:normal}.sg-h .sg-y i{color:var(--mute)}
+.sg-r .cl{font-size:12px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.sg-r[open] .cl{visibility:hidden}
+.sg-b{display:grid;gap:10px;padding:4px 6px 16px calc(1em + 20px);max-width:110ch}
+.sg-b>div{display:grid;grid-template-columns:5.5em minmax(0,1fr);gap:10px}.sg-b .k{color:var(--acc);font-size:12px}
+.sg-b p{margin:0;line-height:1.7;color:var(--ink2)}.sg-b .path{color:var(--mute);font-size:12px;word-break:break-all}
+@media (max-width:760px){.sg-h,.hub .sg-r>summary{grid-template-columns:1em minmax(0,1fr) 3.4em 4em 3.6em;gap:8px}
+ .sg-h>:nth-child(n+5),.sg-r>summary>.sg-y,.sg-r>summary>.cl{display:none}.sg-r .nm .sub{white-space:normal}
+ .sg-b{padding-left:6px}.sg-b>div{grid-template-columns:1fr;gap:2px}}
+
+/* ---- 監看台:損益與策略表在最上面,流程、部位、長期績效往下 ---- */
+.mhero{display:flex}
+.mh-side div{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.mh-side{display:grid;grid-template-columns:1fr;gap:3px}
+.mh-flow{font:inherit;font-size:12px;color:var(--mute);background:none;border:1px solid var(--line);padding:8px 12px;cursor:pointer;text-align:left;line-height:1.6}
+.mh-flow:hover{border-color:var(--acc)}.mh-flow:empty{display:none}
+@media (min-width:761px){
+ #v-monitor{display:flex;flex-direction:column}#v-monitor>*{order:9;min-width:0}
+ #v-monitor>#mhero{order:0}#v-monitor>#strategies{order:1;margin-top:22px!important}#v-monitor>.main{order:2}#v-monitor>#today{order:3;margin-top:32px}#v-monitor>#positions{order:4}#v-monitor>#perf{order:5}
+ .mhero{margin-top:20px;padding:18px 22px}
+ .mh-top{justify-content:flex-start;align-items:flex-end;gap:36px}
+ .mh-big{font-size:76px;font-weight:500;letter-spacing:-.04em;line-height:1;margin-top:6px}
+ .mh-side{display:flex;gap:0;border:1px solid var(--line);text-align:left}
+ .mh-side div{flex-direction:column;gap:2px;padding:10px 20px;border-right:1px solid var(--line)}.mh-side div:last-child{border-right:0}
+ .mh-side b{font-size:20px;font-weight:500}
+ .mh-flow{margin-left:auto;max-width:34em}
+ .mh-chips{display:none}
+ .zh h2{font-size:12px;color:var(--acc);font-weight:500;letter-spacing:.08em}
+}
+@media (max-width:760px){.mh-top{flex-wrap:wrap}.mh-flow{width:100%}.mh-side{text-align:right}}
+
+.a-fold{display:flex;align-items:baseline;gap:12px;cursor:pointer;padding:12px 2px 10px;margin-top:12px;border-top:1px solid var(--line2);font-size:12px;font-weight:500;color:var(--acc);letter-spacing:.08em}
+.a-fold .sub{letter-spacing:0}.a-fold::after{content:"▾";color:var(--mute2);font-size:12px;margin-left:auto}.a-fold.m-open::after{transform:rotate(180deg)}.a-fold:not(.m-open)+*{display:none}
+
+/* ---- 研究所:清單化 ---- */
+.rp-l,.rn-l{border-top:1px solid var(--line)}
+.hub details.rp-r,.hub details.rn-r{border:0;border-bottom:1px solid var(--line2)}
+.hub .rp-r>summary{display:grid;grid-template-columns:1em 3.2em minmax(0,1fr) auto minmax(0,16em) 7em;gap:12px;align-items:baseline;padding:8px 6px;flex-wrap:nowrap}
+.hub .rn-r>summary{display:grid;grid-template-columns:1em 3.2em auto minmax(0,1fr) auto auto;gap:12px;align-items:baseline;padding:9px 6px}
+.rp-r>summary:hover,.rn-r>summary:hover{background:var(--hover)}
+.rp-r>summary b,.rn-r>summary b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rp-r[open]>summary b,.rn-r[open]>summary b{white-space:normal}
+.rp-r .sl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rp-r>summary>.sub:last-child{text-align:right}
+.rp-r>.md,.rp-b{padding:6px 6px 18px calc(1em + 18px)}.rp-b .k{font-size:12px;color:var(--acc);margin:8px 0 2px}
+.rn-r>.runcard{margin:4px 0 18px calc(1em + 18px);border:0;border-left:1px solid var(--line);padding:4px 0 4px 16px;background:none}
+.rn-r>.runcard>.hd{display:none}
+.hub .dfam>details{border:0}.dfam>details>summary{padding:0;align-items:baseline;gap:14px}.dfam>details[open]>summary{margin-bottom:10px}
+.df-c{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.otbl{border-top:1px solid var(--line)}
+.orow,.onode.orow{display:grid;grid-template-columns:5.5em minmax(9em,1.1fr) minmax(0,1.6fr) minmax(0,2fr) 4.5em 3.5em 3.5em 5.5em;gap:12px;align-items:baseline;padding:9px 6px;border:0;border-bottom:1px solid var(--line2);background:none;font-size:13px;flex-direction:initial}
+.orow.oh{font-size:12px;color:var(--mute);border-bottom:1px solid var(--line)}
+.onode.orow:hover{background:var(--hover)}.onode.orow.sel{box-shadow:inset 2px 0 0 var(--acc);background:var(--hover)}
+.orow .og{color:var(--acc);font-size:12px}.orow .onm{display:flex;gap:8px;align-items:center;min-width:0}.orow .onm b{font-weight:500}
+.orow .oph,.orow .onw{color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.orow .r{text-align:right}
+@media (max-width:760px){
+ .hub .rp-r>summary{grid-template-columns:1em 3em minmax(0,1fr) auto}.rp-r>summary>.sub{display:none}.rp-r>.md,.rp-b,.rn-r>.runcard{padding-left:6px;margin-left:0}
+ .hub .rn-r>summary{grid-template-columns:1em 3em auto minmax(0,1fr)}.rn-r>summary>.sub{grid-column:2/-1}.rn-r>summary b{white-space:normal}
+ .orow,.onode.orow{grid-template-columns:minmax(0,1fr) 3em 3.5em;gap:4px 10px}.orow .og,.orow .oph,.orow .oe{display:none}.orow .onw{grid-column:1/-1;grid-row:2;white-space:normal;font-size:12px}
+ .orow.oh .onw,.orow .onw:has(>.mute:only-child){display:none}
+ .df-c{margin-left:0;width:100%}}
+@media (max-width:760px){.dfam>details{min-width:0}.drow>div{min-width:0}.drow .nm,.drow .ds,.drow .use,.dseg{overflow-wrap:anywhere;white-space:normal}}
 </style>
 <script>window.CTS_PUBLIC=1</script></head>
 <body>
@@ -647,7 +749,7 @@ tr.tr-cx>td{color:var(--mute)}
 <div class="pubnote" id="pubnote" hidden>公開快照,每個交易日 21:00 更新:全部是策略理論部位,實單與帳戶資訊已遮蔽</div>
 
 <div id="v-monitor">
-<section class="mhero m-only" id="mhero" aria-label="今天損益"></section>
+<section class="mhero" id="mhero" aria-label="今天損益"></section>
 
 <!-- ============ 今天:時間軸 + 大盤 ============ -->
 <section class="day" id="today" aria-label="今天">
@@ -716,8 +818,8 @@ tr.tr-cx>td{color:var(--mute)}
     <div class="panel sidep">
       <div class="ph m-fold"><h3>不打架的規則・今日檢查</h3></div>
       <div class="pbody" style="padding-top:0"><div class="list" id="ig_rules"></div></div>
-      <div class="ph" style="border-top:1px solid var(--line2);padding-top:14px"><h3>最近事件</h3><span class="s" id="recentN"></span><div class="tools"><button type="button" class="link" id="toLog">完整紀錄 ↓</button></div></div>
-      <div class="list recent" id="recentLog"></div>
+      <div class="ph" hidden style="border-top:1px solid var(--line2);padding-top:14px"><h3>最近事件</h3><span class="s" id="recentN"></span><div class="tools"><button type="button" class="link" id="toLog">完整紀錄 ↓</button></div></div>
+      <div class="list recent" id="recentLog" hidden></div>
     </div>
   </div>
 </section>
@@ -1290,7 +1392,7 @@ async function render(){
   return `<div class="step ${s==='running'||s==='waiting'?'now':s==='done'?'done':s==='failed'?'bad':''}"><div class="between"><span class="num tm">${g[0][0][0]}</span>${pl(s)}</div>${body}</div>`}).join('');
 
  const SF=SV.map(([x,f])=>f),nf=SF.filter(x=>x.s==="failed").length,ri=SF.findIndex(x=>x.s==="running"),pi=SF.findIndex(x=>x.s==="pending"),SX=SV.map(([x])=>x);
- $('#rules_now').innerHTML=(off?`<b>${selDay===td?'今日':''}休市</b>・`:'')+(nf?`<b style="color:var(--t-risk-fg)">${nf} 項故障</b>・`:'')+(!FL?(selDay===td?'今天還沒有任何流程回報(休市或排程沒啟動)':selDay+' 沒有流程紀錄'):[ri>=0?`目前:<b style="color:var(--c-all)">${SX[ri][0]} ${SX[ri][1]}</b>`:'',pi>=0?`下一步 ${SX[pi][0]} ${SX[pi][1]}`:''].filter(Boolean).join('・')||(selDay===td?'今天':'這天')+'流程已全部結束');
+ $('#rules_now').innerHTML=(off?`<b>${selDay===td?'今日':''}休市</b>・`:'')+(nf?`<b style="color:var(--t-risk-fg)">${nf} 項故障</b>・`:'')+(!FL?(selDay===td?'今天還沒有任何流程回報(休市或排程沒啟動)':selDay+' 沒有流程紀錄'):[ri>=0?`目前:<b style="color:var(--c-all)">${SX[ri][0]} ${SX[ri][1]}</b>`:'',pi>=0?`下一步 ${SX[pi][0]} ${SX[pi][1]}`:''].filter(Boolean).join('・')||(selDay===td?'今天':'這天')+'流程已全部結束');{const mf=$('#mh_flow');if(mf)mf.innerHTML=$('#rules_now').innerHTML}
  FLOW={GP,SV,agg,off,FL:!!FL,past,isToday:selDay===td,day:selDay};drawFlow();drawBoard();
 }
 // ---- six-strategy integration (integration.json from build_integration.py) ----
@@ -1570,7 +1672,8 @@ function bSpark(a,c){if(!a||a.length<2)return '<span class="mute">—</span>';co
 // 手機首屏:合體今天賺賠 + 各策略今天(點了跳到策略表那一列)
 function mHero(R,B){const el=$('#mhero');if(!el)return;const a=R.ALL.td,b=R.BM.td,nm=k=>{const e=$(`#board tr.s[data-k="${k}"] .sname b`);return e?e.textContent:k};
  el.innerHTML=`<div class="mh-top"><div><div class="sub">合體${B.isToday?'今天':' '+$('#day').value.slice(5)}・${esc(B.est||'')}</div><div class="num mh-big ${cls(a)}">${pct(a)}</div></div>
-  <div class="mh-side"><span>0050</span><b class="num ${cls(b)}">${pct(b)}</b><span>超額</span><b class="num ${cls(a!=null&&b!=null?a-b:null)}">${a!=null&&b!=null?pct(a-b):'—'}</b><span>累積</span><b class="num ${cls(R.ALL.cm)}">${pct(R.ALL.cm)}</b></div></div>
+  <div class="mh-side"><div><span>0050</span><b class="num ${cls(b)}">${pct(b)}</b></div><div><span>超額</span><b class="num ${cls(a!=null&&b!=null?a-b:null)}">${a!=null&&b!=null?pct(a-b):'—'}</b></div><div><span>累積</span><b class="num ${cls(R.ALL.cm)}">${pct(R.ALL.cm)}</b></div></div>
+  <button type="button" class="mh-flow priv" id="mh_flow" title="看今天的流程">${($('#rules_now')||{}).innerHTML||''}</button></div>
   <div class="mh-chips">${['RGMC','DISPO','V41','TXN','L1','L4'].map(k=>`<button type="button" data-open-row="${k}"${k==='RGMC'?' class="c-rg"':''}><span>${esc(nm(k))}</span><b class="num ${cls(R[k].td)}">${pct(R[k].td)}</b></button>`).join('')}</div>`}
 function drawBoard(){const B=BD;if(!B)return;const sc=IG&&SCH()[igScheme],W=(sc&&sc.weights)||{},T=+$('#c_total').value||0,F=IG?futPlan():null,mn=mnt(B.hm);
  const day=B.day||{},co=day.closed_overnight||[],v4=IG&&IG.v41,FR=F&&F.real,u=IG&&IG.ultra15,la=IG&&IG.lalloc;
@@ -1626,7 +1729,7 @@ buildBoard();
 $('#track').addEventListener('click',e=>{const b=e.target.closest('.node');if(b)openStep(b.dataset.tm)});
 $('#flowToggle').onclick=toggleFlow;
 $('#healthChip').onclick=$('#toLog').onclick=()=>{$('#engine .ph').classList.add('m-open');$('#engine').scrollIntoView({block:'start'})};
-document.addEventListener('click',e=>{const h=e.target.closest('.m-fold');if(h&&!e.target.closest('button,a,input,select'))h.classList.toggle('m-open')});   // 手機:細節區塊點標題展開(桌機 CSS 不收合)
+document.addEventListener('click',e=>{if(e.target.closest('#mh_flow'))return $('#today').scrollIntoView({block:'start'});const h=e.target.closest('.m-fold');if(h&&!e.target.closest('button,a,input,select'))h.classList.toggle('m-open')});   // 手機:細節區塊點標題展開(桌機 CSS 不收合)
 $('#rollCell').onclick=()=>{posTab('roll');$('#positions').scrollIntoView({block:'start'})};
 $('#board').addEventListener('click',e=>{if(e.target.closest('tr.detail'))return;const tr=e.target.closest('tr.s.x');if(tr)setRow(tr.dataset.k,!tr.classList.contains('open'))});
 $('#board').addEventListener('keydown',e=>{const tr=e.target.closest('tr.s.x');if(tr&&e.target===tr&&(e.key==='Enter'||e.key===' ')){e.preventDefault();setRow(tr.dataset.k,!tr.classList.contains('open'))}});
@@ -1658,18 +1761,24 @@ let HUB_T=0;async function loadHub(){if(HUB&&!HUB.error&&Date.now()-HUB_T<60000)
 function setV(v){if(LT.some(x=>x[0]===v)){curL=v;v='lab'}if(!VT.some(x=>x[0]===v))v='monitor';curV=v;try{localStorage.setItem('vtab',v)}catch(e){}
  seg($('#vtabs'),VT,v,setV);$('#v-monitor').hidden=v!=='monitor';$('#v-hub').hidden=v==='monitor';if(v!=='monitor')renderHub();window.scrollTo(0,0)}
 function hStrat(H){
- const I=H.integration||{},S=I.strategies||{};
- const st=s=>{const x=S[s.integration];if(!x)return '';
-  const yrs=Object.entries(x.years||{}).map(([y,v])=>`<span class="yr">${y.slice(2)}<b class="${cls(v)}">${v.toFixed(1)}</b></span>`).join('');
-  return `<div class="bt">Sharpe ${x.sharpe.toFixed(2)}・年化 ${pct(x.cagr,0)}・MDD ${pct(x.mdd,0)}</div><div class="yrs"><span class="sub">逐年 Sharpe</span>${yrs}</div><span class="sub num">${esc((I.window||[]).join(' ~ '))}</span>`};
+ // 一列一個策略:同一段期間的 Sharpe / 年化 / MDD / 逐年並排比較;做法、研究數字、注意事項點開才看
+ const I=H.integration||{},S=I.strategies||{},YS=[...new Set(Object.values(S).flatMap(x=>Object.keys(x.years||{})))].sort();
  const SD={done:'剃刀版已定、樣本外驗過,剩實單校準',wip:'還在驗,數字可能再變'};
  const groups=STG.map(g=>[...g,H.strategies.filter(s=>s.stage===g[0])]).filter(g=>g[3].length);
+ const row=(s,k)=>{const x=S[s.integration],m=String(s.name||'').match(/^([^((]+)[((](.*)[))]\s*$/),nm=m?m[1].trim():s.name,sub=m?m[2]:'';
+  return `<details class="sg-r" data-tk="sg-${esc(s.name)}"><summary><span class="nm"><b>${esc(nm)}</b>${sub?`<span class="sub">${esc(sub)}</span>`:''}</span>
+   <span class="num r">${x?x.sharpe.toFixed(2):'—'}</span><span class="num r ${x?cls(x.cagr):''}">${x?pct(x.cagr,0):'—'}</span><span class="num r">${x?pct(x.mdd,0):'—'}</span>
+   <span class="sg-y num">${YS.map(y=>{const v=x&&x.years?x.years[y]:null;return `<i class="${v==null?'':cls(v)}">${v==null?'·':v.toFixed(1)}</i>`}).join('')}</span>
+   <span class="cl">${esc(s.metrics||'')}</span></summary>
+   <div class="sg-b"><div><span class="k">做法</span><p>${esc(s.summary||'')}</p></div>
+    ${s.metrics?`<div><span class="k">研究數字</span><p>${esc(s.metrics)}</p></div>`:''}
+    ${s.notes?`<div><span class="k">注意</span><p>${esc(s.notes)}</p></div>`:''}
+    ${s.code?`<div><span class="k">出處</span><p class="path">${esc(s.code)}</p></div>`:''}</div></details>`};
  return `<nav class="stg-nav" aria-label="策略階段">${groups.map(([k,l,c,xs])=>`<a href="#stg-${k}">${l}<b>${xs.length}</b></a>`).join('')}</nav>`+groups.map(([k,l,c,xs])=>
-  `<section class="card pad stg" id="stg-${k}" style="display:flex;flex-direction:column;gap:14px"><div class="stg-h"><span class="pill ${c}">${l}</span><span class="sub">${xs.length} 個・${SD[k]||''}</span></div>
-  <div class="scards">${xs.map(s=>`<div class="scard s-${k}"><span class="nm">${esc(s.name)}</span>
-   <p class="sm">${esc(s.summary)}</p>
-   ${s.metrics||(s.integration&&S[s.integration])?`<div class="sc-kpi">${s.metrics?`<div class="m">${esc(s.metrics)}</div>`:''}${s.integration?st(s):''}</div>`:''}
-   ${s.notes?`<div class="sc-note"><p>${esc(s.notes)}</p><button type="button" class="sc-more" aria-expanded="false" hidden>展開全文</button></div>`:''}${s.code?`<span class="path">${esc(s.code)}</span>`:''}</div>`).join('')}</div></section>`).join('')}
+  `<section class="card pad stg" id="stg-${k}" style="display:flex;flex-direction:column;gap:10px"><div class="stg-h"><h2 class="h2">${l}</h2><span class="sub">${xs.length} 個・${SD[k]||''}</span></div>
+  <div class="sg"><div class="sg-h"><span>策略</span><span class="r">Sharpe</span><span class="r">年化</span><span class="r">MDD</span><span class="sg-y">${YS.map(y=>`<i>${y.slice(2)}</i>`).join('')}</span><span>研究報告的數字(口徑各自不同)</span></div>
+  ${xs.map(s=>row(s,k)).join('')}</div>
+  <p class="sub" style="margin:0">Sharpe / 年化 / MDD / 逐年 = 監看台同一套序列、同一段期間(${esc((I.window||[]).join(' ~ '))}),可以互相比;「—」= 還沒接進監看台序列。</p></section>`).join('')}
 function fitNotes(){document.querySelectorAll('#v-hub .sc-note').forEach(n=>{const p=n.firstElementChild;n.lastElementChild.hidden=p.scrollHeight<=p.clientHeight+2})}
 function hParts(H){
  const cnt=k=>H.parts.filter(p=>p.status===k).length;
@@ -1691,20 +1800,27 @@ function drawParts(){const H=HUB,q=PF.q.trim().toLowerCase();
   <span class="num" style="font-size:11px;color:var(--mute2)">${esc(p.round)}・${esc(p.probe)}・${esc(p.src)}</span></div></div>`;
  const filtered=q||PF.status!=='all'||PF.neg;
  const level=(ps,d)=>{const g=new Map();ps.forEach(p=>{const k=p.tree[d];g.has(k)||g.set(k,[]);g.get(k).push(p)});
-  return [...g].map(([k,v])=>`<details class="ptree l${d}"${filtered||(d===0&&k!=='其他研究線')?' open':''}><summary><b>${esc(k)}</b><span class="num sub">${v.length} 條</span></summary><div>${d<2?level(v,d+1):v.map(row).join('')}</div></details>`).join('')};
+  return [...g].map(([k,v])=>`<details class="ptree l${d}"${filtered?' open':''}><summary><b>${esc(k)}</b><span class="num sub">${v.length} 條</span></summary><div>${d<2?level(v,d+1):v.map(row).join('')}</div></details>`).join('')};
  $('#plist').innerHTML=xs.length?level(xs,0):'<p class="sub">沒有符合條件的零件。</p>'}
 function hReports(H){
  const by={};H.reports.forEach(r=>(by[r.probe]=by[r.probe]||[]).push(r));
- const probes=Object.keys(by).sort().reverse().map(pr=>{const g={};by[pr].forEach(r=>(g[r.kind]=g[r.kind]||[]).push(r));
-  return `<section class="card pad" style="display:flex;flex-direction:column;gap:10px"><div><span class="eyebrow">Research</span><h2 class="h2 num" style="font-size:15px;margin-top:4px">${esc(pr)}</h2></div>
-   ${['總報告','分線結果','過程紀錄'].filter(k=>g[k]).map(k=>`<div><div class="sub" style="font-weight:600;margin-bottom:4px">${k}</div>${g[k].map(r=>`<details data-key="${esc(r.probe+'/'+r.file)}"><summary><b>${esc(r.title)}</b>${NEWB(r)}<span class="num sub">${esc(r.file)}・${esc(r.mtime)}</span></summary><div class="md"></div></details>`).join('')}</div>`).join('')}</section>`}).join('');
+ const KS=['總報告','分線結果','過程紀錄'];
+ const rows=Object.keys(by).sort().reverse().map(pr=>{const rs=by[pr],g={};rs.forEach(r=>(g[r.kind]=g[r.kind]||[]).push(r));
+  const main=(g['總報告']||rs)[0],m=pr.match(/^(\d{4}-\d{2}-\d{2})_(.*)$/),dt=m?m[1].slice(5):'',slug=m?m[2]:pr,nw=rs.map(NEWB).find(Boolean)||'';
+  const srch=esc((pr+' '+rs.map(r=>r.title).join(' ')).toLowerCase());
+  const head=`<span class="num">${esc(dt)}</span><b>${esc(main.title)}</b>${nw}<span class="num sub sl">${esc(slug)}</span><span class="num sub">${rs.length>1?rs.length+' 份':esc(main.file)}</span>`;
+  if(rs.length===1)return `<details class="rp-r" data-s="${srch}" data-key="${esc(main.probe+'/'+main.file)}"><summary>${head}</summary><div class="md"></div></details>`;
+  return `<details class="rp-r" data-s="${srch}"><summary>${head}</summary><div class="rp-b">${KS.filter(k=>g[k]).map(k=>`<div><div class="k">${k}</div>${g[k].map(r=>`<details data-key="${esc(r.probe+'/'+r.file)}"><summary><b>${esc(r.title)}</b>${NEWB(r)}<span class="num sub">${esc(r.file)}・${esc(r.mtime)}</span></summary><div class="md"></div></details>`).join('')}</div>`).join('')}</div></details>`}).join('');
+ const probes=`<section class="card pad" style="display:flex;flex-direction:column;gap:10px"><div class="stg-h"><h2 class="h2">研究報告</h2><span class="sub">${Object.keys(by).length} 個研究・${H.reports.length} 份文件・新的在上面・點一列看全文</span>
+  <input type="search" placeholder="搜尋標題或資料夾名" aria-label="搜尋研究報告" style="margin-left:auto;max-width:260px" oninput="const q=this.value.trim().toLowerCase();document.querySelectorAll('#v-hub .rp-r').forEach(r=>r.hidden=!!q&&!r.dataset.s.includes(q))"></div>
+  <div class="rp-l">${rows}</div></section>`;
  const ideas=H.registry.ideas,st={};ideas.forEach(i=>st[i.status||'(無)']=(st[i.status||'(無)']||0)+1);
  return probes+`<section class="card pad" style="display:flex;flex-direction:column;gap:10px"><h2 class="h2">舊研究登錄</h2>
   <p class="sub" style="margin:0">research_lab/registry/ideas.jsonl 共 ${ideas.length} 筆想法:${Object.entries(st).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`${esc(k)} ${n}`).join('・')}</p>
   <details><summary><b>全部想法清單</b></summary><div class="tbl scroll" style="max-height:420px"><table><thead><tr><th>ID</th><th>標題</th><th>狀態</th><th>建立</th></tr></thead><tbody>
   ${ideas.slice().reverse().map(i=>`<tr><td class="num">${esc(i.idea_id)}</td><td>${esc(i.title)}${NEWB(i)}</td><td>${esc(i.status)}</td><td class="num">${esc((i.created_at||'').slice(0,10))}</td></tr>`).join('')}</tbody></table></div></details>
   <details data-md="failures"><summary><b>失敗紀錄 failures.md</b></summary><div class="md"></div></details></section>`}
-function wireReports(){document.querySelectorAll('#v-hub details').forEach(d=>d.addEventListener('toggle',()=>{const box=d.querySelector('.md');if(!box||!d.open||box.dataset.done)return;
+function wireReports(){document.querySelectorAll('#v-hub details').forEach(d=>d.addEventListener('toggle',()=>{const box=d.querySelector(':scope>.md');if(!box||!d.open||box.dataset.done)return;
  const r=HUB.reports.find(r=>r.probe+'/'+r.file===d.dataset.key);box.innerHTML=mdh(r?r.md:d.dataset.md==='failures'?HUB.registry.failures_md:'');box.dataset.done=1}))}
 function hFactory(H){const F=H.factory;
  if(!F)return '<section class="card pad"><h2 class="h2">因子工廠</h2><p class="sub">還沒有因子工廠資料(research_lab/probes/2026-10-19_factor_factory/)。</p></section>';
@@ -1721,7 +1837,7 @@ function hFactory(H){const F=H.factory;
     <div style="display:flex;flex-wrap:wrap;gap:6px">${hv.map(([k,n])=>`<span class="pill ${k==='yes'?'t-ok':k==='fetchable'?'t-info':k==='no'?'t-risk':''}">${esc(HL[k]||k)} ${n.toLocaleString()}</span>`).join('')}</div>
     <span class="sub" style="font-weight:600;margin-top:6px">最常用的算子</span><div style="display:flex;flex-wrap:wrap;gap:4px">${ops.map(([k,n])=>`<span class="ptype num">${esc(k)} ${n}</span>`).join('')}</div></div></div></section>
  <section class="card pad" style="display:flex;flex-direction:column;gap:6px"><h2 class="h2">各家族表達式範例</h2><p class="sub" style="margin:0">每族挑 6 條較短、優先本地有資料的公式;報酬都還沒在我們這邊驗證。</p>${samp}</section>
- <section class="card pad"><div class="md">${mdh(F.md)}</div></section>`}
+ <section class="card pad"><details><summary><h2 class="h2">方法論全文</h2><span class="sub">封存文件・公式出處與流程</span></summary><div class="md">${mdh(F.md)}</div></details></section>`}
 // ── 資料盤點(hub.json 的 inventory,來源 research_lab/data/inventory.yaml)──
 const DST={have:['已抓','t-ok'],can:['可抓未抓','t-info'],cant:['抓不到','t-risk'],unk:['未知','t-disp']},DF={st:'all',fam:'all'};
 function hData(H){const I=H.inventory;
@@ -1745,7 +1861,9 @@ function dataList(I){const t0=Date.parse(I.axis[0]),t1=Date.parse(I.axis[1]),x=d
   return `<div class="drow"><div><div class="nm">${esc(it.name)} ${it.prio?`<span class="pill t-info">${esc(it.prio)}</span>`:''}${it.tag==='fetching'?' <span class="pill t-disp">抓取中</span>':''}</div><div class="ds">${esc(it.ds||'')}${it.src_first?`・來源最早 ${esc(it.src_first)}`:''}</div>${it.use?`<div class="use">${esc(it.use)}</div>`:''}</div>
    <div class="dbar">${bar}${ticks}</div><div class="dseg">${txt}</div></div>`};
  const out=I.families.filter(f=>DF.fam==='all'||DF.fam===f.id).map(f=>{const xs=I.items.filter(it=>it.fam===f.id&&(DF.st==='all'||it.seg.some(s=>s.st===DF.st)));if(!xs.length)return '';
-  return `<section class="card pad dfam"><div class="between" style="margin-bottom:6px"><h3 class="h2" style="font-size:15px">${esc(f.name)}</h3><span class="sub">${xs.length} 項</span></div>${axis}${xs.map(row).join('')}</section>`}).join('');
+  const n=k=>xs.filter(it=>it.seg.some(g=>g.st===k)).length,flt=DF.st!=='all'||DF.fam!=='all';
+   return `<section class="card pad dfam"><details${flt?' open':''}><summary><h3 class="h2">${esc(f.name)}</h3><span class="num sub">${xs.length} 項</span>
+    <span class="df-c">${Object.keys(DST).map(k=>n(k)?`<span class="pill ${DST[k][1]}">${DST[k][0]} ${n(k)}</span>`:'').join('')}</span></summary>${axis}${xs.map(row).join('')}</details></section>`}).join('');
  return out||'<section class="card pad"><p class="sub" style="margin:0">這個條件沒有資料。</p></section>'}
 $('#v-hub').addEventListener('click',e=>{const t=e.target.closest('[data-dst],[data-dfam]');if(!t||!HUB||!HUB.inventory)return;
  if(t.dataset.dst)DF.st=DF.st===t.dataset.dst?'all':t.dataset.dst;else DF.fam=t.dataset.dfam;
@@ -1782,15 +1900,16 @@ async function renderTrader(){const box=$('#v-hub');let d=(selDay||new Date(Date
  const dur=m=>m==null?'—':m<1?`${Math.max(1,Math.round(m*60))} 秒`:`${+Number(m).toFixed(1)} 分`;
 
  // ── 四場會卡片(內容同舊版)──
- const cards=['am','open','pre_close','post'].map(s=>{const m=M[s];if(!m)return `<section class="card pad idle"><h3 class="h2" style="font-size:14px">${TZH[s]}</h3><p class="sub" style="margin:0">還沒開</p></section>`;
+ const MT={am:'08:30',open:'09:20',pre_close:'12:40',post:'13:40'};
+ const cards=['am','open','pre_close','post'].map(s=>{const m=M[s];if(!m)return `<div class="mt-r idle"><span class="num">${MT[s]}</span><b>${TZH[s]}</b><span class="sub">還沒開</span></div>`;
   const go=m.approval&&m.approval.decision==='go',ap=m.approval?(go?(m.approval.mode==='live'?'已核准(實單)':'已核准(演練)'):'不做'):'';
-  const icon={PASS:'✅',CONCERN:'🟡',FAIL:'🔴'}[m.verdict]||'';
+  const vz={PASS:['審查通過','t-ok'],CONCERN:['審查有疑慮','t-disp'],FAIL:['審查沒過','t-risk']}[m.verdict];
   const tone=SC[m.status]==='t-risk'||m.verdict==='FAIL'?'bad':m.verdict==='CONCERN'||(m.approval&&!go)?'warn':go?'ok':'info';
-  return `<section class="card pad ${tone}">
-   <div class="between"><h3 class="h2" style="font-size:14px">${TZH[s]} ${icon}</h3><span class="sub num">${esc((m.ended||m.started||'').slice(11,16))}</span></div>
-   <div style="display:flex;gap:6px;flex-wrap:wrap">${m.status==='awaiting'&&ap?'':pill(MSZH[m.status]||m.status||'',SC[m.status])}${ap?pill(ap,go?(m.approval.mode==='live'?'t-ok':'t-info'):'t-disp'):''}${m.finished?pill('程式已結束'):''}</div>
-   <div class="tg">${esc(m.tg||'')}</div>
-   ${m.review&&m.verdict!=='PASS'?`<div class="rv">審查:${esc(m.review)}</div>`:''}</section>`}).join('');
+  const ln=String(m.tg||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  return `<details class="mt-r ${tone}" data-tk="tr-m-${s}"><summary><span class="num">${esc((m.ended||m.started||'').slice(11,16)||MT[s])}</span><b>${TZH[s]}</b>
+   <span class="pl">${m.status==='awaiting'&&ap?'':pill(MSZH[m.status]||m.status||'',SC[m.status])}${ap?pill(ap,go?(m.approval.mode==='live'?'t-ok':'t-info'):'t-disp'):''}${vz?pill(vz[0],vz[1]):''}${m.finished?pill('程式已結束'):''}</span>
+   <span class="l1">${esc(ln[0]||'')}</span>${ln.length>1?`<span class="sub num">+${ln.length-1} 行</span>`:''}</summary>
+   <div class="mt-b"><div class="tg">${esc(m.tg||'')}</div>${m.review&&m.verdict!=='PASS'?`<div class="rv">審查:${esc(m.review)}</div>`:''}</div></details>`}).join('');
 
  // ── 今天的實單(刪單紀錄顯示成「刪單」,另加成交欄與送單當下報價)──
  const OS=TR.orders||[],REAL=OS.filter(o=>o.kind!=='cancel'),CX=OS.filter(o=>o.kind==='cancel'),cxBy={};
@@ -1809,6 +1928,7 @@ async function renderTrader(){const box=$('#v-hub');let d=(selDay||new Date(Date
  const B=TR.books||{},books=Object.entries(B).filter(([k,v])=>v&&Object.keys(v).length).map(([k,v])=>`<div><b>${STZH[k]||esc(k)}</b> <span class="num">${Object.entries(v).map(([s,n])=>`${esc(s)} ${n.toLocaleString()}股`).join('、')}</span></div>`).join('')||'<span class="sub">還沒有正式帳本(books.json)</span>';
  const fixes=Object.entries(M).flatMap(([s,m])=>(m.book_fixes||[]).map(f=>`<div>${STZH[f.strategy]||esc(f.strategy)} ${esc(f.sid)} ${f.delta>0?'+':''}${f.delta}:<span class="sub">${esc(f.reason)}</span></div>`)).join('')||'<span class="sub">沒有</span>';
  const plans=Object.entries(M).filter(([s,m])=>m.plan).map(([s,m])=>`<details data-tk="tr-plan-${s}"><summary>${TZH[s]} 計畫</summary><div class="md">${mdh(m.plan)}</div></details>`).join('');
+ const bookRows=Object.entries(B).flatMap(([k,v])=>Object.entries(v||{}).map(([c,n])=>`<tr><td>${STZH[k]||esc(k)}</td><td class="num">${esc(c)} ${esc(names[c]||'')}</td><td class="num r">${Number(n).toLocaleString()}</td></tr>`)).join('');
  const nBook=Object.values(B).reduce((a,v)=>a+(v?Object.keys(v).length:0),0);
 
  // ── 盤中巡檢 ──
@@ -1844,10 +1964,25 @@ async function renderTrader(){const box=$('#v-hub');let d=(selDay||new Date(Date
    fx=`<div class="tr-fx">${ps.join('')}${at}${p.review?`<span>審查:${esc(p.review)}</span>`:''}${dr}</div>`}
   const note=p.note?`<details data-tk="tr-pn-${t}"><summary>巡檢筆記</summary><div class="md">${mdh(p.note)}</div></details>`:'';
   return `<div class="tr-pr ${c==='fail'||c==='run'?c:'hit tk-'+c}"><span class="t">${t}</span><div class="b"><div class="ps">${head}<span>${esc(p.summary||'')}</span></div>${fds}${fx}${note}</div></div>`};
- const pBody=P.length?`${strip}<div class="tr-pl">${groups.map(prow).join('')}</div>`
+ // 同一件事每輪換句話重講 → 用文字相似度合併成「問題」,一列一個:第一次/最後一次看到、出現在哪幾輪
+ const strip2=x=>String(x||'').replace(/[\d:：.,，。、;；\s%]/g,''),bg=x=>{const g=new Set();for(let i=0;i<x.length-1;i++)g.add(x.slice(i,i+2));return g};
+ const ISS=[];P.slice().sort((a,b)=>String(a.at)<String(b.at)?-1:1).forEach(p=>(p.findings||[]).forEach(f=>{const k=KO.includes(f.kind)?f.kind:'anomaly',g=bg(strip2(f.text)),sid=f.sid?String(f.sid):'';
+  let hit=null,best=0;ISS.forEach(x=>{if(x.k!==k)return;let n=0;g.forEach(v=>{if(x.g.has(v))n++});const sc=n/Math.max(1,Math.min(g.size,x.g.size)),need=sid&&x.sids.size&&!x.sids.has(sid)?.6:.5;if(sc>=need&&sc>best){best=sc;hit=x}});
+  if(!hit){hit={k,g,sids:new Set(),ats:[],text:''};ISS.push(hit)}
+  if(sid)hit.sids.add(sid);if(!hit.ats.includes(p.at))hit.ats.push(p.at);hit.text=f.text||''}));
+ ISS.sort((a,b)=>KO.indexOf(a.k)-KO.indexOf(b.k)||b.ats.length-a.ats.length);
+ const lastAt=P.map(p=>String(p.at||'')).sort().pop()||'';
+ const issTbl=ISS.length?`<div class="tbl"><table class="iss"><thead><tr><th>類型</th><th>問題(最新一輪的說法)</th><th>時段</th><th>出現在哪幾輪</th><th class="r">輪數</th><th>現況</th></tr></thead><tbody>${ISS.map(x=>`<tr>
+   <td><span class="tag tr-tag tk-${x.k}">${KZ[x.k]}</span></td>
+   <td class="iss-t">${[...x.sids].map(c=>`<b class="num">${esc(c)}</b> ${esc(names[c]||'')}`).join('、')}${x.sids.size?' ':''}${esc(x.text)}</td>
+   <td class="num">${x.ats[0]}${x.ats.length>1?'–'+x.ats[x.ats.length-1]:''}</td>
+   <td><span class="iss-p tk-${x.k}">${times.map(t=>`<i${x.ats.includes(t)?' class="on"':''}></i>`).join('')}</span></td>
+   <td class="num r">${x.ats.length}/${P.length}</td>
+   <td>${x.ats.includes(lastAt)?pill('最新一輪仍在','t-risk'):pill('已消失','t-ok')}</td></tr>`).join('')}</tbody></table></div>`:'<p class="tr-note">每一輪都沒有發現。</p>';
+ const pBody=P.length?`${strip}${issTbl}<details data-tk="tr-rounds"><summary>逐輪紀錄<span class="sub">${P.length} 輪・每輪原文</span></summary><div class="tr-pl">${groups.map(prow).join('')}</div></details>`
   :isToday&&hm<'13:26'?`${strip}<p class="tr-note">${hm<'09:30'?'09:30 開始第一輪。':'今天還沒有巡檢紀錄。'}</p>`
   :`<p class="tr-note">${isToday?'今天':'這天'}沒有巡檢紀錄。</p>`;
- const patrolSec=`<section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">盤中巡檢</h2><span class="sub">09:30–13:15 每 15 分一輪${P.length?`・已跑 ${P.length} 輪・修正 ${nFix} 次・發現 ${FD.length} 件`:''}</span>
+ const patrolSec=`<section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">盤中巡檢</h2><span class="sub">09:30–13:15 每 15 分一輪${P.length?`・已跑 ${P.length} 輪・修正 ${nFix} 次・${FD.length} 筆發現歸成 ${ISS.length} 個問題`:''}</span>
   <span class="tr-leg">${KO.map(k=>`<span class="tag tr-tag tk-${k}">${KZ[k]}</span>`).join('')}</span></div>${pBody}</section>`;
 
  // ── 每日檢討 ──
@@ -1903,17 +2038,18 @@ async function renderTrader(){const box=$('#v-hub');let d=(selDay||new Date(Date
   <div class="tr-kpis">${kpis.map(k=>`<div class="sc-kpi tr-kpi"><span class="l">${esc(k.label)}</span><b class="v">${esc(k.value)}</b>${k.note?`<span class="n">${esc(k.note)}</span>`:''}</div>`).join('')}</div></section>`;
 
  paint(`<div class="hub">${hero}${revSec}${patrolSec}
-  <section class="tr-sec"><div class="stg-h"><h2 class="h2">四場會</h2><span class="sub">08:30 早盤・09:20 盤中檢查・12:40 收盤前・13:40 盤後檢查</span></div><div class="mtg">${cards}</div></section>
-  <section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">今天的實單</h2><span class="sub">${REAL.length} 筆${CX.length?`・巡檢刪單 ${CX.length} 筆`:''}</span></div>
+  <section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">四場會</h2><span class="sub">點一列看全文</span></div><div class="mtg mt-l">${cards}</div></section>
+  <div class="tr-2"><section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">今天的實單</h2><span class="sub">${REAL.length} 筆${CX.length?`・巡檢刪單 ${CX.length} 筆`:''}</span></div>
    ${rows?`<div class="tbl"><table><thead><tr><th>時間</th><th>場次</th><th>策略</th><th>買賣</th><th>股票</th><th class="r">股數</th><th class="r">成交</th><th class="r">限價</th><th>狀態</th><th>理由</th></tr></thead><tbody>${rows}</tbody></table></div>`:'<span class="sub">今天還沒有送出實單</span>'}${dry}</section>
-  <div style="display:flex;flex-wrap:wrap;gap:12px"><section class="card pad" style="flex:1 1 320px;display:flex;flex-direction:column;gap:6px"><h2 class="h2">各策略帳本</h2>${books}</section>
-   <section class="card pad" style="flex:1 1 320px;display:flex;flex-direction:column;gap:6px"><h2 class="h2">帳本修正</h2>${fixes}</section></div>
+  <section class="card pad tr-sec"><div class="stg-h"><h2 class="h2">各策略帳本</h2><span class="sub">${nBook} 筆</span></div>
+   ${bookRows?`<div class="tbl"><table><thead><tr><th>策略</th><th>股票</th><th class="r">股數</th></tr></thead><tbody>${bookRows}</tbody></table></div>`:'<span class="sub">還沒有正式帳本(books.json)</span>'}
+   <div class="sub">帳本修正:</div>${fixes}</section></div>
   <section class="card pad" style="display:flex;flex-direction:column;gap:8px"><h2 class="h2">計畫與紀錄</h2>${plans}
    ${TR.journal?`<details data-tk="tr-journal"><summary>journal</summary><div class="md">${mdh(TR.journal)}</div></details>`:''}
    ${TR.lessons?`<details data-tk="tr-lessons"><summary>給操盤手的提醒(lessons)</summary><div class="md">${mdh(TR.lessons)}</div></details>`:''}</section></div>`);renderCapOpts()}
 
 // 操盤手分頁底部:資金方案目標(sharpe / cagr / 11-06 原參數)與期貨版本 v4/v5/v6;寫 config(serve.py /api/objective)
-let CAPT=null,CAPIN=null;   // 操盤手分頁的總資金預覽 / 正在輸入的數字(30 秒重畫不洗掉)
+let CAPT=null,CAPIN=null,CAPOPEN=false;   // 操盤手分頁的總資金預覽 / 正在輸入的數字(30 秒重畫不洗掉)
 // 期貨三個版本的現在槓桿(integration.json v41_presets,build_integration 每天重算)+ 差異 + 第一性原理說明
 // v6 確認版(舊稱 rolling5y,2026-11-08):每年 1 月用前 5 個完整年度重選參數;選參狀態 + 提醒
 function v41Sel(S){if(!S)return '';const y=S.year,nx=(S.for_year||y)+1,pv=S.preview&&S.preview.pick;
@@ -2041,7 +2177,7 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
    <p class="sm">L1 名目 ${P.l1_notional_x}×・期貨 ×${(P.sleeve_mult||{}).V41??1}・${(P.drop||[]).length?'拿掉 '+P.drop.join('、'):'全部策略'}・${P.invvol_lookback} 日反波動、${P.rebalance_days} 日換</p>
    <div class="sc-kpi"><span class="m">本機重算 ${esc(v.local.window[0].slice(0,7))} 起:年化 ${p(v.local.cagr)}・Sharpe ${v.local.sharpe.toFixed(2)}・MDD ${p(v.local.mdd)}</span><span class="bt">研究所 WF:${esc(v.research)}</span></div>
    ${on?'':`<button type="button" class="btn" data-obj="${k}">改用這個</button>`}</div>`}).join('');
- sec.innerHTML=`<div class="stg-h"><h2 class="h2">資金方案目標</h2><span class="sub">總資金 ${O.total?Math.round(O.total/1e4).toLocaleString()+' 萬':'0(測試期)'}・換了會重算各策略資本額,隔天早盤生效</span></div>
+ sec.innerHTML=`<details class="cfgd"${CAPOPEN||msg?' open':''} ontoggle="CAPOPEN=this.open"><summary><h2 class="h2">設定</h2><span>資金方案 <b>${esc((O.options[O.objective]||{}).label||O.objective)}</b></span><span>總資金 <b class="num">${O.total?Math.round(O.total/1e4).toLocaleString()+' 萬':'0(測試期)'}</b></span><span>期貨 <b class="num">${esc(O.v41_preset)}</b></span><span class="sub">點開才能改・換了隔天早盤生效</span></summary><div class="tr-sec cfgb">
   ${msg?`<div class="flash ${msg.startsWith('❌')?'err':'ok'}" role="status">${esc(msg)}</div>`:''}
   <div class="sc-kpi"><span class="m"><b>總資金</b>(你打算投入股票 + 期貨的錢;0 = 測試期,各策略 1 元)</span>
    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="tr_cap_in" class="num" type="number" min="0" step="1000000" placeholder="例 10000000" value="${CAPIN??(O.total||'')}" oninput="CAPIN=this.value" aria-label="總資金(元)" style="width:160px"><span class="sub">元</span>
@@ -2053,7 +2189,7 @@ async function renderCapOpts(msg){let O;try{const r=await fetch('api/capital_opt
   ${v41Box(VP)}
   <div class="row" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="sub">切換期貨版本</span>${O.v41_presets.map(v=>`<button type="button" class="btn${v===O.v41_preset?' pri':''}" data-v41="${v}" aria-pressed="${v===O.v41_preset}">${({v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)',v7:'v7 合成版'})[v]||v}</button>`).join('')}</div>
   <p class="sub" style="margin:0">v7 合成版 = v5 與 v6 的目標槓桿取平均,平均低於 4 倍就空手,否則乘 6/6.5(最大 6 倍)。回測 2022 起約六成日子空手、年化 258% / Sharpe 2.28 / 最大回撤 −39%。k 倍數設定不套用在 v7。<b>v7 內建夜盤停損</b>:美股開盤後 2 小時(台北 冬令 00:30 / 夏令 23:30)當晚已賠 2% 權益砍半、5% 全砍,隔天 08:46 比砍價更差才補回;其他版本只記錄不下單。</p>
-  <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p>`;
+  <p class="sub" style="margin:0">本機重算 = 用監看台六策略報酬序列(現行策略、L4 不避險、TXN 照研究)跑同一套程式;研究所 WF 數字是五組升級版 + 盤前 L1,照抄未重跑。</p></div></details>`;
  v41Paint();
  sec.onclick=async e=>{const c=e.target.closest('button[data-cap]');
   if(c){try{const go=c.dataset.cap==='1'&&CAPT,t=+(($('#tr_cap_in')||{}).value||0),j=await opPost('api/capital',{total:go?CAPT.total:t,confirm:!!go});CAPT=go?null:j;if(go)CAPIN=null;renderCapOpts(go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入')}catch(err){renderCapOpts('❌ '+err.message)}return}
@@ -2141,7 +2277,7 @@ async function renderThermo(){const box=$('#v-hub');
  if(!THR)THR=thRange(THk);const C=thCol();
  box.innerHTML=`<section class="card pad"><div class="between th-hd" style="align-items:flex-start"><div><h2 class="h2" style="font-size:20px">盤勢溫度</h2><div class="sub">資料截至 ${TH.asof}<span class="m-hide">・顏色=相對該尺度近期歷史的冷熱・▲▼=當時可知的趨勢翻向・滑過看當天讀數,拖曳框選放大,雙擊還原</span></div></div><div class="seg" id="th_rg"></div></div>
   <div class="th-cards" id="th_cards"></div><div class="m-only thm-ro num" id="th_ro"></div><canvas id="th_cv" role="img" aria-label="加權指數與短中長三尺度溫度帶"></canvas>
-  <div class="m-fold m-only th-fold">圖例與說明</div><div>
+  <div class="m-fold a-fold th-fold">圖例與說明<span class="sub">線與標記、亮燈怎麼讀、色階</span></div><div>
   <div class="th-legx">
    <div class="th-lg"><div class="th-lgh">線與標記</div>${thLi([['#e8890c','line','過熱(三尺度 ≥65)'],['#1f6fd1','line','酷寒(三尺度 <35 且短線 <20)'],['#2e9e6b','dia','國安基金進場首日'],['#1f6fd1','up','酷寒+下跌爆量(近 5 日收黑且量 ≥ 前 20 日均量 1.3 倍;20、60 日後 5/5 上漲,但之後仍可能再跌)'],['#1f6fd1','uph','任一尺度酷寒+下跌爆量(任一尺度 <20;研究中,實心之外新增的;多半只是短暫反彈,20 日後上漲 58%)']])}</div>
    <div class="th-lg"><div class="th-lgh">過熱亮燈</div>${thLi([['#d62728','tri','亮燈・之後真的跌 15%'],['#5c6b7d','tri','亮燈・誤報'],['#e8890c','tri','亮燈・進行中']])}<div class="th-lgh" style="margin-top:6px">亮燈期間背景</div><div class="th-lbox">${thLi([['#f9c9d4','box','真・跌 <5%'],['#e06070','box','真・已跌 ≥5%'],['#e4e8ee','box','誤報・跌 <5%'],['#aab4c0','box','誤報・已跌 ≥5%'],['#fbe3b8','box','進行中・跌 <5%'],['#f0a040','box','進行中・已跌 ≥5%']])}</div></div>
@@ -2264,14 +2400,12 @@ function oHealth(h){if(!h||!h.runs)return ['idle','尚未出勤'];const bad=h.fa
 function steps(st,inv){const S=st||{},xs=inv==='放手'?STEPS.filter(([k])=>!k.startsWith('G')):STEPS;
  return `<div class="psteps" role="list">${xs.map(([k,l])=>{const v=S[k]||'',g=k.startsWith('G');
   return `<div class="pstep ${v} ${g?'gate':''}" role="listitem" title="${esc(l)}:${({done:'完成',running:'進行中',waiting:'等你裁決',issue:'有失敗或退件'})[v]||'還沒到'}"><i>${v==='done'?'<b>✓</b>':v==='issue'?'<b>!</b>':''}</i><span>${g?k:esc(l)}</span></div>`}).join('')}</div>`}
-function oNode(A,r){const h=A.health[r.id],[hc,hl]=oHealth(h),lv=roleLive(r.id),cur=lv.find(x=>x.state==='running'||x.state==='waiting_user')||lv[lv.length-1];
- const ph=(r.sop_phases||[]).map(x=>PHN[x]||x).join('・'),run=cur&&cur.state==='running';
- return `<div class="onode h-${hc}${run?' st-running':''}${ORGSEL===r.id?' sel':''}" role="button" tabindex="0" data-role="${esc(r.id)}" aria-label="${esc(r.name)}:${esc(hl)}">
-  <div class="on-hd"><span class="on-av">${esc(r.name.slice(0,1))}</span><span class="on-tt"><b>${esc(r.name)}</b><span>${esc(ph)}</span></span><span class="sdot ${hc==='idle'?'':hc}" title="${esc(hl)}"></span></div>
-  <p class="on-mis">${esc(r.mission)}</p>
-  ${cur&&cur.task?`<div class="on-now">${ast(cur.state)} ${esc(cur.task)}${cur.note?'<br>'+esc(String(cur.note).slice(0,70)):''}</div>`:''}
-  ${run&&cur.pct!=null?`<div class="obar"><i style="width:${Math.max(3,cur.pct)}%"></i></div>`:''}
-  <div class="on-ft"><span title="引擎">${esc(r.engine||'')}</span>${(()=>{const j=(A.journals||{})[r.id];return j&&j.n?`<span class="on-xp" title="角色日誌:每次出勤先讀">經驗 ${j.n}</span>`:''})()}${h&&h.runs?`<span>・完成 ${h.done}</span>${h.failed?`<span style="color:var(--bad)">・失敗 ${h.failed}</span>`:''}${h.blamed?`<span style="color:var(--bad)">・被退 ${h.blamed}</span>`:''}`:'<span>・尚未出勤</span>'}</div></div>`}
+function oNode(A,r,g){const h=A.health[r.id],[hc,hl]=oHealth(h),lv=roleLive(r.id),cur=lv.find(x=>x.state==='running'||x.state==='waiting_user')||lv[lv.length-1];
+ const ph=(r.sop_phases||[]).map(x=>PHN[x]||x).join('・'),run=cur&&cur.state==='running',j=(A.journals||{})[r.id],bad=h&&h.runs?(h.failed||0)+(h.blamed||0):0;
+ return `<div class="onode orow h-${hc}${run?' st-running':''}${ORGSEL===r.id?' sel':''}" role="button" tabindex="0" data-role="${esc(r.id)}" aria-label="${esc(r.name)}:${esc(hl)}" title="${esc(r.mission)}">
+  <span class="og">${esc(g||'')}</span><span class="onm"><span class="sdot ${hc==='idle'?'':hc}" title="${esc(hl)}"></span><b>${esc(r.name)}</b></span><span class="oph">${esc(ph)}</span>
+  <span class="onw">${cur&&cur.task?`${ast(cur.state)} ${esc(cur.task)}`:'<span class="mute">—</span>'}</span>
+  <span class="num r oe">${esc(r.engine||'')}</span><span class="num r oe">${j&&j.n?j.n:'—'}</span><span class="num r">${h&&h.runs?h.done:'—'}</span><span class="num r"${bad?' style="color:var(--bad)"':''}>${h&&h.runs?bad:'—'}</span></div>`}
 function oBanner(){const act=(LIVE&&LIVE.active)||[];
  if(!act.length)return `<p class="lede">目前沒有進行中的研究。說「燒 token」或「研究 X」就會開始一輪${LIVE?`(即時狀態 ${esc(LIVE.updated.slice(11,16))} 更新)`:''}。</p>`;
  return act.map(r=>{const w=r.status==='waiting_user';
@@ -2295,10 +2429,11 @@ async function fillArts(){for(const d of document.querySelectorAll('#olive detai
 function drawLive(){const b=$('#olive');if(!b||[...b.querySelectorAll('textarea')].some(t=>t.value||t===document.activeElement))return;setH(b,oLive());fillArts()}
 function oChart(A){const O=A.org,teams=O.teams,grp=[...new Set(teams.map(t=>t.group))];
  const lanes=O.lanes.map(l=>`<span class="lane ${esc(l.status)}" title="吃:${esc(l.eats)}&#10;問:${esc(l.question)}">${esc(l.name)}${l.status==='proposed'?'(提議)':''}</span>`).join('');
- return `<div class="chain"><div class="onode judge"><div class="on-hd"><span class="on-av">你</span><span class="on-tt"><b>${esc(O.judge.name)}</b><span>${esc(O.judge.who)}</span></span></div><p class="on-mis">${esc(O.judge.mission)}</p></div>
-  <span class="arrow" aria-hidden="true">→</span>${oNode(A,O.commander)}<span class="arrow" aria-hidden="true">→</span>${oNode(A,O.pm)}</div>
- <div style="display:flex;flex-direction:column;gap:6px"><span class="sub">研究線(每條一位 PM;包含但不限於,滑過看細節):</span><div class="lanes">${lanes}</div></div>
- <div class="cols">${grp.map(g=>`<div class="col"><div class="col-hd"><b>${esc(g)}</b><span>${esc(GROUPS[g]||'')}</span></div>${teams.filter(t=>t.group===g).map(t=>oNode(A,t)).join('')}</div>`).join('')}</div>
+ return `<div class="otbl"><div class="orow oh"><span class="og">層級</span><span>角色</span><span class="oph">負責的階段</span><span>現在在做</span><span class="r oe">引擎</span><span class="r oe">經驗</span><span class="r">完成</span><span class="r">退件/失敗</span></div>
+  <div class="orow oj" title="${esc(O.judge.mission)}"><span class="og">裁決</span><span class="onm"><span class="sdot"></span><b>${esc(O.judge.name)}</b></span><span class="oph">${esc(O.judge.who)}</span><span class="onw">${esc(O.judge.mission)}</span><span class="oe"></span><span class="oe"></span><span></span><span></span></div>
+  ${oNode(A,O.commander,'指揮')}${oNode(A,O.pm,'研究線')}
+  ${grp.map(g=>teams.filter(t=>t.group===g).map((t,i)=>oNode(A,t,i?'':g)).join('')).join('')}</div>
+ <div style="display:flex;flex-direction:column;gap:6px"><span class="sub">研究線(每條一位 PM;滑過看細節):</span><div class="lanes">${lanes}</div></div>
  ${oLoop(A)}`}
 // 進行中的 run 會把 live:/role: 的介入當輪送給下一個開工的角色;送達回條在 agency_live.json active[].notes[].delivered
 const sugNow=t=>{t=String(t);return t.startsWith('live:')||(t.startsWith('role:')&&((LIVE&&LIVE.active)||[]).some(r=>r.status==='running'))};
@@ -2374,13 +2509,13 @@ function oSel(A,id){const O=A.org,r=oRole(O,id);if(!r)return '';
  <details><summary><b>角色定義全文</b><span class="sub">${esc(d.path||r.agent_file)}・${esc(d.mtime||'')}</span></summary><div class="md">${mdh((d.md||'').replace(/^---\r?\n[\s\S]*?\r?\n---\s*\r?\n/,'').replace(/^\s*# .*\r?\n/,''))}</div></details></section>`}
 function hOrg(H){const A=H.agency;if(A)A.toolbox_md=H.toolbox_md||A.toolbox_md;
  if(!A)return '<section class="card pad"><h2 class="h2">研究所還沒有組織資料</h2><p class="lede">在 research-trunk 建立 research_lab/agency/org.yaml 後執行 publish_hub.py。</p></section>';
- return `${oChanges(A)}<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="hd"><h2 class="h2">現在在跑什麼</h2></div><div id="obanner" style="display:flex;flex-direction:column;gap:10px">${oBanner()}</div></section>
+ return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="hd"><h2 class="h2">現在在跑什麼</h2></div><div id="obanner" style="display:flex;flex-direction:column;gap:10px">${oBanner()}</div></section>
  <section class="card pad" style="display:flex;flex-direction:column;gap:10px"><div class="hd"><h2 class="h2">各組交卷(即時)</h2><span class="sub">每 5 秒更新</span></div><div id="olive" style="display:flex;flex-direction:column;gap:8px">${oLive()}</div></section>
  <section class="card pad" style="display:flex;flex-direction:column;gap:16px"><div class="hd"><h2 class="h2">研究團隊</h2>
   <div class="legend"><span><b class="sdot ok"></b>健康</span><span><b class="sdot warn"></b>有狀況</span><span><b class="sdot bad"></b>問題多</span><span><b class="sdot"></b>尚未出勤</span><span>點角色看細節</span></div></div>
   <p class="lede">你下指令給總指揮,總指揮選題後交給負責那條研究線的 PM;PM 再把工作派給下面四組。每一輪都照同一套研究流程走,結束時把新零件、報告和點子收進庫。</p>
   <div id="ochart" style="display:flex;flex-direction:column;gap:18px">${oChart(A)}</div></section>
- <div id="orgsel">${ORGSEL?oSel(A,ORGSEL):''}</div>${oIssues(A)}`}
+ <div id="orgsel">${ORGSEL?oSel(A,ORGSEL):''}</div>${oIssues(A)}${oChanges(A)}`}
 const ADDL=[['parts','零件'],['reports','報告'],['ideas','點子'],['factors','因子卡'],['failures','失敗紀錄'],['basket_added','籃子新增'],['basket_removed','籃子移出']];
 function kpiBlock(A){
  const rs=A.runs||[],kr=rs.filter(r=>r.kpi).slice(0,12),f=v=>v==null?'—':v;
@@ -2405,15 +2540,16 @@ function hRuns(H){const rs=(H.agency&&H.agency.runs)||[];
  const ST={running:['t-info','進行中'],waiting_user:['t-disp','等你裁決'],done:['t-ok','完成'],failed:['t-risk','失敗'],aborted:['','中止']};
  return `<section class="card pad" style="display:flex;flex-direction:column;gap:14px">${head}
  <div class="ochips">${ADDL.slice(0,4).map(([k,l])=>`<span class="stat ${tot[k]?'':'zero'}">${l}<b>+${tot[k]}</b></span>`).join('')}<span class="stat">共<b>${rs.length}</b>輪</span></div>
- ${rs.map(r=>{const c=r.counts||{},w=r.waste||{},a=r.added||{},s=ST[r.status]||['',r.status];
-  return `<div class="runcard ${r.status==='waiting_user'?'waiting':''}"><div class="hd"><h3>${esc(r.goal)}</h3><span class="pill ${s[0]}">${s[1]}${r.gate?' '+esc(r.gate):''}</span></div>
+ <div class="rn-l">${rs.map((r,ri)=>{const c=r.counts||{},w=r.waste||{},a=r.added||{},s=ST[r.status]||['',r.status];
+  return `<details class="rn-r"${ri===0||r.status==='waiting_user'||r.status==='running'?' open':''}><summary><span class="num">${esc((r.started||'').slice(5,10))}</span><span class="pill ${s[0]}">${s[1]}${r.gate?' '+esc(r.gate):''}</span><b>${esc(r.goal)}</b>
+   <span class="num sub">${r.added?`零件 +${c.parts||0}・報告 +${c.reports||0}・點子 +${c.ideas||0}`:'還沒收尾'}</span><span class="num sub">規模 ${esc(r.scale)}</span></summary><div class="runcard ${r.status==='waiting_user'?'waiting':''}">
   ${(()=>{const st=r.stages||(((LIVE&&LIVE.active)||[]).find(x=>x.run_id===r.run_id)||{}).stages;return st?steps(st,r.involvement):''})()}
   <div class="ochips">${r.added?ADDL.map(([k,l])=>`<span class="stat ${c[k]?'':'zero'}">${l}<b>+${c[k]||0}</b></span>`).join('')+(w.failed?`<span class="stat bad">失敗<b>${w.failed}</b></span>`:'')+(w.rejected?`<span class="stat bad">退件<b>${w.rejected}</b></span>`:''):'<span class="sub">收尾後才會算出新增了什麼。</span>'}</div>
   <span class="meta">${esc(r.involvement)}・規模 ${esc(r.scale)}・${esc((r.started||'').slice(5,16))}${r.ended?' → '+esc(r.ended.slice(5,16)):''}・${esc(r.run_id)}</span>
   ${ADDL.some(([k])=>(a[k]||[]).length)?`<details><summary><b>新增清單</b></summary><div style="display:flex;flex-direction:column;gap:8px;padding-top:6px">${ADDL.filter(([k])=>(a[k]||[]).length).map(([k,l])=>`<div><b style="font-size:13px">${l}</b><ul style="margin:2px 0 0;padding-left:20px;font-size:13px">${a[k].map(x=>`<li class="meta" style="font-size:13px">${esc(x)}</li>`).join('')}</ul></div>`).join('')}
   ${w.blame&&Object.keys(w.blame).length?`<span class="sub">退件歸責:${Object.entries(w.blame).map(([k,v])=>`${esc(k)} ${v}`).join('・')}</span>`:''}</div></details>`:''}
   ${r.report_research_md?`<details class="orep" open><summary><b>這輪的結果與下一步</b><span class="sub">優化組收尾檢討・研究結論可信度看紅隊</span></summary><div class="md">${mdh(r.report_research_md)}</div></details>`:''}
-  ${r.report_md?`<span class="sub">完整優化報告(含架構與各組流程的問題)在:Agent 組織 → 組織飛輪 → 檢討會</span>`:''}</div>`}).join('')}</section>`}
+  ${r.report_md?`<span class="sub">完整優化報告(含架構與各組流程的問題)在:Agent 組織 → 組織飛輪 → 檢討會</span>`:''}</div></details>`}).join('')}</div></section>`}
 async function refreshOrg(){if(curV!=='lab'||curL!=='org'||document.hidden||!HUB||!HUB.agency)return;await loadLive();
  const b=$('#obanner'),c=$('#ochart');if(!b||!c)return;b.innerHTML=oBanner();drawLive();
  if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#ochart'))return;setH(c,oChart(HUB.agency))}

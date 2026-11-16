@@ -1856,6 +1856,7 @@ let CAPT=null,CAPIN=null;   // 操盤手分頁的總資金預覽 / 正在輸入�
 function v41Sel(S){if(!S)return '';const y=S.year,nx=(S.for_year||y)+1,pv=S.preview&&S.preview.pick;
  const warn=S.stale?`<span class="pill t-risk" style="font-size:11px">⚠ ${S.for_year} 年還沒重選,沿用 ${y} 年</span> `:(pv&&pv!==S.pick?`<span class="pill t-disp" style="font-size:11px">最新 5 年窗預覽改選 ${esc(pv)},明年 1 月可能換參數</span> `:'');
  return `<p class="sub" style="margin:0">${warn}v6 選參:<b style="color:var(--ink)">${y} 年用 ${esc(S.pick)}</b>(用 ${esc(S.window[0])}~${esc(S.window[1])} 的 Sharpe 挑;算於 ${esc(S.computed_at)})・下次重選 ${nx} 年 1 月第一個交易日 15:00 前自動跑，結果推 TG${pv?`・目前預覽 ${esc(pv)}`:''}</p>`}
+const v41Img=(f,alt,w,h)=>{const u='data/'+f+'?'+Math.floor(Date.now()/6e5);return `<a href="${u}" target="_blank" rel="noopener" style="display:block"><img src="${u}" alt="${alt}" width="${w}" height="${h}" style="display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line);background:#fff"></a>`};
 function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">期貨現在槓桿還沒算(${esc((V&&V.error)||'integration.json 沒有 v41_presets')})</p>`;
  const P=V.presets||{},nm={v4:'v4 原版',v5:'v5 剃刀版',v6:'v6 確認版(可做空)',v7:'v7 合成版'},f=x=>x==null?'—':(+x).toFixed(2)+'x',PS=['v4','v5','v6','v7'].filter(p=>P[p]&&!P[p].error);
  const row=(l,k,n)=>`<tr><td>${l}</td>${PS.map(p=>`<td class="num r">${f((P[p]||{})[k])}</td>`).join('')}<td class="sub" style="white-space:normal">${n}</td></tr>`;
@@ -1863,6 +1864,13 @@ function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">期貨
   ${row('今天 15:00 目標','next','今天收盤後的訊號、15:00 下單的槓桿(上限 ±6.5;負 = 空單)')}${row('昨天 15:00 目標','held','前一交易日 15:00 下的部位，持有到今天 15:00')}${row('未截上限','uncapped','訊號本身想開多少;超過 6.5 的部分被上限截掉')}${row('近 20 日平均','avg20','')}</tbody></table></div>
   <p class="sub" style="margin:0">訊號:逆價差 z(zb)${V.zb}・大額交易人淨部位 z(zn)${V.zn}・距結算 ${V.dte} 個交易日・逆價差資料 ${esc(V.basis_as_of)}、net10 ${esc(V.net10_as_of)}</p>
   ${v41Sel((P.v6||{}).selection)}
+  <h3 class="h2" style="font-size:14px;margin:6px 0 0">差在哪(每個參數 → 綜合)</h3>
+  <p class="sub" style="margin:0">三張圖每天 15:00 期貨換完部位後重畫(dashboard/build_v41_charts.py,和實單同一套程式,圖上的綜合槓桿會和回測引擎對帳)。點圖看原尺寸。</p>
+  ${v41Img('v41_rules.png','期貨 v4 到 v7 的規則、今天的算式與參數總表',1878,1818)}
+  ${v41Img('v41_daily.png','net10、逆價差、閘門、各版本乘數與目標槓桿的每日走勢',2087,2777)}
+  <h3 class="h2" style="font-size:14px;margin:6px 0 0">為什麼這樣改(第一性原理)</h3>
+  ${v41Img('v41_why.png','訊號分組的隔天報酬、各版本把槓桿放在哪、2022 起權益曲線',1945,1790)}
+  <details data-tk="v41-tbl"><summary>文字對照表</summary>
   <div class="tbl"><table><thead><tr><th>差在哪</th><th>v4 原版</th><th>v5 剃刀版</th><th>v6 確認版(可做空)</th></tr></thead><tbody>
    <tr><td>net10 太高時</td><td>越高越加碼,z ≥ 2 最滿</td><td>z > 0.5 起反過來減碼(折返 λ=2)</td><td>同 v5;太高時可翻成空單</td></tr>
    <tr><td>net10 乘數範圍</td><td>0.4–2.0,冪次 0.4</td><td>0.2–2.0,冪次 0.7</td><td>−0.4–2.0(負 = 空單),冪次 0.7</td></tr>
@@ -1871,8 +1879,8 @@ function v41Box(V){if(!V||V.error)return `<p class="sub" style="margin:0">期貨
    <tr><td>空單</td><td colspan="2">不做空</td><td>只在溫度計亮燈首日起 40 個交易日內;窗外改空手。上限 −6.5</td></tr>
    <tr><td>參數怎麼定</td><td colspan="2">固定</td><td>每年 1 月用前 5 個完整年度從 29 組候選重選</td></tr>
    <tr><td>不變</td><td colspan="3">200 日趨勢閘門、上限 6.5、結算週減碼</td></tr>
-   <tr><td>成績(2022 起樣本外 WF,滑價 4.5 點)</td><td>年化 128%・Sharpe 1.37・MDD −74%</td><td>年化 217%・Sharpe 1.73・MDD −61%</td></tr></tbody></table></div>
-  <details data-tk="v41-why"><summary>為什麼這樣改(第一性原理)</summary><div class="md" style="font-size:13px;line-height:1.75">
+   <tr><td>成績(2022 起樣本外 WF,滑價 4.5 點)</td><td>年化 128%・Sharpe 1.37・MDD −74%</td><td>年化 217%・Sharpe 1.73・MDD −61%</td></tr></tbody></table></div></details>
+  <details data-tk="v41-why"><summary>第一性原理文字說明</summary><div class="md" style="font-size:13px;line-height:1.75">
    <p><b>1. 賺什麼、怎麼活下來。</b>賺台指期長期往上漂的錢(股市長期上漲,加上逆價差換月收斂;後者約 85% 來自除息季的股利),用槓桿放大。跌破 200 日均線就空手,當崩盤保險;上限 6.5 倍是因為台指單日最多跌 10%、史上最壞連兩天 −14.7%,6.5 倍不會爆倉。</p>
    <p><b>2. 槓桿的真實成本是波動的平方。</b>平均槓桿一樣,把槓桿從「沒有 edge 又波動大」的日子挪到「有 edge」的日子,長期複利會明顯變好。v5 剃刀版只做這件事,整體沒有多開。</p>
    <p><b>3. 逆價差。</b>期貨比現貨便宜越多,抱期貨本身就多賺,所以深逆價差時加碼合理;但資料顯示只有很深時才有額外好處,不深時沒有 → v5 剃刀版允許降到 0。</p>

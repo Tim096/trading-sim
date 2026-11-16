@@ -326,6 +326,20 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
 .foot{margin-top:28px}
 #v-hub{margin-top:22px}
 .m-only{display:none}
+.mhero{flex-direction:column;gap:12px;margin-top:14px;padding:16px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel)}
+.mh-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.mh-big{font-size:40px;font-weight:700;line-height:1.1}
+.mh-side{display:grid;grid-template-columns:auto auto;gap:3px 10px;font-size:12px;color:var(--mute);text-align:right;align-items:baseline}.mh-side b{font-weight:600;font-size:14px}
+.mh-chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.mh-chips button{display:flex;flex-direction:column;gap:2px;align-items:flex-start;padding:8px 10px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);font:inherit;font-size:11.5px;color:var(--mute);cursor:pointer}.mh-chips b{font-size:14px;font-weight:600}
+.thm-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.thm-head b{font-size:22px}
+.thm-g{display:flex;flex-direction:column;gap:16px;margin:16px 0 12px}
+.thm-top{display:flex;align-items:center;gap:8px}.thm-top .nm{font-weight:700;font-size:14px}.thm-v{font-size:26px;font-weight:700;line-height:1}.thm-d{font-size:12px;color:var(--mute)}.thm-tr{margin-left:auto;font-size:12.5px;font-weight:700}
+.thm-track{position:relative;height:10px;border-radius:5px;margin-top:9px}.thm-track i{position:absolute;top:50%;border-radius:50%;transform:translate(-50%,-50%)}
+.thm-track .mk{width:18px;height:18px;background:var(--ink);border:3px solid var(--panel)}.thm-track .gh{width:10px;height:10px;border:2px solid var(--ink);background:var(--panel);opacity:.6}
+.thm-scale{position:relative;height:14px;font-size:10.5px;color:var(--mute2);margin-top:-8px}.thm-scale span{position:absolute;transform:translateX(-50%)}
+.thm-ro{align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px;margin:10px 0 6px;min-height:24px}.thm-ro i{font-style:normal;font-weight:700;font-size:12px;padding:1px 7px;border-radius:6px}
+.thm-heat{display:grid;grid-template-columns:1fr repeat(3,58px);gap:4px;align-items:center}.thm-heat i{font:600 12.5px 'JetBrains Mono',monospace;text-align:center;padding:5px 0;border-radius:6px}.thm-heat b{text-align:center;font-size:11.5px;color:var(--mute);font-weight:500}
 @media (max-width:1100px){.main,.two{grid-template-columns:minmax(0,1fr)}.att{position:static}.focus{grid-template-columns:minmax(0,1fr)}.kv{grid-template-columns:repeat(2,minmax(0,1fr))}.recent{max-height:360px}}
 @media (max-width:760px){.wrap{padding:0 14px 48px}.topbar{position:static;margin:0 -14px;padding:0 14px}.topbar-in{height:auto;flex-wrap:wrap;gap:8px;padding:10px 0}.tabs{order:3;width:100%;margin:0}.tabs button{height:40px}.right{margin-left:auto}.health .hx{display:none}.brand .paper{display:none}
  .day{padding:16px 14px 0}.dayhead h1{font-size:20px}.dayhead .sum{margin-left:0;width:100%}.ribbon{margin:8px -14px 0}.ph{padding:14px 14px 10px}.pbody{padding:14px}.flow{columns:1}.recent{padding:0 14px 14px}
@@ -349,7 +363,14 @@ tr.s.open>td{background:color-mix(in srgb,var(--acc) 3%,transparent);border-bott
  .board>tbody>tr>td{padding:11px 8px}.board>thead>tr>th{padding:8px}.board>tbody>tr.s>td:first-child,.board>thead>tr>th:first-child{padding-left:14px!important}.board>tbody>tr.s>td:nth-child(3),.board>thead>tr>th:nth-child(3){padding-right:14px}
  .board>tbody>tr.detail>td{padding:0 12px 14px}.big{font-size:16px}tr.total .big{font-size:18px}
  #ov th:nth-child(3),#ov td:nth-child(3),#ov th:nth-child(4),#ov td:nth-child(4),#ov th:nth-child(6),#ov td:nth-child(6){display:none}#ov th,#ov td{padding-left:6px;padding-right:6px}#ov td:nth-child(2){white-space:normal;min-width:76px}#ov td:nth-child(2) .pill,#ov td:nth-child(5) .mute,#engine .ph .s{display:none}
- .pad{padding:14px}.th-date b,.th-row b{font-size:18px}.th-card,.th-date{padding:10px 12px}}
+ .pad{padding:14px}
+ /* 手機首屏:今天損益 → 狀態與大盤 → 策略 → 部位 → 績效 → 系統 */
+ #v-monitor{display:flex;flex-direction:column}#v-monitor>*{order:5;min-width:0}#v-monitor>#mhero{order:0}#v-monitor>#today{order:1;margin-top:12px}#v-monitor>#strategies,#v-monitor>.main{order:2}#v-monitor>#positions{order:3}#v-monitor>#perf{order:4}
+ .fc.idle,.fc.ok,.dayhead .sum{display:none}.dayhead h1{font-size:17px}.focus{margin-top:10px}
+ /* 手機溫度計:最新讀數固定在上,圖表滿版、手指滑動看當天 */
+ .th-hd{display:none}.th-cards{display:block;margin:0}.th-lamp,.th-cold{margin-top:8px}
+ .th-lamp.off,.th-cold.off{min-height:0;height:auto;padding:8px 12px}.th-lamp.off .th-mwrap,.th-lamp.off .th-worry,.th-lamp.off .th-lmeta,.th-cold.off .th-ctxt{display:none}
+ #th_rg{margin-top:16px}#th_cv{margin:0 -14px;width:calc(100% + 28px)}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 #today,#perf,#strategies,#positions,#engine,.board tr{scroll-margin-top:76px}
 /* ---- research hub tabs ---- */
@@ -614,6 +635,7 @@ tr.tr-cx>td{color:var(--mute)}
 <div class="pubnote" id="pubnote" hidden>公開快照,每個交易日 21:00 更新:全部是策略理論部位,實單與帳戶資訊已遮蔽</div>
 
 <div id="v-monitor">
+<section class="mhero m-only" id="mhero" aria-label="今天損益"></section>
 
 <!-- ============ 今天:時間軸 + 大盤 ============ -->
 <section class="day" id="today" aria-label="今天">
@@ -1533,6 +1555,11 @@ function setRow(k,on){const tr=$(`#board tr.s[data-k="${k}"]`),d=$(`#board tr.de
 function openRow(k){setRow(k,true);const tr=$(`#board tr.s[data-k="${k}"]`);if(tr){tr.scrollIntoView({block:'center'});tr.querySelectorAll('td').forEach(flash)}}
 function bSpark(a,c){if(!a||a.length<2)return '<span class="mute">—</span>';const W=200,H=24,lo=Math.min(...a,0),hi=Math.max(...a,0),r=hi-lo||1,Y=v=>(H-2-(v-lo)/r*(H-4)).toFixed(1);
  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" style="width:110px;height:26px;display:block"><path d="M0 ${Y(0)} H${W}" stroke="var(--btn)" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><path d="${a.map((v,i)=>(i?'L':'M')+(i/(a.length-1)*W).toFixed(1)+' '+Y(v)).join(' ')}" fill="none" stroke="var(${c})" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`}
+// 手機首屏:合體今天賺賠 + 各策略今天(點了跳到策略表那一列)
+function mHero(R,B){const el=$('#mhero');if(!el)return;const a=R.ALL.td,b=R.BM.td,nm=k=>{const e=$(`#board tr.s[data-k="${k}"] .sname b`);return e?e.textContent:k};
+ el.innerHTML=`<div class="mh-top"><div><div class="sub">合體${B.isToday?'今天':' '+$('#day').value.slice(5)}・${esc(B.est||'')}</div><div class="num mh-big ${cls(a)}">${pct(a)}</div></div>
+  <div class="mh-side"><span>0050</span><b class="num ${cls(b)}">${pct(b)}</b><span>超額</span><b class="num ${cls(a!=null&&b!=null?a-b:null)}">${a!=null&&b!=null?pct(a-b):'—'}</b><span>累積</span><b class="num ${cls(R.ALL.cm)}">${pct(R.ALL.cm)}</b></div></div>
+  <div class="mh-chips">${['RGMC','DISPO','V41','TXN','L1','L4'].map(k=>`<button type="button" data-open-row="${k}"${k==='RGMC'?' class="c-rg"':''}><span>${esc(nm(k))}</span><b class="num ${cls(R[k].td)}">${pct(R[k].td)}</b></button>`).join('')}</div>`}
 function drawBoard(){const B=BD;if(!B)return;const sc=IG&&SCH()[igScheme],W=(sc&&sc.weights)||{},T=+$('#c_total').value||0,F=IG?futPlan():null,mn=mnt(B.hm);
  const day=B.day||{},co=day.closed_overnight||[],v4=IG&&IG.v41,FR=F&&F.real,u=IG&&IG.ultra15,la=IG&&IG.lalloc;
  const txIn=(B.isToday&&B.txo)||day.txn_entry,txOut=co.find(c=>c.kind==='TXN'),l4n=(day.l4_entry||[]).length,l4x=co.filter(c=>c.kind==='L4');
@@ -1560,6 +1587,7 @@ function drawBoard(){const B=BD;if(!B)return;const sc=IG&&SCH()[igScheme],W=(sc&
   const p=q('.b-pos');p.innerHTML=v.pos??'';p.title=p.textContent;
   const x=q('.b-nx');x.innerHTML=v.nx??'';x.title=x.textContent;x.classList.toggle('soon',!!(B.isToday&&v.nt&&mnt(v.nt)>=mn&&mnt(v.nt)-mn<=60));
   q('.b-al').textContent=v.al??(k in W?money(IGAMT[k]):'—');const w=q('.b-w');if(w)w.style.width=(v.w??(W[k]||0)*100)+'%'});
+ mHero(R,B);
  const dA=$('#board tr.detail[data-d="ALL"]'),dT=$('#board tr.detail[data-d="TXN"]');
  if(dA&&!dA.hidden)dA.querySelector('.det-copy').innerHTML=`<div class="strip">${$('#ig_kpi').innerHTML}</div><div class="note">合體報酬依右上角選的分配方案計算;各策略權重與金額在「績效與配置 → 資金分配」。</div><div><button type="button" class="link" data-perf="alloc">看資金分配 →</button></div>`;
  if(dT&&!dT.hidden)dT.querySelector('.det-copy').innerHTML=`<div class="todo">${$('#fut_sum').innerHTML}</div><div class="strip">${$('#fut_k').innerHTML}</div><div><button type="button" class="link" data-pos="fut">看期貨淨單完整時間表 →</button></div>`}
@@ -2074,7 +2102,8 @@ $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[
 
 // ---- 盤勢溫度(data/thermo.json 由 research-trunk 的 research_lab/probes/2026-11-03_cycle_turns/export_thermo.py 發佈)----
 // 溫度 = 8 個指標(中線多一項:站上 MA60 家數比例)相對該尺度近期歷史的熱向分位平均(台指 VIX 反向;2021-07 前以美 VIX 接);趨勢 = 當時可知的方向判斷(短 A / 中 D / 長 B)
-let TH=null,THR=null,THk='2025',THhov=null,THdrag=null;
+const MOB=()=>matchMedia('(max-width:760px)').matches;
+let TH=null,THR=null,THk=MOB()?'1y':'2025',THhov=null,THdrag=null;
 // 國安基金進場首日(research_lab/probes/2026-11-03_cycle_turns/sources/national_fund_events.json;2004 取公視歷次護盤表;2026 第 10 次 11/6 收盤後宣布、11/9 起可進場):[進場首日, 公告日]
 // 資料還沒到進場日時,先標在公告日
 const THNF=[['2000-03-16',null],['2000-10-03',null],['2004-05-20',null],['2008-09-18',null],['2011-12-21',null],['2015-08-26','2015-08-25'],['2020-03-20','2020-03-19'],['2022-07-13','2022-07-12'],['2025-04-09','2025-04-08'],['2026-11-09','2026-11-06']];
@@ -2082,7 +2111,7 @@ const thNFi=()=>THNF.map(([a,n])=>{const D=TH.dates,s=D.findIndex(d=>d>=a);if(s>
 const THLC=['#e0b04a','#ee9a3a','#ec7a34','#e25a3c','#d23a44','#b8243f'];
 const THN=['酷寒','冰','溫','熱','滾'],THB=[20,35,65,80],THSC=[['short','短線','約 3 週'],['medium','中線','約 3 個月'],['long','長線','約 3 年']];
 const THK={return:'漲跌',gap:'乖離',breadth:'指數均線差',drawdown:'回撤',margin_change:'融資變化',maintenance:'維持率',volume:'量能',vix:'台指VIX(反向)',ma60:'站上MA60家數'};
-const THRG=[['1y','近 1 年'],['2025','2025 起'],['3y','近 3 年'],['10y','近 10 年'],['all','全部'],['2008','2007–09'],['2020','2019–22']];
+const THRG=[['3m','近 3 月'],['1y','近 1 年'],['2025','2025 起'],['3y','近 3 年'],['10y','近 10 年'],['all','全部'],['2008','2007–09'],['2020','2019–22']];
 const thLight=()=>document.documentElement.dataset.theme==='light';
 const thCol=()=>thLight()?['#2f5597','#9dc3e6','#e3ded4','#f2a65a','#d9534f']:['#3b6fd4','#86b6e8','#3a424d','#e8924a','#e0544c'];
 const thTxt=()=>['#fff','#10202e',thLight()?'#1f2a37':'#e6e9ee','#1f2a37','#fff'];
@@ -2093,13 +2122,13 @@ function thGrad(t,C){if(t==null)return null;const h=C.map(x=>[1,3,5].map(o=>pars
  const f=Math.max(0,Math.min(1,(t-THA[k])/(THA[k+1]-THA[k])));return `rgb(${h[k].map((v,m)=>Math.round(v+(h[k+1][m]-v)*f)).join(',')})`}
 const thSeg=()=>seg($('#th_rg'),THRG,THk,k=>{THk=k;THR=thRange(k);THhov=null;renderThermo()});
 function thRange(k){const D=TH.dates,last=D.at(-1),y=+last.slice(0,4),ago=n=>`${y-n}${last.slice(4)}`;
- const [a,b]={'1y':[ago(1),last],'2025':['2025-01-01',last],'3y':[ago(3),last],'10y':[ago(10),last],all:[D[0],last],'2008':['2007-01-01','2009-12-31'],'2020':['2019-07-01','2022-12-31']}[k];
+ const [a,b]={'3m':[D[Math.max(0,D.length-64)],last],'1y':[ago(1),last],'2025':['2025-01-01',last],'3y':[ago(3),last],'10y':[ago(10),last],all:[D[0],last],'2008':['2007-01-01','2009-12-31'],'2020':['2019-07-01','2022-12-31']}[k];
  let i0=D.findIndex(d=>d>=a),i1=D.length-1;while(i1>0&&D[i1]>b)i1--;return [Math.max(0,i0),i1]}
 async function renderThermo(){const box=$('#v-hub');
  if(!TH){box.innerHTML='<section class="card pad sub">載入盤勢溫度…</section>';try{TH=await (await fetch('data/thermo.json?'+Date.now())).json()}catch(e){box.innerHTML='<section class="card pad"><h2 class="h2">讀不到 data/thermo.json</h2><p class="sub">在 research-trunk 執行 python research_lab/probes/2026-11-03_cycle_turns/export_thermo.py 發佈。</p></section>';return}if(curV!=='cycle')return}
  if(!THR)THR=thRange(THk);const C=thCol();
- box.innerHTML=`<section class="card pad"><div class="between" style="align-items:flex-start"><div><h2 class="h2" style="font-size:20px">盤勢溫度</h2><div class="sub">資料截至 ${TH.asof}<span class="m-hide">・顏色=相對該尺度近期歷史的冷熱・▲▼=當時可知的趨勢翻向・滑過看當天讀數,拖曳框選放大,雙擊還原</span></div></div><div class="seg" id="th_rg"></div></div>
-  <div class="th-cards" id="th_cards"></div><canvas id="th_cv" role="img" aria-label="加權指數與短中長三尺度溫度帶"></canvas>
+ box.innerHTML=`<section class="card pad"><div class="between th-hd" style="align-items:flex-start"><div><h2 class="h2" style="font-size:20px">盤勢溫度</h2><div class="sub">資料截至 ${TH.asof}<span class="m-hide">・顏色=相對該尺度近期歷史的冷熱・▲▼=當時可知的趨勢翻向・滑過看當天讀數,拖曳框選放大,雙擊還原</span></div></div><div class="seg" id="th_rg"></div></div>
+  <div class="th-cards" id="th_cards"></div><div class="m-only thm-ro num" id="th_ro"></div><canvas id="th_cv" role="img" aria-label="加權指數與短中長三尺度溫度帶"></canvas>
   <div class="m-fold m-only th-fold">圖例與說明</div><div>
   <div class="th-legx">
    <div class="th-lg"><div class="th-lgh">線與標記</div>${thLi([['#e8890c','line','過熱(三尺度 ≥65)'],['#1f6fd1','line','酷寒(三尺度 <35 且短線 <20)'],['#2e9e6b','dia','國安基金進場首日'],['#1f6fd1','up','酷寒+下跌爆量(近 5 日收黑且量 ≥ 前 20 日均量 1.3 倍;20、60 日後 5/5 上漲,但之後仍可能再跌)'],['#1f6fd1','uph','任一尺度酷寒+下跌爆量(任一尺度 <20;研究中,實心之外新增的;多半只是短暫反彈,20 日後上漲 58%)']])}</div>
@@ -2108,16 +2137,16 @@ async function renderThermo(){const box=$('#v-hub');
   </div>
   <div class="th-lg th-lgrow"><div style="display:flex;flex-direction:column;gap:5px;width:100%;max-width:420px"><div class="th-lgh">溫度色階</div><span style="height:10px;border-radius:5px;background:linear-gradient(90deg,${[0,10,20,27.5,35,50,65,72.5,80,90,100].map(t=>thGrad(t,C)+' '+t+'%').join(',')})"></span><span class="sub num" style="position:relative;height:14px;font-size:11px">${[[10,'酷寒'],[27.5,'冰'],[50,'溫'],[72.5,'熱'],[90,'滾']].map(([t,n])=>`<span style="position:absolute;left:${t}%;transform:translateX(-50%)">${n}</span>`).join('')}</span></div><div style="display:flex;flex-direction:column;gap:5px"><div class="th-lgh">指標</div><span class="sub" style="line-height:1.55">漲跌・乖離・指數均線差・回撤・融資變化・維持率・量能・VIX;中線另加站上 MA60 家數比例</span></div></div></div>
   <div class="m-fold m-only th-fold">各指標讀數</div><div id="th_det"></div></section>`;
- thSeg();
+ thSeg();if(MOB())$('#th_ro').before($('#th_rg'));
  const cv=$('#th_cv'),ix=e=>{const g=thGeo(),r=cv.getBoundingClientRect();return Math.max(g.i0,Math.min(g.i1,g.I(e.clientX-r.left)))};
  cv.onpointermove=e=>{const i=ix(e);if(THdrag!=null)THdrag[1]=i;if(i!==THhov||THdrag){THhov=i;requestAnimationFrame(()=>{thDraw();thInfo(THhov)})}};
- cv.onpointerleave=()=>{if(THdrag)return;THhov=null;thDraw();thInfo(THR[1])};
- cv.onpointerdown=e=>{const i=ix(e);THdrag=[i,i];try{cv.setPointerCapture(e.pointerId)}catch(_){}};
+ cv.onpointerleave=e=>{if(THdrag||e.pointerType==='touch')return;THhov=null;thDraw();thInfo(THR[1])};
+ cv.onpointerdown=e=>{const i=ix(e);if(e.pointerType==='touch'){THhov=i;thDraw();thInfo(i);return}THdrag=[i,i];try{cv.setPointerCapture(e.pointerId)}catch(_){}};
  cv.onpointerup=()=>{const d=THdrag;THdrag=null;if(d&&Math.abs(d[1]-d[0])>=10){THR=[Math.min(...d),Math.max(...d)];THk=null;thSeg()}thDraw()};
  cv.ondblclick=()=>{THk=THk||'2025';THR=thRange(THk);renderThermo()};
  thDraw();thInfo(THR[1])}
-function thGeo(){const cv=$('#th_cv'),w=cv.clientWidth||cv.parentElement.clientWidth,h=Math.round(Math.max(400,Math.min(540,w*.5))),L=w<600?46:70,R=10,[i0,i1]=THR,n=Math.max(1,i1-i0),sh=26,gap=22,pB=h-26-3*(sh+gap),pT=10;
- return {cv,w,h,L,R,i0,i1,n,sh,gap,pT,pB,X:i=>L+(i-i0)/n*(w-L-R),I:x=>Math.round(i0+(x-L)/(w-L-R)*n),sy:j=>pB+gap+j*(sh+gap)}}
+function thGeo(){const cv=$('#th_cv'),w=cv.clientWidth||cv.parentElement.clientWidth,m=w<600,h=m?340:Math.round(Math.max(400,Math.min(540,w*.5))),L=m?6:70,R=m?6:10,[i0,i1]=THR,n=Math.max(1,i1-i0),sh=m?18:26,gap=m?20:22,pB=h-26-3*(sh+gap),pT=10;
+ return {cv,w,h,m,L,R,i0,i1,n,sh,gap,pT,pB,X:i=>L+(i-i0)/n*(w-L-R),I:x=>Math.round(i0+(x-L)/(w-L-R)*n),sy:j=>pB+gap+j*(sh+gap)}}
 // 過熱訊號(研究中,2026-11-07 改版):三尺度都 >=65(可用的至少 2 個)後開始盯這波最高收盤 H(過熱結束後仍續更新)→ 收盤 <= H×0.95 → 隔天亮燈;
 // 最後過熱日後 60 個交易日內沒跌破就不再盯;收盤 > H×1.02 解除;新一波過熱的跌破可取代舊燈。2007 起 31 盞:真 13、誤 18(準確率 42%),15% 大跌全有新燈(2025-04 突發除外)
 // 真/誤 = 解除前從高點跌滿 15%(事後才知道);新酷寒 = 三尺度都 <35 且短線 <20
@@ -2155,7 +2184,7 @@ function thDraw(){const cv=$('#th_cv');if(!cv)return;const g=thGeo(),{w,h,L,R,i0
  const px=TH.close.slice(i0,i1+1);let lo=Math.min(...px),hi=Math.max(...px);const pd=(hi-lo)*.06||1;lo-=pd;hi+=pd;const Y=v=>g.pB-(v-lo)/(hi-lo)*(g.pB-g.pT);
  const r0=(hi-lo)/5,p10=10**Math.floor(Math.log10(r0)),st=(r0/p10<1.5?1:r0/p10<3?2:r0/p10<7?5:10)*p10;
  c.textAlign='right';c.textBaseline='middle';c.strokeStyle=line;c.fillStyle=mute;c.lineWidth=1;
- for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st){const y=Math.round(Y(v))+.5;c.beginPath();c.moveTo(L,y);c.lineTo(w-R,y);c.stroke();c.fillText(Math.round(v).toLocaleString(),L-8,y)}
+ for(let v=Math.ceil(lo/st)*st;v<=hi;v+=st){const y=Math.round(Y(v))+.5;c.beginPath();c.moveTo(L,y);c.lineTo(w-R,y);c.stroke();const t=Math.round(v).toLocaleString();if(g.m){c.textAlign='left';c.fillText(t,L+3,y-7)}else c.fillText(t,L-8,y)}
  c.beginPath();for(let i=i0;i<=i1;i++){const x=g.X(i),y=Y(TH.close[i]);i===i0?c.moveTo(x,y):c.lineTo(x,y)}c.strokeStyle=ink;c.lineWidth=1.5;c.stroke();
  c.lineTo(g.X(i1),g.pB);c.lineTo(g.X(i0),g.pB);c.closePath();c.globalAlpha=.07;c.fillStyle=ink;c.fill();c.globalAlpha=1;
  const half=(w-L-R)/g.n/2,SG=thSig();
@@ -2167,19 +2196,18 @@ function thDraw(){const cv=$('#th_cv');if(!cv)return;const g=thGeo(),{w,h,L,R,i0
  SG.kac.forEach(i=>{if(i<i0||i>i1)return;const x=g.X(i),y=Y(TH.close[i])+7,r=6;c.strokeStyle='#1f6fd1';c.fillStyle=css('--panel')||'#fff';c.lineWidth=1.6;c.lineJoin='round';c.beginPath();c.moveTo(x,y);c.lineTo(x-r,y+r*1.6);c.lineTo(x+r,y+r*1.6);c.closePath();c.fill();c.stroke()});
  SG.kc.forEach(i=>{if(i<i0||i>i1)return;const x=g.X(i),y=Y(TH.close[i])+7,r=6;c.fillStyle='#1f6fd1';c.beginPath();c.moveTo(x,y);c.lineTo(x-r,y+r*1.6);c.lineTo(x+r,y+r*1.6);c.fill()});
  SG.ev.forEach(e=>{if(e.s<i0||e.s>i1)return;const x=g.X(e.s),y=Y(TH.close[e.s])-6,r=e.k==='true'?6:4;c.fillStyle=e.k==='true'?'#d62728':e.k==='open'?'#e8890c':'#5c6b7d';c.beginPath();c.moveTo(x,y);c.lineTo(x-r,y-r*1.6);c.lineTo(x+r,y-r*1.6);c.fill()});
- THSC.forEach(([s,lab,sub],j)=>{const S=TH.scales[s],y=g.sy(j);c.textAlign='right';c.fillStyle=ink;c.font='bold 12.5px '+F;c.fillText(lab,L-8,y+g.sh/2-6);c.font='10px '+F;c.fillStyle=mute;c.fillText(sub,L-8,y+g.sh/2+8);
+ THSC.forEach(([s,lab,sub],j)=>{const S=TH.scales[s],y=g.sy(j);if(g.m){c.textAlign='left';c.textBaseline='alphabetic';c.fillStyle=ink;c.font='bold 11px '+F;c.strokeStyle=css('--panel');c.lineWidth=3;c.lineJoin='round';c.strokeText(lab,L+1,y-5);c.fillText(lab,L+1,y-5)}else{c.textAlign='right';c.fillStyle=ink;c.font='bold 12.5px '+F;c.fillText(lab,L-8,y+g.sh/2-6);c.font='10px '+F;c.fillStyle=mute;c.fillText(sub,L-8,y+g.sh/2+8)}
   c.fillStyle=line;c.fillRect(L,y,w-L-R,g.sh);
   for(let a=i0,i=i0+1;i<=i1+1;i++){if(i<=i1&&S.t[i]===S.t[a])continue;const col=thGrad(S.t[a],C);if(col){const x0=Math.max(L,g.X(a)-half),x1=Math.min(w-R,g.X(i-1)+half);c.fillStyle=col;c.fillRect(x0,y,Math.max(1,x1-x0)+.5,g.sh)}a=i}
   for(let i=i0+1;i<=i1;i++){const a=S.tr[i-1],b=S.tr[i];if(a==null||b==null||a===b)continue;const x=g.X(i),t=y-5;c.fillStyle=css(b>0?'--up':'--dn');c.beginPath();
    if(b>0){c.moveTo(x,t-7);c.lineTo(x-4.5,t);c.lineTo(x+4.5,t)}else{c.moveTo(x,t);c.lineTo(x-4.5,t-7);c.lineTo(x+4.5,t-7)}c.fill()}});
  // x 軸:跨度長標年,短標月
  const D=TH.dates,yr=g.n>1100,ty=g.h-8;c.textAlign='center';c.textBaseline='alphabetic';c.fillStyle=mute;c.font='11px '+F;let lastX=-1e9;
- for(let i=i0+1;i<=i1;i++){const p=D[i-1],d=D[i];if(yr?d.slice(0,4)===p.slice(0,4):d.slice(0,7)===p.slice(0,7))continue;const x=g.X(i);if(x-lastX<(yr?44:58)||x<L+16||x>w-R-16)continue;lastX=x;c.fillText(yr?d.slice(0,4):d.slice(0,7),x,ty)}
+ for(let i=i0+1;i<=i1;i++){const p=D[i-1],d=D[i];if(yr?d.slice(0,4)===p.slice(0,4):d.slice(0,7)===p.slice(0,7))continue;const x=g.X(i);if(x-lastX<(yr?44:58)||x<L+(g.m?24:16)||x>w-R-(g.m?24:16))continue;lastX=x;c.fillText(yr?d.slice(0,4):d.slice(0,7),x,ty)}
  if(THdrag&&THdrag[0]!==THdrag[1]){const x0=g.X(Math.min(...THdrag)),x1=g.X(Math.max(...THdrag));c.globalAlpha=.15;c.fillStyle=css('--acc');c.fillRect(x0,g.pT,x1-x0,g.sy(2)+g.sh-g.pT);c.globalAlpha=1}
  if(THhov!=null){const x=Math.round(g.X(THhov))+.5;c.strokeStyle=mute;c.setLineDash([3,3]);c.beginPath();c.moveTo(x,g.pT);c.lineTo(x,g.sy(2)+g.sh);c.stroke();c.setLineDash([]);
   c.fillStyle=ink;c.beginPath();c.arc(x,Y(TH.close[THhov]),3.5,0,7);c.fill()}}
-function thInfo(i){const C=thCol(),T=thTxt(),last=i===TH.dates.length-1;
- const SG=thSig(),ce=SG.evid[i],cev=ce>=0?SG.ev[ce]:null,lamp=(()=>{
+function thLamp(SG,i){const ce=SG.evid[i],cev=ce>=0?SG.ev[ce]:null;
   // 擔心等級(跌破 5% 版):2007 起亮燈滿 k 天仍未創新高、未跌滿 15% 者,最後真跌 15% 的比例:0–19 天 ~4 成、20+ 天 ~3 成。進度條=離高點跌幅 5%→15%(只看到當天)
   const tick='<div class="th-mtick num"><span>5%</span><span>7%</span><span>9%</span><span>11%</span><span>13–15%</span></div>';
   if(!cev){const pd=SG.pend&&i===TH.dates.length-1;
@@ -2187,7 +2215,19 @@ function thInfo(i){const C=thCol(),T=thTxt(),last=i===TH.dates.length-1;
   const k=i-cev.s;let mx=0;for(let j=cev.s;j<=i;j++)mx=Math.max(mx,SG.dd[j]);
   const hit=mx>=.15,n=hit?5:Math.max(0,Math.min(4,Math.floor((mx-.05)/.02))),L=hit?5:k<20?3:2;
   const seg=[0,1,2,3,4].map(m=>`<i class="th-mseg${m<=n?' on':''}" style="--c:${THLC[Math.min(5,m+1)]}"></i>`).join('');
-  return `<div class="th-lamp" style="--c:${THLC[L]}"><span class="th-lttl">過熱訊號<span class="th-lpill">${hit?'已跌滿 15%':'亮燈中'}</span></span><span class="th-worry">${hit?'訊號成立':`擔心<b>${k<20?'~4 成':'~3 成'}</b>`}</span><div class="th-mwrap"><div class="th-meter">${seg}</div>${tick}</div><div class="th-lmeta num"><b>${k}</b> 天未創新高・離高 <b>−${(SG.dd[i]*100).toFixed(1)}%</b><br>${TH.dates[cev.s].slice(5).replace('-','/')} 亮燈・站上高點 +2% 解除</div></div>`})();
+  return `<div class="th-lamp" style="--c:${THLC[L]}"><span class="th-lttl">過熱訊號<span class="th-lpill">${hit?'已跌滿 15%':'亮燈中'}</span></span><span class="th-worry">${hit?'訊號成立':`擔心<b>${k<20?'~4 成':'~3 成'}</b>`}</span><div class="th-mwrap"><div class="th-meter">${seg}</div>${tick}</div><div class="th-lmeta num"><b>${k}</b> 天未創新高・離高 <b>−${(SG.dd[i]*100).toFixed(1)}%</b><br>${TH.dates[cev.s].slice(5).replace('-','/')} 亮燈・站上高點 +2% 解除</div></div>`}
+// 手機:上面永遠是最新一天(三支溫度計:實心點=今天、空心點=5 個交易日前);手指在圖上滑,只更新圖上方那一行
+function thInfoM(i){const C=thCol(),T=thTxt(),D=TH.dates,n=D.length-1,SG=thSig(),cl=x=>Math.max(2,Math.min(98,x)),hero=$('#th_cards');
+ if(!hero.firstChild){const chg=TH.close[n]/TH.close[n-1]-1,grad=`linear-gradient(90deg,${[0,10,20,27.5,35,50,65,72.5,80,90,100].map(t=>thGrad(t,C)+' '+t+'%').join(',')})`;
+  hero.innerHTML=`<div class="thm-head"><span class="sub">${D[n].slice(5).replace('-','/')} 收盤・加權</span><b class="num">${Math.round(TH.close[n]).toLocaleString()}</b><span class="num ${cls(chg)}">${pct(chg)}</span></div><div class="thm-g">`+
+   THSC.map(([s,lab,sub])=>{const S=TH.scales[s],t=S.t[n],p=S.t[n-5],k=thLv(t),tr=S.tr[n],d=t!=null&&p!=null?Math.round(t-p):null;
+    return `<div><div class="thm-top"><span class="nm">${lab}</span><span class="th-pill" style="background:${k==null?'var(--btn)':C[k]};color:${k==null?'var(--mute)':T[k]}">${k==null?'暖機中':THN[k]}</span><b class="num thm-v">${t??'—'}</b><span class="thm-d num">${d==null?sub:'5 日 '+(d>0?'+':d<0?'−':'±')+Math.abs(d)}</span><span class="thm-tr ${tr>0?'up':tr<0?'dn':'mute'}">${tr>0?'▲ 趨勢向上':tr<0?'▼ 趨勢向下':'—'}</span></div><div class="thm-track" style="background:${grad}">${p==null?'':`<i class="gh" style="left:${cl(p)}%"></i>`}${t==null?'':`<i class="mk" style="left:${cl(t)}%"></i>`}</div></div>`}).join('')+
+   `<div class="thm-scale">${[[10,'酷寒'],[27.5,'冰'],[50,'溫'],[72.5,'熱'],[90,'滾']].map(([t,x])=>`<span style="left:${t}%">${x}</span>`).join('')}</div></div>`+thLamp(SG,n)+thCold(SG,n);
+  const keys=Object.keys(THK).filter(k=>THSC.some(([s])=>k in TH.scales[s].p));
+  $('#th_det').innerHTML=`<div class="sub num" style="margin:2px 0 10px">分數越高越熱・融資維持率 ${TH.raw.maintenance[n]==null?'—':TH.raw.maintenance[n]+'%'}・VIX ${TH.raw.vix[n]??'—'}</div><div class="thm-heat"><span></span>${THSC.map(([,lab])=>`<b>${lab}</b>`).join('')}`+
+   keys.map(k=>`<span class="sub">${THK[k]}</span>`+THSC.map(([s])=>{const P=TH.scales[s].p[k],v=P?P[n]:null;return `<i style="${v==null?'color:var(--mute2)':`background:${thGrad(v,C)};color:${T[thLv(v)]}`}">${v??'—'}</i>`}).join('')).join('')+'</div>'}
+ $('#th_ro').innerHTML=`<b>${D[i].slice(2)}</b><span>${Math.round(TH.close[i]).toLocaleString()}</span>`+THSC.map(([s,lab])=>{const t=TH.scales[s].t[i],k=thLv(t);return `<i style="background:${k==null?'var(--btn)':thGrad(t,C)};color:${k==null?'var(--mute)':T[k]}">${lab[0]} ${t??'—'}</i>`}).join('')+(SG.evid[i]>=0?'<span style="color:#e8890c">▼ 亮燈</span>':'')+(SG.KC[i]?'<span style="color:#1f6fd1">▲ 爆量</span>':'')}
+function thInfo(i){if(MOB())return thInfoM(i);const C=thCol(),T=thTxt(),last=i===TH.dates.length-1,SG=thSig(),lamp=thLamp(SG,i);
  $('#th_cards').innerHTML=`<div class="th-date"><span class="sub">${last?'最新交易日':'滑鼠所在日'}</span><b class="num">${TH.dates[i]}</b><span class="sub">加權指數 <b class="num" style="font-size:14px;color:var(--ink)">${Math.round(TH.close[i]).toLocaleString()}</b></span>${SG.KC[i]?'<span class="sub"><b style="color:#1f6fd1;font-size:inherit">▲ 酷寒+下跌爆量</b></span>':SG.KAC[i]?'<span class="sub"><b style="color:#1f6fd1;font-size:inherit">△ 任一尺度酷寒+下跌爆量</b></span>':SG.K[i]?'<span class="sub">新酷寒 <b style="color:#1f6fd1;font-size:inherit">三尺度 &lt;35</b></span>':'<span class="sub">&nbsp;</span>'}</div>`+
   THSC.map(([s,lab,sub])=>{const S=TH.scales[s],t=S.t[i],k=thLv(t),tr=S.tr[i];
    return `<div class="th-card"><div class="sub">${lab}(${sub})</div><div class="th-row"><span class="th-pill" style="background:${k==null?'var(--btn)':C[k]};color:${k==null?'var(--mute)':T[k]}">${k==null?'暖機中':THN[k]}</span><b class="num">${t??'—'}</b><span class="sub">分</span><span class="${tr>0?'up':tr<0?'dn':'mute'}" style="margin-left:auto;font-weight:700">${tr>0?'趨勢向上 ▲':tr<0?'趨勢向下 ▼':'—'}</span></div></div>`}).join('')+lamp+thCold(SG,i);

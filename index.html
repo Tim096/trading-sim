@@ -2263,6 +2263,9 @@ async function renderOps(msg){const box=$('#v-hub');let O,CT=null;
    <div class="proc">${procs}</div>
    <div class="row">${on?'<button type="button" class="btn" data-op="live" data-on="0">關閉監看與行情</button>':'<button type="button" class="btn pri" data-op="live" data-on="1">開啟(1 分鐘內自動啟動)</button>'}</div>
    <p class="sub" style="margin:0">只影響監看與行情程式,網站伺服器不受影響。</p></section>
+  <section class="card pad"><div class="hd"><h2 class="h2">期貨全停</h2>${O.futures_halt?'<span class="pill t-risk">已全停:不下單</span>':'<span class="pill t-ok">正常下單</span>'}</div>
+   <div class="row">${O.futures_halt?'<button type="button" class="btn pri" data-op="fhalt" data-on="0">恢復期貨下單</button>':'<button type="button" class="btn danger" data-op="fhalt" data-on="1">期貨全停…</button>'}</div>
+   <p class="sub" style="margin:0">全停期間兩個帳戶都不開新倉:15:00 換倉、尾盤順勢、08:46 補回都不下單(手動 /futures 也一樣)。已有的部位不會自動平倉;夜盤停損的砍倉照常。按下立刻生效,不必重啟;要恢復得自己回來按。</p></section>
   ${capCard(CT)}
   <section class="card pad"><div class="hd"><h2 class="h2">臨時休市</h2><span class="sub">颱風假等</span></div>
    ${days?`<div class="daychips">${days}</div>`:'<p class="sub" style="margin:0">目前沒有設定休市日。</p>'}
@@ -2277,6 +2280,7 @@ $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[
  try{let j,m;
   if(b.dataset.op==='hadd'){const d=b.dataset.d||($('#opday')||{}).value;if(!d)throw new Error('先選日期');j=await opPost('api/holiday',{date:d,closed:true});m=`已設為休市:${j.date}`+(j.stopped?`,停止 ${j.stopped} 個行程`:'')}
   else if(b.dataset.op==='hdel'){j=await opPost('api/holiday',{date:b.dataset.d,closed:false});m=`已取消休市:${j.date}`}
+  else if(b.dataset.op==='fhalt'){const on=b.dataset.on==='1';if(on&&!confirm('期貨全停:兩個帳戶都不再開新倉,直到你回來按恢復。確定?'))return;j=await opPost('api/futures_halt',{on});m=j.on?'期貨已全停:不會再下單':'已恢復期貨下單'}
   else if(b.dataset.op==='live'){j=await opPost('api/live',{on:b.dataset.on==='1'});m=j.on?'已開啟,1 分鐘內自動啟動':`已關閉,停止 ${j.stopped} 個行程`}
   else if(b.dataset.op==='cap'){const t=+(($('#cap_in')||{}).value||0),go=b.dataset.c==='1'&&CAPV;j=await opPost('api/capital',{total:go?CAPV.total:t,confirm:!!go});CAPV=go?null:j;m=go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入'}
   else if(b.dataset.op==='reboot'){if(prompt('輸入 REBOOT 確認重開整台機器')!=='REBOOT')return;j=await opPost('api/reboot',{confirm:'REBOOT'});m=j.msg}

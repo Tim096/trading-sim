@@ -634,11 +634,19 @@ tr.tr-cx>td{color:var(--mute)}
 .ops input[type=date]{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--btn);background:var(--panel2);color:var(--ink)}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .danger-zone{border-color:color-mix(in srgb,var(--bad) 30%,var(--line))}
-.cfg-r{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:10px 0 10px 10px;border-top:1px solid var(--line2);font-size:14px}
-.cfg-r b{font-weight:500;font-family:'IBM Plex Mono','LXGW WenKai TC',monospace;font-size:13px}.cfg-r p{margin:2px 0 0;font-size:12.5px;color:var(--mute);line-height:1.5}
-.cfg-c{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.cfg-c small{font-size:12px;color:var(--mute);max-width:260px;text-align:right}
-.cfgp input,.cfgp select{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--btn);background:var(--panel2);color:var(--ink);width:150px}
-@media (max-width:640px){.cfg-r{grid-template-columns:1fr}.cfg-c{justify-content:flex-start}.cfg-c small{text-align:left}}
+.cfg-r{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line2)}
+.cfg-r:last-child{border-bottom:0;padding-bottom:0}.cfg-r:first-child{padding-top:0}
+.cfg-r b{font-weight:500;font-size:14px;color:var(--ink)}.cfg-r p{margin:2px 0 0;font-size:12px;color:var(--mute);line-height:1.5}
+.cfg-c{display:flex;gap:8px;align-items:center;justify-content:flex-end;font-size:12px;color:var(--mute)}
+.cfg-c input,.cfg-c select{font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--btn);background:var(--panel2);color:var(--ink);width:118px;text-align:right}
+.cfg-c select{text-align:left;width:auto;max-width:150px}.cfg-c input[type=text]{text-align:left}
+.cfg-c .btn{display:none;padding:6px 12px}.cfg-r.dirty .cfg-c .btn{display:inline-flex}
+.tgl{appearance:none;width:40px;height:22px;border-radius:999px;border:1px solid var(--btn);background:var(--panel2);position:relative;cursor:pointer;padding:0;flex:none;transition:background .15s,border-color .15s}
+.tgl::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--mute);transition:left .15s,background .15s}
+.tgl[aria-checked=true]{background:var(--acc);border-color:var(--acc)}.tgl[aria-checked=true]::after{left:20px;background:#0B1220}
+.tgl:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.cfg-more>summary{font-size:13px;color:var(--mute)}.cfg-more .cfg-r:first-of-type{padding-top:11px}
+@media (max-width:640px){.cfg-r{grid-template-columns:1fr;gap:8px}.cfg-c{justify-content:flex-start}}
 
 /* ============ 終端風格(B):方角、格線、琥珀色標籤、等寬數字 ============ */
 *,*::before,*::after{border-radius:0!important}
@@ -2271,20 +2279,20 @@ function capCard(C){const m=x=>x==null?'—':(Math.abs(x)>=1e5?Math.round(x/1e4)
   <div class="row"><input id="cap_in" class="num" type="number" min="0" step="1000000" placeholder="總資金(元)" value="${tot||''}" aria-label="總資金" style="width:150px"><button type="button" class="btn" data-op="cap" data-c="0">預覽</button>${CAPV?`<button type="button" class="btn pri" data-op="cap" data-c="1">確認寫入 ${m(CAPV.total)}</button>`:''}</div>
   ${CAPV?`<div class="tg" style="white-space:pre-wrap;font-size:13px;color:var(--ink2);line-height:1.65">${esc(CAPV.text)}</div>`:''}
   <p class="sub" style="margin:0">依新方案(60 日反波動、每 20 個交易日換、L1 1.25× 疊加)算各策略資本額,確認後寫進 config,隔天早盤生效;0 = 回測試期。每天期貨跑完會 TG 今日匯款。更新於 ${esc((C&&C.made||'').slice(5,16))}</p></section>`}
-// 設定面板(api/config;core/config_edit.py 決定哪些能改):帳密與連線位址不會出現在這裡
-const CFGOPEN=new Set(),escA=s=>esc(s).replace(/"/g,'&quot;');
-const cfgVal=v=>v===null||v===undefined?'沒設':v===true?'開':v===false?'關':Array.isArray(v)?(v.join(', ')||'(空)'):typeof v==='number'?v.toLocaleString():String(v);
+// 設定面板(api/config;core/config_edit.py 決定放哪些):帳密與連線位址不會出現在這裡
+let CFGMORE=false;const escA=s=>esc(s).replace(/"/g,'&quot;');
+const cfgVal=v=>v===null||v===undefined?'照版本':v===true?'開':v===false?'關':Array.isArray(v)?(v.join(', ')||'(空)'):typeof v==='number'?v.toLocaleString():String(v);
 function cfgCard(CF){if(!CF||CF.error||!CF.groups)return `<section class="card pad"><h2 class="h2">設定</h2><p class="sub" style="margin:0">讀不到設定(api/config)${CF&&CF.error?':'+esc(CF.error):''}。</p></section>`;
- const ctl=i=>{const p=escA(i.path);
-  if(i.locked)return `<span class="num">${esc(cfgVal(i.value))}</span><small>${esc(i.locked)}</small>`;
-  if(i.kind==='bool')return `<span class="pill ${i.value?'t-ok':'t-disp'}">${i.value?'開':'關'}</span><button type="button" class="btn" data-op="cfg" data-p="${p}" data-k="bool" data-v="${i.value?'0':'1'}">${i.value?'關掉':'打開'}</button>`;
-  if(i.kind==='choice')return `<select aria-label="${p}">${i.choices.map(c=>`<option value="${escA(JSON.stringify(c.value))}"${c.value===i.value?' selected':''}>${esc(c.label)}</option>`).join('')}</select><button type="button" class="btn" data-op="cfg" data-p="${p}" data-k="choice">儲存</button>`;
-  return `<input ${i.kind==='num'?'type="number" step="any" class="num"':'type="text"'} value="${escA(i.kind==='list'?i.value.join(', '):String(i.value??''))}" aria-label="${p}"><button type="button" class="btn" data-op="cfg" data-p="${p}" data-k="${i.kind}">儲存</button>`};
- return `<section class="card pad cfgp"><div class="hd"><h2 class="h2">設定</h2><span class="sub">config.json</span></div>
-  <p class="sub" style="margin:0">改了立刻寫進設定檔(舊的會備份成 config.backup.json),下一次程式執行時生效。帳號、密碼、連線位址不在這裡,要回電腦改。操盤手開會的時段不要改,會讓那場會議作廢。</p>
-  <div>${CF.groups.map(g=>`<details data-g="${escA(g.key)}"${CFGOPEN.has(g.key)?' open':''}><summary>${esc(g.title)} <span class="sub">${g.items.length} 項</span></summary>${g.items.map(i=>`<div class="cfg-r" data-old="${escA(cfgVal(i.value))}"><div><b>${esc(i.label)}</b><p>${esc(i.desc)}</p></div><div class="cfg-c">${ctl(i)}</div></div>`).join('')}</details>`).join('')}</div></section>`}
+ const ctl=i=>{const a=`data-op="cfg" data-p="${escA(i.path)}" data-n="${escA(i.label)}"`;
+  if(i.kind==='bool')return `<button type="button" class="tgl" role="switch" aria-checked="${!!i.value}" aria-label="${escA(i.label)}" ${a} data-k="bool" data-v="${i.value?'0':'1'}"></button>`;
+  if(i.kind==='choice')return `<select aria-label="${escA(i.label)}">${i.choices.map(c=>`<option value="${escA(JSON.stringify(c.value))}"${c.value===i.value?' selected':''}>${esc(c.label)}</option>`).join('')}</select><button type="button" class="btn pri" ${a} data-k="choice">儲存</button>`;
+  return `<input ${i.kind==='num'?'type="number" step="any" class="num"':'type="text" placeholder="沒有"'} value="${escA(i.kind==='list'?i.value.join(', '):String(i.value??''))}" aria-label="${escA(i.label)}">${i.unit?`<span>${esc(i.unit)}</span>`:''}<button type="button" class="btn pri" ${a} data-k="${i.kind}">儲存</button>`};
+ const row=i=>`<div class="cfg-r" data-old="${escA(cfgVal(i.value))}"><div><b>${esc(i.label)}</b>${i.desc?`<p>${esc(i.desc)}</p>`:''}</div><div class="cfg-c">${ctl(i)}</div></div>`;
+ return `<div class="ops">${CF.groups.map(g=>`<section class="card pad"><div class="hd"><h2 class="h2">${esc(g.title)}設定</h2></div><div>${g.items.map(row).join('')}</div></section>`).join('')}</div>
+  ${(CF.more||[]).length?`<section class="card pad"><details class="cfg-more"${CFGMORE?' open':''}><summary>進階設定 <span class="sub">${CF.more.length} 項,很少需要改</span></summary>${CF.more.map(row).join('')}</details>
+  <p class="sub" style="margin:10px 0 0">改了立刻寫進設定檔(舊的備份成 config.backup.json),下一次程式執行時生效。操盤手開會的時段不要改。帳號密碼不在這裡。</p></section>`:''}`}
 async function renderOps(msg){const box=$('#v-hub');let O,CT=null,CF=null;
- document.querySelectorAll('#v-hub details[data-g]').forEach(d=>CFGOPEN[d.open?'add':'delete'](d.dataset.g));
+ {const d=document.querySelector('#v-hub details.cfg-more');if(d)CFGMORE=d.open}
  try{CF=await (await fetch('api/config?'+Date.now())).json()}catch(e){CF={error:String(e)}}
  try{O=await (await fetch('api/ops?'+Date.now())).json()}catch(e){O={error:String(e)}}
  try{const r=await fetch('data/capital_today.json?'+Date.now());CT=r.ok?await r.json():null}catch(e){}
@@ -2315,6 +2323,7 @@ async function renderOps(msg){const box=$('#v-hub');let O,CT=null,CF=null;
    <p class="lede">15 秒後重開整台機器。重開後要登入 Windows,看門狗才會把程式叫起來;Tailscale 是系統服務,登入前就能用 RDP 連回來。</p>
    <div class="row"><button type="button" class="btn danger" data-op="reboot">重開整台機器…</button></div></section>
  </div>${cfgCard(CF)}</div>`}
+$('#v-hub').addEventListener('input',e=>{const r=e.target.closest('.cfg-r');if(r)r.classList.add('dirty')});
 $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[data-op]');if(!b||curV!=='ops')return;
  try{let j,m;
   if(b.dataset.op==='hadd'){const d=b.dataset.d||($('#opday')||{}).value;if(!d)throw new Error('先選日期');j=await opPost('api/holiday',{date:d,closed:true});m=`已設為休市:${j.date}`+(j.stopped?`,停止 ${j.stopped} 個行程`:'')}
@@ -2322,10 +2331,8 @@ $('#v-hub').addEventListener('click',async e=>{const b=e.target.closest('button[
   else if(b.dataset.op==='fhalt'){const on=b.dataset.on==='1';if(on&&!confirm('期貨全停:兩個帳戶都不再開新倉,直到你回來按恢復。確定?'))return;j=await opPost('api/futures_halt',{on});m=j.on?'期貨已全停:不會再下單':'已恢復期貨下單'}
   else if(b.dataset.op==='cfg'){const row=b.closest('.cfg-r'),k=b.dataset.k,el=row.querySelector('input,select');let v;
    if(k==='bool')v=b.dataset.v==='1';else if(k==='choice')v=JSON.parse(el.value);else if(k==='num'){if(el.value.trim()===''||isNaN(+el.value))throw new Error('要填數字');v=+el.value}else if(k==='list')v=el.value.split(/[,\s、]+/).filter(Boolean);else v=el.value;
-   if(!confirm(`${b.dataset.p}
-${row.dataset.old} → ${cfgVal(v)}
-確定要改?`))return;
-   j=await opPost('api/config',{path:b.dataset.p,value:v});m=j.changed?`已改 ${j.path}:${cfgVal(j.old)} → ${cfgVal(j.new)}`:'值沒有變'}
+   if(!confirm(b.dataset.n+':'+row.dataset.old+' → '+cfgVal(v)+'\n確定要改?'))return;
+   j=await opPost('api/config',{path:b.dataset.p,value:v});m=j.changed?('已改「'+b.dataset.n+'」:'+cfgVal(j.old)+' → '+cfgVal(j.new)):'值沒有變'}
   else if(b.dataset.op==='live'){j=await opPost('api/live',{on:b.dataset.on==='1'});m=j.on?'已開啟,1 分鐘內自動啟動':`已關閉,停止 ${j.stopped} 個行程`}
   else if(b.dataset.op==='cap'){const t=+(($('#cap_in')||{}).value||0),go=b.dataset.c==='1'&&CAPV;j=await opPost('api/capital',{total:go?CAPV.total:t,confirm:!!go});CAPV=go?null:j;m=go?`已寫入總資金 ${j.total.toLocaleString()} 元,明天早盤生效`:'預覽好了,確認後才寫入'}
   else if(b.dataset.op==='reboot'){if(prompt('輸入 REBOOT 確認重開整台機器')!=='REBOOT')return;j=await opPost('api/reboot',{confirm:'REBOOT'});m=j.msg}

@@ -499,6 +499,11 @@ tr.tr-cx>td{color:var(--mute)}
 .ptree summary::before{content:none}
 .newb{font-size:11px;font-weight:500;padding:0 6px;border-radius:999px;background:var(--now);color:#111;line-height:16px;display:inline-block;margin-left:4px;vertical-align:1px}
 /* 資料盤點:每列一條時間軸,四種狀態上色 */
+.fgrp{display:flex;flex-direction:column}.fgrp+.fgrp{margin-top:6px}.fgrp .hd{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding-bottom:8px}.fgrp .hd h3{margin:0}
+.frow{display:grid;grid-template-columns:minmax(180px,1.1fr) 150px minmax(200px,2fr);gap:4px 14px;align-items:center;padding:8px 0;border-top:1px solid var(--line2)}
+.frow .nm{font-size:14px;font-weight:500;color:var(--ink);line-height:1.4}.frow .ds{font-size:12px;color:var(--ink2);line-height:1.5}
+.frow .lg{font-family:'IBM Plex Mono','LXGW WenKai TC',monospace;font-size:12px;color:var(--ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+@media(max-width:760px){.frow{grid-template-columns:1fr}.frow .lg{white-space:normal;word-break:break-all}}
 .dtiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .dtile{font:inherit;text-align:left;cursor:pointer;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--card2);color:var(--ink);display:flex;flex-direction:column;gap:2px}
 .dtile b{font-family:'IBM Plex Mono','LXGW WenKai TC',monospace;font-size:22px;font-weight:500}.dtile span{font-size:13px;color:var(--ink2)}
@@ -1879,12 +1884,27 @@ function hFactory(H){const F=H.factory;
  <section class="card pad"><details><summary><h2 class="h2">方法論全文</h2><span class="sub">封存文件・公式出處與流程</span></summary><div class="md">${mdh(F.md)}</div></details></section>`}
 // ── 資料盤點(hub.json 的 inventory,來源 research_lab/data/inventory.yaml)──
 const DST={have:['已抓','t-ok'],can:['可抓未抓','t-info'],cant:['抓不到','t-risk'],unk:['未知','t-disp']},DF={st:'all',fam:'all'};
+// 抓取啟動與進度(serve.py /api/fetch;鏈的定義在 research-trunk 的 research_lab/data/fetch_chains.json)
+let FS=null,FMSG='',FBUSY='';
+const fT=t=>t?t.slice(5,16):'';
+function fetchCard(){if(!FS)return '<p class="sub" style="margin:0">讀取抓取狀態…</p>';if(FS.error)return `<p class="sub" style="margin:0">讀不到抓取狀態:${esc(FS.error)}</p>`;
+ const st=c=>c.running?['t-info','抓取中']:c.done_ts?['t-ok','完成 '+fT(c.done_ts)]:c.last_ts?['t-risk','中斷 '+fT(c.last_ts)]:['t-disp','還沒跑過'];
+ const hint={latest:'把每份資料補到最新一天,多數幾分鐘到一小時。先按這個。',backfill:'往回補平常沒在用的長歷史,會跑好幾天,和「更新到最新」共用 FinMind 額度。'};
+ return Object.entries(FS.groups).map(([g,gl])=>{const xs=FS.chains.filter(c=>c.group===g),run=xs.filter(c=>c.running).length,all=run===xs.length;
+  return `<div class="fgrp"><div class="hd"><h3 class="h2">${esc(gl)}</h3><button type="button" class="btn ${g==='latest'?'pri':''}" data-fetch="${g}" ${all||FBUSY?'disabled':''}>${FBUSY===g?'啟動中…':all?'全部在跑':run?'啟動其餘 '+(xs.length-run)+' 條':'開始'}</button><span class="sub">${esc(hint[g]||'')}</span><span class="sub num">${run} / ${xs.length} 條在跑</span></div>
+   ${xs.map(c=>{const [k,l]=st(c);return `<div class="frow"><div><div class="nm">${esc(c.label)}</div><div class="ds">${esc(c.detail)}</div></div><div><span class="pill ${k}">${esc(l)}</span>${c.running&&c.step?` <span class="sub num">第 ${c.step} / ${c.steps} 步</span>`:''}</div><div class="lg" title="${esc(c.last)}">${c.running&&c.cmd?esc(c.cmd)+'・':''}${esc(c.last||'—')}</div></div>`}).join('')}</div>`}).join('')+(FMSG?`<p class="sub" style="margin:8px 0 0">${esc(FMSG)}</p>`:'')}
+async function loadFetch(){if(PUB)return;try{FS=await (await fetch('api/fetch?'+Date.now())).json()}catch(e){FS={error:e.message}}const b=$('#fetchbody');if(b)b.innerHTML=fetchCard();const u=$('#fetchupd');if(u&&FS&&FS.time)u.textContent=FS.time.slice(11)+' 更新・每 10 秒'}
+setInterval(()=>{if(curV==='lab'&&curL==='data'&&!document.hidden)loadFetch()},10000);
+$('#v-hub').addEventListener('click',async e=>{const t=e.target.closest('[data-fetch]');if(!t||FBUSY)return;const g=t.dataset.fetch;FBUSY=g;FMSG='';$('#fetchbody').innerHTML=fetchCard();
+ try{const j=await opPost('api/fetch',{group:g});FMSG=`${FS.groups[g]}:啟動 ${j.started.length} 條${j.already.length?`、${j.already.length} 條本來就在跑`:''}。`}catch(err){FMSG='啟動失敗:'+err.message}
+ FBUSY='';await loadFetch()});
 function hData(H){const I=H.inventory;
  if(!I)return `<section class="card pad"><div class="md">${H.data_md?mdh(H.data_md):'還沒有資料盤點(research_lab/data/inventory.yaml)。'}</div></section>`;
  const n=k=>I.items.filter(it=>it.seg.some(s=>s.st===k)).length;
  const tiles=Object.entries(DST).map(([k,[l]])=>`<button type="button" class="dtile" data-dst="${k}" aria-pressed="${DF.st===k}"><i class="sw dbar-sw s-${k}" style="${k==='unk'?'background:repeating-linear-gradient(45deg,var(--mute2) 0 3px,transparent 3px 6px)':`background:var(--${{have:'ok',can:'acc',cant:'bad'}[k]})`}"></i><b>${n(k)}</b><span>${l}</span></button>`).join('');
  const fams=[['all','全部'],...I.families.map(f=>[f.id,f.name])].map(([k,l])=>`<button type="button" data-dfam="${k}" aria-pressed="${DF.fam===k}">${esc(l)}</button>`).join('');
- return `<section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="between"><h2 class="h2">資料盤點</h2><span class="sub">${esc(I.asof)} 實測・${I.items.length} 項・點方塊篩選</span></div>
+ return `${PUB?'':`<section class="card pad"><div class="between" style="margin-bottom:10px"><h2 class="h2">抓取</h2><span class="sub num" id="fetchupd"></span></div><div id="fetchbody">${fetchCard()}</div></section>`}
+ <section class="card pad" style="display:flex;flex-direction:column;gap:12px"><div class="between"><h2 class="h2">資料盤點</h2><span class="sub">${esc(I.asof)} 實測・${I.items.length} 項・點方塊篩選</span></div>
   <p class="sub" style="margin:0">每一列是一份資料,橫條是 ${I.axis[0].slice(0,4)}–${I.axis[1].slice(0,4)} 的時間軸。同一份資料的不同年段可能狀態不同,例如前段可抓未抓、中段已抓、最近幾天還沒更新。一項資料可能同時算進多個方塊。</p>
   <div class="dtiles">${tiles}</div><div class="dchips">${fams}</div>
   <div class="dleg"><span><i style="background:var(--ok)"></i>已抓</span><span><i style="background:var(--acc)"></i>可抓未抓</span><span><i style="background:var(--bad);opacity:.75"></i>抓不到</span><span><i style="background:repeating-linear-gradient(45deg,var(--mute2) 0 3px,transparent 3px 6px)"></i>未知</span><span><i style="background:var(--panel2);box-shadow:inset 0 0 0 1px var(--line)"></i>空白 = 來源在這之前沒有</span><span class="pill t-disp">抓取中</span><span class="pill t-info">A</span> 優先序</div></section>
@@ -2625,7 +2645,7 @@ async function renderHub(){if(curV==='cycle')return renderThermo();if(curV==='tr
  box.innerHTML=`<div class="hub">${v==='lab'?`<div class="hd"><div class="seg" id="ltabs" role="tablist" aria-label="研究所分頁"></div><span class="sub">零件 ${H.parts.length}・報告 ${H.reports.length}・資料 ${esc(H.built.slice(5))} 更新</span></div>`:`<span class="sub">研究資料建置於 ${esc(H.built)}・零件 ${H.parts.length} 條・報告 ${H.reports.length} 份・策略 ${H.strategies.length} 個</span>`}${views[k](H)}</div>`;
  if(v==='lab')seg($('#ltabs'),LT,curL,setL);
  if(k==='plan')seg($('#ptabs'),[['user','我提出的'],['ai','研究所提出的']],curP,p=>{curP=p;renderHub()});
- if(k==='parts')drawParts();if(k==='reports'||k==='org')wireReports();if(k==='strategies')fitNotes()}
+ if(k==='data')loadFetch();if(k==='parts')drawParts();if(k==='reports'||k==='org')wireReports();if(k==='strategies')fitNotes()}
 const oPick=id=>{ORGSEL=ORGSEL===id?null:id;document.querySelectorAll('#ochart .onode[data-role]').forEach(n=>n.classList.toggle('sel',n.dataset.role===ORGSEL));
  const box=$('#orgsel');if(box){box.innerHTML=ORGSEL?oSel(HUB.agency,ORGSEL):'';if(ORGSEL)box.scrollIntoView({behavior:'smooth',block:'nearest'})}};
 $('#v-hub').addEventListener('toggle',e=>{const d=e.target,mo=d.classList&&d.classList.contains('oartm');if(!mo&&!(d.classList&&d.classList.contains('oart')))return;const p=mo?'__more':decodeURIComponent(d.dataset.art);d.open?AOPEN.add(p):AOPEN.delete(p);if(d.open)fillArts()},true);

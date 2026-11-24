@@ -1249,11 +1249,11 @@ async function render(){
  let day=null;try{day=await (await fetch(`day_${selDay}.json?`+Date.now())).json()}catch(e){}
  const h=H[selDay]||{};
  // market strip
- // 台指期:元大即時成交價。NQ / 道瓊 / 標普:CME 期貨近月,Yahoo 分鐘線(延遲約 10 分)
+ // 台指期:元大即時成交價。NQ / 道瓊 / 標普:CME 期貨近月,Yahoo 分鐘線(延遲約 10 分)+ 新浪即時買賣中價接最後那幾分鐘(q.live)
  const T=yqAll(d=>d.series,{d:state.spark&&(state.spark.tx||[]).length?state.updated.slice(0,10):'',p:(state.spark||{}).tx});
  if(!T.q.last&&state.tx)T.q={last:state.tx.last,ref:state.tx.chg!=null?state.tx.last/(1+state.tx.chg/100):null};
- const U=(USQ&&USQ.quotes)||{},us=(k,name)=>{const q=U[k];return idxCard(name,q?`<span title="${esc(q.symbol)} 期貨近月・Yahoo 延遲約 10 分・資料時間 ${esc(q.time)}">${esc(q.time.slice(11,16))}</span>`:'',q,q&&q.points,'s_'+k)};
- $('#mk_t').textContent='日盤 + 夜盤連成一條(08:45 → 隔天 05:00)・台指期:元大即時・NQ / 道瓊 / 標普:CME 期貨,Yahoo 延遲約 10 分';
+ const U=(USQ&&USQ.quotes)||{},us=(k,name)=>{const q=U[k];return idxCard(name,q?`<span title="${esc(q.symbol)} 期貨近月・${q.live?'現價與最後幾分鐘 = 新浪即時買賣中價,之前 = Yahoo 分鐘線':'Yahoo 分鐘線,延遲約 10 分'}・資料時間 ${esc(q.time)}">${q.live?'即時':'延遲'} ${esc(q.time.slice(11,16))}</span>`:'',q,q&&q.points,'s_'+k)};
+ $('#mk_t').textContent='日盤 + 夜盤連成一條(08:45 → 隔天 05:00)・台指期:元大即時・NQ / 道瓊 / 標普:CME 期貨(Yahoo 分鐘線 + 即時買賣中價)';
  $('#mkstrip').innerHTML=idxCard('台指期',T.sub,T.q,T.pts,'s_tx')+us('NQ','NQ 那斯達克')+us('DOW','DOW 道瓊')+us('SPX','標普 500');
  // history & chart
  const LO=liveOld(),rowsAll=days.filter(d=>!((MS&&MS.closed_days)||[]).includes(d)).map(d=>{const o=(IG&&IG.recent&&IG.recent[d])||(d===today?{RGMC:LO.rgmc,DISPO:LO.dispo,V41:LO.v41,live:1}:{}),r={d,...H[d],b0050:(bench.ret||{})[d],rgmc:o.RGMC??null,stack3:o.STACK3??null,dispo:o.DISPO??null,v41:o.V41??null,live:!!o.live};if(HEDGE()&&r.l4!=null)r.l4=r.l4+(r.l4h||0);r.combo=comboOf(r);return r});const rows=range==='5'?rowsAll.slice(-5):range==='20'?rowsAll.slice(-20):rowsAll;
@@ -1648,7 +1648,7 @@ async function tick(){try{MS=await (await fetch('data/market_status.json?'+Date.
  try{YQ=await (await fetch('data/yuanta_tx.json?'+Date.now())).json()}catch(_){YQ=null}
  try{YQN=await (await fetch('data/yuanta_night.json?'+Date.now())).json()}catch(_){YQN=null}
  try{YQD=await (await fetch('data/yuanta_day.json?'+Date.now())).json()}catch(_){YQD=null}
- if(Date.now()-USQ_T>30000){USQ_T=Date.now();try{USQ=await (await fetch('data/us_index.json?'+Date.now())).json()}catch(_){}}
+ if(Date.now()-USQ_T>5000){USQ_T=Date.now();try{USQ=await (await fetch('data/us_index.json?'+Date.now())).json()}catch(_){}}
  if(!PUB)loadFP();
  try{state=await (await fetch('state.json?'+Date.now())).json();try{bench=await (await fetch('bench.json?'+Date.now())).json()}catch(_){}$('#upd').textContent=state.updated.slice(11);liveMark();render()}
  catch(e){$('#hb_txt').textContent='讀不到 state.json';$('#hb_dot').style.background=css('--bad')}}

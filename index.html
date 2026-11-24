@@ -1247,7 +1247,7 @@ async function render(){
  let day=null;try{day=await (await fetch(`day_${selDay}.json?`+Date.now())).json()}catch(e){}
  const h=H[selDay]||{};
  // market strip
- const T=txAll(),U=(USQ&&USQ.quotes)||{},us=(k,name)=>{const q=U[k];return idxCard(name,q?`<span title="${esc(q.symbol)} 期貨近月・Yahoo 延遲約 10 分・資料時間 ${esc(q.time)}">Yahoo ${esc(q.time.slice(11,16))}</span>`:'',q,q&&q.points,'s_'+k)};
+ const T=txAll(),U=(USQ&&USQ.quotes)||{},us=(k,name)=>{const q=U[k];return idxCard(name,q?`<span title="${esc(q.symbol)} 期貨近月・Yahoo 延遲約 10 分・資料時間 ${esc(q.time)}">${esc(q.time.slice(11,16))}</span>`:'',q,q&&q.points,'s_'+k)};
  $('#mk_t').textContent='日盤 + 夜盤連成一條(08:45 → 隔天 05:00)・台指期:元大即時・NQ / 道瓊 / 標普:期貨,Yahoo 延遲約 10 分';
  $('#mkstrip').innerHTML=idxCard('台指期',T.sub,T.q,T.pts,'s_tx')+us('NQ','NQ 那斯達克')+us('DOW','DOW 道瓊')+us('SPX','標普 500');
  // history & chart

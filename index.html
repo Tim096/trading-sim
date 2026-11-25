@@ -1019,19 +1019,19 @@ const dtag=s=>dispo.has(s)?' <span class="tag t-disp">處置</span>':'';
 const seg=(el,items,cur,cb)=>{el.innerHTML=items.map(([k,l])=>`<button type="button" aria-pressed="${k===cur}" data-k="${k}">${l}</button>`).join('');el.querySelectorAll('button').forEach(b=>b.onclick=()=>cb(b.dataset.k))};
 
 // ---- 四大指數(台指期 / NQ / 道瓊 / 標普):日盤 + 夜盤連成一條。x 軸 08:45 → 隔天 05:00(台北時間);點 = [從當天 00:00 起算的分鐘, 價] ----
-const D0=525,D1=1740,hm2m=s=>{const [h,m]=s.split(':').map(Number);return h*60+m},m2hm=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
-function dayChart(P,base,color,key){const W=240,H=40,PH=26,X=m=>(m-D0)/(D1-D0)*W;
+const hm2m=s=>{const [h,m]=s.split(':').map(Number);return h*60+m},m2hm=m=>String(Math.floor(m/60)%24).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+function dayChart(P,base,color,key,D0=525,D1=1740,mid=900){const W=240,H=40,PH=26,X=m=>(m-D0)/(D1-D0)*W;   // 預設 08:45 → 隔天 05:00,中間標 15:00
  const pts=(P||[]).filter(p=>p&&p[1]!=null&&p[0]>=D0&&p[0]<=D1),vs=pts.map(p=>p[1]).concat(base!=null?[base]:[]);
  const lo=vs.length?Math.min(...vs):0,hi=vs.length?Math.max(...vs):1,r=hi-lo||1,Y=v=>2+(hi-v)/r*(PH-4);
  HV[key]={x:pts.map(p=>X(p[0])/W),y:pts.map(p=>Y(p[1])/H),tip:i=>`<div class="sub">${m2hm(pts[i][0])}</div>${pxTip(pts[i][1],base)}`};
  return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true" data-hv="${key}" style="width:100%;height:40px;display:block;overflow:visible">
   ${base!=null&&pts.length?`<line x1="0" x2="${W}" y1="${Y(base).toFixed(1)}" y2="${Y(base).toFixed(1)}" stroke="var(--mute)" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke"/>`:`<line x1="0" x2="${W}" y1="${PH/2}" y2="${PH/2}" stroke="var(--line)" stroke-dasharray="3 3"/>`}
   ${pts.length>1?`<path d="${pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join(' ')}" stroke="${color}" stroke-width="1.5" fill="none" vector-effect="non-scaling-stroke"/>`:''}
-  <text x="0" y="${H-1}" font-size="9" fill="var(--mute)">08:45</text><text x="${X(900).toFixed(1)}" y="${H-1}" font-size="9" fill="var(--mute2)" text-anchor="middle">15:00</text><text x="${W}" y="${H-1}" font-size="9" fill="var(--mute)" text-anchor="end">05:00</text></svg>`}
-function idxCard(name,sub,q,pts,key){q=q||{};const chg=q.last&&q.ref?q.last/q.ref-1:null;
+  <text x="0" y="${H-1}" font-size="9" fill="var(--mute)">${m2hm(D0)}</text><text x="${X(mid).toFixed(1)}" y="${H-1}" font-size="9" fill="var(--mute2)" text-anchor="middle">${m2hm(mid)}</text><text x="${W}" y="${H-1}" font-size="9" fill="var(--mute)" text-anchor="end">${m2hm(D1)}</text></svg>`}
+function idxCard(name,sub,q,pts,key,rng=[]){q=q||{};const chg=q.last&&q.ref?q.last/q.ref-1:null;
  return `<div class="mk"><div class="l"><span>${name}</span><span class="num">${sub}</span></div>
    <div class="v num">${q.last?q.last.toLocaleString(undefined,{maximumFractionDigits:2}):'—'} <small class="${cls(chg)}">${chg==null?'':pct(chg)}</small></div>
-   <div class="ch">${dayChart(pts,q.ref,css(chg>=0?'--up':'--dn'),key)}</div></div>`}
+   <div class="ch">${dayChart(pts,q.ref,css(chg>=0?'--up':'--dn'),key,...rng)}</div></div>`}
 // 元大行情(yuanta_quotes.py)的一檔商品:日盤檔 + 夜盤檔,同一天的才接在一起;報價用最新的那一份。get(doc) → {symbol, points};sp = 沒有元大日盤時的備援分鐘點
 function yqAll(get,sp){const P=d=>{const s=d&&d.session&&get(d);return s&&(s.points||[]).length?s.points:null},dOf=d=>P(d)?d.session.slice(0,10):'';
  const yd=P(YQD)?YQD:YQ&&/日盤/.test(YQ.session||'')&&P(YQ)?YQ:null;
@@ -1253,8 +1253,8 @@ async function render(){
  // 台指期:元大即時成交價。NQ / 道瓊 / 標普:CME 期貨近月,Yahoo 分鐘線(延遲約 10 分)+ 新浪即時買賣中價接最後那幾分鐘(q.live)
  const T=yqAll(d=>d.series,{d:state.spark&&(state.spark.tx||[]).length?state.updated.slice(0,10):'',p:(state.spark||{}).tx});
  if(!T.q.last&&state.tx)T.q={last:state.tx.last,ref:state.tx.chg!=null?state.tx.last/(1+state.tx.chg/100):null};
- const U=(USQ&&USQ.quotes)||{},us=(k,name)=>{const q=U[k];return idxCard(name,q?`<span title="${esc(q.symbol)} 期貨近月・${q.live?'現價與最後幾分鐘 = 新浪即時買賣中價,之前 = Yahoo 分鐘線':'Yahoo 分鐘線,延遲約 10 分'}・資料時間 ${esc(q.time)}">${q.live?'即時':'延遲'} ${esc(q.time.slice(11,16))}</span>`:'',q,q&&q.points,'s_'+k)};
- $('#mk_t').textContent='日盤 + 夜盤連成一條(08:45 → 隔天 05:00)・台指期:元大即時・NQ / 道瓊 / 標普:CME 期貨(Yahoo 分鐘線 + 即時買賣中價)';
+ const U=(USQ&&USQ.quotes)||{},us=(k,name)=>{const q=U[k];return idxCard(name,q?`<span title="${esc(q.symbol)} 期貨近月・${q.live?'現價與最後幾分鐘 = 新浪即時買賣中價,之前 = Yahoo 分鐘線':'Yahoo 分鐘線,延遲約 10 分'}・資料時間 ${esc(q.time)}">${q.live?'即時':'延遲'} ${esc(q.time.slice(11,16))}</span>`:'',q,q&&q.points,'s_'+k,[420,1800,1110])};   // 美股三檔:07:00 → 隔天 06:00
+ $('#mk_t').textContent='日盤 + 夜盤連成一條・台指期 08:45 → 隔天 05:00(元大即時)・NQ / 道瓊 / 標普 07:00 → 隔天 06:00(CME 期貨:Yahoo 分鐘線 + 即時買賣中價)';
  $('#mkstrip').innerHTML=idxCard('台指期',T.sub,T.q,T.pts,'s_tx')+us('NQ','NQ 那斯達克')+us('DOW','DOW 道瓊')+us('SPX','標普 500')+`
   <div class="mk"><div class="l"><span>等權平均漲跌</span><span class="num">${n.toLocaleString()} 檔</span></div>
    <div class="v num ${cls(m.ew_change)}">${m.ew_change==null?'—':pct(m.ew_change/100)}</div><div class="ch">${sessChart(sp.ew,'09:00','13:30',0,css(m.ew_change>=0?'--up':'--dn'),'s_ew',v=>`<b class="num ${cls(v)}">${pct(v/100)}</b>`)}</div></div>

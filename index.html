@@ -1654,10 +1654,12 @@ function renderRoll(){const box=$('#roll_box');if(!box)return;const R=ROLL;rollC
 let YQ=null,YQN=null,YQD=null;   // 元大即時行情(dashboard/yuanta_quotes.py):目前這一盤 / 最近一次夜盤 / 最近一次日盤
 let USQ=null,USQ_T=0;   // 美股三大指數期貨(serve.py us_index_loop:Yahoo 分鐘線 + 新浪即時買賣中價,每 5 秒更新)
 let MS=null;   // serve.py 每分鐘寫:今天是否休市(週末/公告休市/颱風假)
+let YQ_T=0;
 async function tick(){try{MS=await (await fetch('data/market_status.json?'+Date.now())).json()}catch(e){MS=null}session();integ();loadFT();loadRoll();
+ if(Date.now()-YQ_T>9000){YQ_T=Date.now();   // 元大行情檔 10 秒才寫一次,不用每 3 秒抓三份
  try{YQ=await (await fetch('data/yuanta_tx.json?'+Date.now())).json()}catch(_){YQ=null}
  try{YQN=await (await fetch('data/yuanta_night.json?'+Date.now())).json()}catch(_){YQN=null}
- try{YQD=await (await fetch('data/yuanta_day.json?'+Date.now())).json()}catch(_){YQD=null}
+ try{YQD=await (await fetch('data/yuanta_day.json?'+Date.now())).json()}catch(_){YQD=null}}
  if(Date.now()-USQ_T>5000){USQ_T=Date.now();try{USQ=await (await fetch('data/us_index.json?'+Date.now())).json()}catch(_){}}
  if(!PUB)loadFP();
  try{state=await (await fetch('state.json?'+Date.now())).json();try{bench=await (await fetch('bench.json?'+Date.now())).json()}catch(_){}$('#upd').textContent=state.updated.slice(11);liveMark();render()}

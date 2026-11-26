@@ -2394,7 +2394,7 @@ async function renderThermo(){const box=$('#v-hub');
    <div class="th-note"><b>過熱亮燈怎麼讀</b><ul><li>亮燈=過熱後收盤跌破這波高點 5%,隔天亮(過熱結束 60 個交易日內有效);收盤超過高點 2% 解除。</li><li>2007 起 31 盞:真 13、誤報 18(準確率 42%),15% 大跌都有亮。真/誤報是事後才知道(研究中,未回測交易規則)。</li><li>擔心等級=亮燈後最後真跌 15% 的比例:亮燈 0–19 天 ~4 成、20 天以上仍沒創新高 ~3 成</li><li>進度條=離高點跌幅</li></ul></div>
   </div>
   <div class="th-lg th-lgrow"><div style="display:flex;flex-direction:column;gap:5px;width:100%;max-width:420px"><div class="th-lgh">溫度色階</div><span style="height:10px;border-radius:5px;background:linear-gradient(90deg,${[0,10,20,27.5,35,50,65,72.5,80,90,100].map(t=>thGrad(t,C)+' '+t+'%').join(',')})"></span><span class="sub num" style="position:relative;height:14px;font-size:11px">${[[10,'酷寒'],[27.5,'冰'],[50,'溫'],[72.5,'熱'],[90,'滾']].map(([t,n])=>`<span style="position:absolute;left:${t}%;transform:translateX(-50%)">${n}</span>`).join('')}</span></div><div style="display:flex;flex-direction:column;gap:5px"><div class="th-lgh">指標</div><span class="sub" style="line-height:1.55">漲跌・乖離・指數均線差・回撤・融資變化・維持率・量能・VIX;中線另加站上 MA60 家數比例</span></div></div></div>
-  <div class="m-fold m-only th-fold">各指標讀數</div><div id="th_det"></div></section>`;
+  <div class="m-fold m-only th-fold">各指標讀數</div><div id="th_det"></div><div id="th_lead"></div></section>`;
  thSeg();if(MOB())$('#th_ro').before($('#th_rg'));
  const cv=$('#th_cv'),ix=e=>{const g=thGeo(),r=cv.getBoundingClientRect();return Math.max(g.i0,Math.min(g.i1,g.I(e.clientX-r.left)))};
  cv.onpointermove=e=>{const i=ix(e);if(THdrag!=null)THdrag[1]=i;if(i!==THhov||THdrag){THhov=i;requestAnimationFrame(()=>{thDraw();thInfo(THhov)})}};
@@ -2402,7 +2402,33 @@ async function renderThermo(){const box=$('#v-hub');
  cv.onpointerdown=e=>{const i=ix(e);if(e.pointerType==='touch'){THhov=i;thDraw();thInfo(i);return}THdrag=[i,i];try{cv.setPointerCapture(e.pointerId)}catch(_){}};
  cv.onpointerup=()=>{const d=THdrag;THdrag=null;if(d&&Math.abs(d[1]-d[0])>=10){THR=[Math.min(...d),Math.max(...d)];THk=null;thSeg()}thDraw()};
  cv.ondblclick=()=>{THk=THk||'2025';THR=thRange(THk);renderThermo()};
- thDraw();thInfo(THR[1])}
+ thDraw();thInfo(THR[1]);thLead()}
+// ---- 領先分數(data/lead_score.json 由 research-trunk 的 research_lab/hub/lead_score.py 在交易日 16:10、每晚 21:00 溫度更新後各算一次;說明 research_lab/hub/lead_score.md)----
+// 分數 = 信用利差、金融狀況、韓國出口、台股月營收四個數字的過去 10 年分位平均;格子 = 溫度三尺度平均(≤35 冷、≥65 熱)× 上月底分數(≥0.6 高、<0.4 低),統計由同一支程式每天重算
+let LS=null,LSv='score';
+async function thLead(){if(!$('#th_lead'))return;
+ if(!LS){try{LS=await (await fetch('data/lead_score.json?'+Date.now())).json()}catch(e){LS=null}}
+ const el=$('#th_lead');if(!el)return;if(!LS){el.innerHTML='<div class="th-note sub">領先分數:讀不到 data/lead_score.json(在 research-trunk 執行 python research_lab/hub/lead_score.py)</div>';return}
+ const L=LS,f2=v=>v==null?'—':v.toFixed(2),pp=v=>v==null?'—':(v>0?'+':v<0?'−':'')+Math.abs(v*100).toFixed(0)+'%',BC={高:'#1f6fd1',中:'#7a8594',低:'#c77700'},G=L.grid||{},gh=G['冷|高']||{},gl=G['冷|低']||{};
+ const st=c=>{const s=c&&c.stats;return s&&s.n?`歷史 <b>${s.n}</b> 段,每段第一天進場抱 120 個交易日:<b>${s.up}</b> 段上漲、中位 <b>${pp(s.median)}</b>、<b>${s.dd10}</b> 段途中再跌超過 10%`:'歷史樣本不足'};
+ const T=L.thermo,c=L.cell,ct=L.cell_today,ep=L.episode,b=L.base;
+ const warn=(L.warnings||[]).length?`<div style="color:#d9534f;font-size:13px;margin-top:8px">⚠ ${L.warnings.join(';')}</div>`:'';
+ const pgScore=()=>`<div class="th-note" style="display:grid;grid-template-columns:minmax(220px,1fr) minmax(280px,2fr);gap:12px 36px;align-items:start">
+  <div><div class="th-row" style="margin-top:0"><b class="num" style="font-size:30px">${f2(L.score)}</b><span class="th-pill" style="background:${BC[L.band]||'var(--line)'};color:#fff">${L.band||'—'}</span></div>
+   <div class="sub" style="margin-top:6px">0–1,越高 = 之後 12 個月企業獲利方向越好。0.6 以上高、0.4 以下低。</div>
+   <div class="sub num" style="margin-top:6px">上月底 ${f2(L.score_month_end.score)}・3 個月前 ${f2(L.score_3m_ago.score)}</div></div>
+  <div>${L.parts.map(p=>`<div class="th-ind" style="grid-template-columns:84px 1fr 28px"><span class="sub">${p.name}</span><span class="th-bar"><i style="width:${Math.max(3,(p.pct||0)*100)}%;background:${BC[p.pct>=.6?'高':p.pct<.4?'低':'中']}"></i></span><b class="num" style="text-align:right">${p.pct==null?'—':Math.round(p.pct*100)}</b></div><div class="sub" style="font-size:11px;margin:-1px 0 6px 92px">${p.text}・資料到 ${p.date}</div>`).join('')}<div class="sub" style="font-size:11px">數字 = 在自己過去 10 年的分位,越右越好;四個平均 = 分數</div></div></div>`;
+ const pgCombo=()=>`<div class="th-note" style="font-size:13px;line-height:1.6">${c&&T?`<div class="th-row" style="margin-top:0"><span class="th-pill" style="background:${c.temp==='冷'&&c.band==='高'?'#1f6fd1':c.temp==='冷'&&c.band==='低'?'#c77700':'#7a8594'};color:#fff">現在:${c.temp} × 分數${c.band}</span><span class="sub">溫度三尺度平均 <b class="num" style="font-size:inherit">${Math.round(T.avg)}</b>(${T.asof.slice(5)};35 以下冷、65 以上熱)・分數用 ${c.basis}</span></div>
+   <div style="margin-top:8px">${st(c)}。<span class="sub">對照,任一天進場:${Math.round(b.up_rate*100)}% 上漲、中位 ${pp(b.median)}</span></div>
+   ${ct&&ct.band!==c.band?`<div class="sub" style="margin-top:4px">今天的分數已到「${ct.band}」;月底若沒回來,換成 ${ct.temp} × 分數${ct.band}:${st(ct)}</div>`:''}
+   ${ep?`<div class="sub num" style="margin-top:4px">這一段 ${ep.start.slice(5)} 起第 ${ep.days} 天:${pp(ep.ret)},途中最深 ${pp(ep.low)}</div>`:''}`:'<span class="sub">溫度計讀不到,格子算不出來</span>'}
+  <ul style="margin-top:10px">
+  <li>溫度變冷時,分數高 = 可以撿的跌(${gh.n??'—'} 段裡 ${gh.up??'—'} 段 120 天後上漲);分數低 = 好壞各半(${gl.n??'—'} 段裡 ${gl.up??'—'} 段上漲、${gl.dd10??'—'} 段再跌超過 10%)。</li>
+  <li>不是出場訊號:分數低就空手,輸給一直抱著。分數單獨對指數沒有預測力。</li>
+  <li>變冷不等於見底:分數高那組進場後,中位還要再跌 ${pp(gh.median_low).replace('−','')},最差途中跌 ${pp(gh.worst_low).replace('−','')}。</li>
+  <li>樣本內、門檻沒調過、段數少、指數不含息沒算成本。完整說明:research_lab/hub/lead_score.md</li></ul></div>`;
+ el.innerHTML=`<div class="between" style="margin-top:22px;padding-top:14px;border-top:1px solid var(--line);align-items:center"><div><h2 class="h2" style="font-size:16px">領先分數</h2><div class="sub">${L.asof} 更新・交易日 16:10、每晚 21:00 後各算一次</div></div><div class="seg" id="ls_seg"></div></div>${warn}${LSv==='combo'?pgCombo():pgScore()}`;
+ seg($('#ls_seg'),[['score','分數與成分'],['combo','搭配溫度計']],LSv,k=>{LSv=k;thLead()})}
 function thGeo(){const cv=$('#th_cv'),w=cv.clientWidth||cv.parentElement.clientWidth,m=w<600,h=m?340:Math.round(Math.max(400,Math.min(540,w*.5))),L=m?6:70,R=m?6:10,[i0,i1]=THR,n=Math.max(1,i1-i0),sh=m?18:26,gap=m?20:22,pB=h-26-3*(sh+gap),pT=10;
  return {cv,w,h,m,L,R,i0,i1,n,sh,gap,pT,pB,X:i=>L+(i-i0)/n*(w-L-R),I:x=>Math.round(i0+(x-L)/(w-L-R)*n),sy:j=>pB+gap+j*(sh+gap)}}
 // 過熱訊號(研究中,2026-11-07 改版):三尺度都 >=65(可用的至少 2 個)後開始盯這波最高收盤 H(過熱結束後仍續更新)→ 收盤 <= H×0.95 → 隔天亮燈;
